@@ -1,0 +1,707 @@
+/**
+Theme Name: Astra Child
+Author: Brainstorm Force
+Author URI: http://wpastra.com/about/
+Description: Astra is the fastest, fully customizable & beautiful theme suitable for blogs, personal portfolios and business websites. It is very lightweight (less than 50KB on frontend) and offers unparalleled speed. Built with SEO in mind, Astra comes with schema.org code integrated so search engines will love your site. Astra offers plenty of sidebar options and widget areas giving you a full control for customizations. Furthermore, we have included special features and templates so feel free to choose any of your favorite page builder plugin to create pages flexibly. Some of the other features: # WooCommerce Ready # Responsive # Compatible with major plugins # Translation Ready # Extendible with premium addons # Regularly updated # Designed, Developed, Maintained & Supported by Brainstorm Force. Looking for a perfect base theme? Look no further. Astra is fast, fully customizable and beautiful theme!
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: astra-child
+Template: astra
+*/
+
+html, body{
+    overflow-x:hidden !important;
+}
+.success-story-tabitem{cursor:pointer;}
+
+.boxSearch-news .bdt-search-button{
+    position: relative;
+    bottom: 25px;
+}
+
+.sideBar-post-news .bdt-post-list-title{
+	margin-bottom: 45px !important;
+}
+
+#filter-news .jet-listing-grid .jet-listing-grid__item:last-child .box-postNews{
+	border-bottom: 0;
+}
+
+#filter-news .jet-listing-grid .jet-listing-grid__item{
+	padding: 0 10px 0;
+}
+
+#filter-news .jet-listing-grid__item:first-child  .elementor-heading-title{
+	font-size: 20px;
+}
+
+#filter-news .jet-listing-grid__item:first-child  .elementor-widget-theme-post-excerpt .elementor-widget-container{
+	font-size: 16px;
+}
+
+#filter-news .jet-listing-grid__item:first-child .elementor-element-aaf9294{
+	--flex-shrink: 1;
+}
+
+#filter-news .jet-listing-grid__item .elementor-widget-container{
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+#filter-news .jet-listing-grid__item:first-child .elementor-widget-container{
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.pagi :where(.next .jet-filters-pagination__link, .prev .jet-filters-pagination__link){
+	background-color: unset !important;
+	width: 48px;
+	height: 54px;
+	border-radius: 6px !important;
+	position: relative;
+	top: 4px;
+}
+
+.pagi .next .jet-filters-pagination__link{
+	background: url('https://tamland.ir/wp-content/uploads/2024/02/next.svg') center center no-repeat;
+	
+}
+
+.pagi .prev .jet-filters-pagination__link{
+	background: url('https://tamland.ir/wp-content/uploads/2024/02/prev.svg') center center no-repeat;
+}
+
+.pagi .jet-filters-pagination__link{
+	box-shadow: 0 5px 40px 0 rgba(0,0,0, 5%);
+}
+/*
+#platformTab .bdt-tabs-item{
+    position:relative;
+}
+#platformTab .bdt-tabs-item.bdt-active:before{
+    content: "";
+    display: block;
+    width: 1px;
+    height: calc(100% + 12px);
+    border-right: 2px dashed #C4161C;
+    position: absolute;
+    top: 55px;
+    right: 23px;
+}
+#platformTab .bdt-tabs-item:before{
+    content: "";
+    display: block;
+    width: 1px;
+    height: calc(100% + 12px);
+    border-right: 2px dashed rgba(0, 14, 65, 0.1);
+    position: absolute;
+    top: 55px;
+    right: 23px;
+}
+#platformTab .bdt-tab-sub-title{
+    padding-right: 30px;
+    text-align: justify;
+}
+*/
+@media (min-width: 767px) {
+.nl-form :where(.gform_body, .gform_footer){
+	display: inline-block;
+	width: 48%;
+}	
+}
+@media(max-width:768px){
+.nl-form:where(.gform_body, .gform_footer){
+	display: inline-block;
+	width: 100%;
+}	
+}
+
+.nl-form .gform_footer{
+	margin: 0 20px 0 0 !important;
+	padding: 0 !important;
+}
+
+.gform_confirmation_message{
+	color: green;
+	text-align: center;
+}
+
+#best-bs .elementor-widget-container{
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+#best-lands .elementor-widget-container{
+	display: -webkit-box;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.hot-posts .jet-listing-grid__slider-icon{
+	border-radius: 100%;
+	border: 1px solid #eee;
+}
+
+.hot-posts .jet-listing-grid__slider .jet-slick-dots li.slick-active{
+	width: 20px !important;
+	height: 8px !important;
+	border-radius: 20px;
+}
+
+.hot-posts .jet-listing-grid__slider .jet-slick-dots{
+	margin-top: 20px;
+}
+
+.cat-carousel .pciwgas-title{
+	background-color: #fff;
+	border-radius: 43px;
+	padding: 8px;
+}
+
+.cat-carousel .pciwgas-title a{
+	font-size: 16px;
+	color: #000E41;
+}
+
+.cat-carousel .pciwgas-title span{
+	font-size: 16px;
+	font-weight: 700;
+	background-color: #F7EDED;
+	color: #C4161C;
+	border-radius: 34px;
+	padding: 6px 30px;
+	float: left;
+	display: flex;
+	justify-content: center;
+    height: 37px;
+    position: relative;
+    bottom: 3px;
+}
+
+.cat-carousel .slick-dots{
+	display: none !important;
+}
+
+.cat-carousel .slick-arrow{
+	background-color: #fff;
+	width: 46px;
+	height: 46px;
+	border-radius: 46px;
+	box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cat-carousel .slick-arrow svg{
+	fill: #2D3748;
+	width: 16px;
+	height: 22px;
+	margin-top: 12px;
+}
+
+.cat-carousel .pciwgas-post-cat-inner{
+	width: 90%;
+}
+
+.cat-carousel :where(.pciwgas-img-wrapper, .pciwgas-description){
+    display: none;
+}
+
+#postGrid-blog .elementor-widget-text-editor .elementor-widget-container{
+	display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/*
+#postGrid-blog .jet-listing-grid__items .jet-listing-grid__item:first-child{
+	min-width: 100%;
+	padding-top: 0 !important;
+}
+
+#postGrid-blog .jet-listing-grid__items .jet-listing-grid__item:first-child img{
+	height: 247px;
+	width: 100vw;
+}
+*/
+.rt-reading-time:before{
+	content: '';
+	background: url('https://tamland.ir/wp-content/uploads/2024/03/timer.svg');
+	width: 24px;
+	height: 24px;
+	display: inline-block;
+	margin-left: 3px;
+}
+
+.rt-reading-time{
+	display: flex;
+	align-items: center;
+}
+
+.rt-reading-time :where(.rt-prefix, .rt-time, .rt-postfix){
+	font-family: 'یکان باخ';
+	font-size: 14px;
+	margin: 2px 0 0 2px;
+}
+
+.bdt-ep-breadcrumb>:nth-child(n+2):not(.bdt-first-column)::before{
+	content: '';
+	background: url('https://tamland.ir/wp-content/uploads/2024/03/arrow-left.svg');
+	width: 18px;
+	height: 18px;
+	margin: 0 6px;
+	position: relative;
+	top: 4px;
+}
+
+#st-1 .st-btn[data-network='sharethis'] img{
+	display: none;
+}
+
+#st-1.st-has-labels .st-btn.st-remove-label > span{
+	display: none !important;
+}
+
+#st-1 .st-btn{
+	background: url('https://tamland.ir/wp-content/uploads/2024/03/share-1.svg') center right no-repeat;
+	width: 24px;
+	height: 24px;
+	top: 2px !important;
+	padding-right: 122px !important;
+	border: unset !important;
+}
+
+#st-1 .st-btn:before{
+	content: 'اشتراک گذاری';
+	font-family: 'یکان باخ';
+	font-size: 16px;
+	font-weight: 400;
+}
+
+#st-el-2 .st-disclaimer{
+	display: none;
+}
+
+#st-el-2 .st-logo{
+	display: none;
+}
+.gform_legacy_markup_wrapper .validation_message{
+    color:#c4161c !important;
+}
+.gform_legacy_markup_wrapper li.gfield_error input:not([type=radio]):not([type=checkbox]):not([type=submit]):not([type=button]):not([type=image]):not([type=file]), .gform_legacy_markup_wrapper li.gfield_error textarea{
+    border-color:#c4161c !important;
+}
+.gform_validation_errors.validation_error{
+    border:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+}
+.gform_validation_errors.validation_error .validation_error{
+    border: 1px solid #ACE1AF;
+    padding: 15px;
+    border-radius: 12px;
+    color: #88AB8E;
+    background: #E0FBE2;
+    margin-bottom:7px;
+}
+.gfield.gform_sms_verification{
+    background:transparent !important;
+    border:0 !important;
+}
+.gfield.gform_sms_verification .gfield_label{
+    color:#222 !important;
+}
+.gfield.gform_sms_verification .ginput_container_verfication .verify_code{
+    margin-left:7px;
+    border:1px solid #ccc !important;
+}
+.gfield.gform_sms_verification .ginput_container_verfication #gform_resend_button{
+    border-radius:12px;
+}
+.gfield.gform_sms_verification .validation_message.gfield_validation_message{
+    color:#888 !important;
+}
+.gfield.gfield_error.gfield_contains_required.field_sublabel_below{
+    border:0 !important;
+    background:none !important;
+}
+#wptime-plugin-preloader{
+    -moz-background-size:auto auto !important;
+	-o-background-size:auto auto !important;
+	-webkit-background-size:auto auto !important;
+	background-size:auto auto !important;
+}
+.elementor-element-c51360f  iframe {
+    width: 75% !important;
+}
+.elementor-widget-container:has(iframe) {
+    display: flex;
+    justify-content: center;
+}
+a {
+  text-decoration: none !important;
+}
+
+.elementor .elementor-element.elementor-widget-n-tabs>.elementor-widget-container>.e-n-tabs>.e-n-tabs-heading .e-n-tab-title[aria-selected=true] {
+        width: 10px !important;
+    padding: 20px 5px;
+    border-radius: 500px;
+    background: #D8042A;
+}
+.elementor-widget-n-tabs .e-n-tab-title {
+        padding: 5px 5px;
+    border-radius: 500px;
+    background: #D9D9D9;
+}
+.elementor-widget-n-tabs .e-n-tab-title:hover {
+    background: #D8042A !important;
+}
+#teacher-courses-video-sample iframe {
+    height: fit-content !important; 
+}
+
+/* CSS for teacher_courses_schedule shortcode */
+.teacher-courses-schedule-table{
+    border:0;
+    color:#fff;
+    border-collapse: collapse;
+}
+.teacher-courses-schedule-table th{
+    border-bottom: 1px solid #fff;
+}
+.teacher-courses-schedule-table td,
+.teacher-courses-schedule-table th {
+    border-left: 1px solid #fff;
+    text-align:center;
+}
+.teacher-courses-schedule-table td{
+    font-size:13px;
+    font-weight:400;
+}
+.teacher-courses-schedule-table th:last-child {
+    border-left: 0;
+}
+.teacher-courses-schedule-table td:last-child {
+    border-left: 0;
+}
+
+/* CSS teacher-courses-video-sample-place shortcode */
+.teacher-courses-video-sample-place{
+    width:100%;
+}
+#teacher-courses-video-sample .owl-carousel{
+    margin:auto;
+}
+#teacher-courses-video-sample .owl-stage {
+    display:flex;
+    flex-direction:row;
+    align-items:end;
+}
+#teacher-courses-video-sample svg, #teacher-courses-video-sample span{width:auto;display:inline;}
+#teacher-courses-video-sample .owl-nav{display:none;}
+.teacher-courses-video-sample-owl-next,.teacher-courses-video-sample-owl-prev{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    color:#fff;
+    background: #fff;
+    border-radius:50%;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 4px 25px rgba(0,0,0,0.07);
+    position: absolute;
+    z-index: 2;
+}
+.teacher-courses-video-sample-owl-next{right:-10px;}
+.teacher-courses-video-sample-owl-prev{left:-10px;}
+#teacher-courses-video-sample .owl-item{
+    width:277px !important;
+}
+#teacher-courses-video-sample h4{
+    height:35px;
+    font-size:14px;
+    color:#000E41;
+    text-align:Center;
+    font-weight:600;
+    margin-top:7px;
+    line-height:1.2em;
+}
+#teacher-courses-video-sample .item-box {
+  width:100%;
+  display:flex;
+  flex-direction: column;
+  color:#fff;
+  background:#fff;
+  padding:7px;
+  border-radius:16px;
+}
+#teacher-courses-video-sample .owl-stage-outer{
+    padding-top:8px;
+}
+#teacher-courses-video-sample iframe{width:100%;height:193px;}
+
+/* CSS teacher_current_courses shorcode*/
+.price, .price_sale{
+    color:#000000;
+    font-size:20px;
+    font-weight:800;
+    line-height:1.8em;
+    
+}
+.free, .currency{
+    color:#2D3748;
+    font-size:12px;
+    font-weight:700;
+    line-height:34px;
+    margin-right:5px;
+}
+.view-more-b{
+    display:block;
+    width:100%;
+   border:1px solid #C4161C;
+   border-radius:4px;
+   color:#C4161C;
+   text-align:center;
+   font-size:12px;
+   font-weight:700;
+   line-height:20px;
+   padding:8px 5px;
+   margin-bottom:6px;
+}
+.old_price{
+    color:rgba(119, 119, 119, 0.4588235294117647);
+    font-size:12px;
+    font-weight:500;
+    text-decoration: line-through;
+}
+.add-to-cart-button.cart-icon{
+    width:36px !important;
+    background-color:rgba(196, 22, 28, 1);
+    border-radius: 4px 4px 4px 4px !important;
+    padding: 5px 8px 5px 8px !important;
+    height:38px;
+}
+.add-to-cart-button.cart-icon:hover{
+    background:#ED1337 !important;
+}
+.add-to-cart-button.cart-icon img{
+    width:100%;
+}
+#teacher-current-courses h2{
+    color:#000;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:3px !important;
+    line-height: 1.5rem;
+    text-align: right;
+}
+.teacher-current-courses-card{
+    background:#fff;
+    border-radius:18px;
+    padding:8.5px;
+    box-shadow:0 4px 4px rgba(0, 0, 0, 0.08);
+    color:#2D3748;
+}
+span.secound-title{
+    color:#777777;
+    text-align:justify;
+    font-size:11px;
+    font-weight:400;
+}
+.price_sale_percentage{
+    background:rgba(196, 22, 28, 1);
+    border-radius:4px;
+    padding:0 3px;
+    color:#fff;
+    font-size:12px;
+    font-weight:300;
+    line-height:12px;
+    text-align:left;
+    margin-right:7px;
+}
+.teacher-current-courses-image{
+    height:135px;
+    overflow:hidden;
+    margin-bottom:15px;
+    position:relative;
+}
+.teacher-current-courses-image img{
+    border-radius:18px;
+}
+.teacher-current-courses-card:hover .view-more{
+    opacity:1;
+}
+.teacher-current-courses-image .view-more{
+    opacity:0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    backdrop-filter: blur(5px);
+    transition:all 0.3s;
+    border-radius:18px;
+}
+.teacher-current-courses-image .view-more a{
+    background:#C4161C;
+    border-radius:8px;
+    font-weight:700;
+    color:#fff;
+    padding:5px 15px;
+    font-size:14px;
+}
+.teacher-current-courses-cat-link{
+    font-size:10px;background:#E8F7F6;padding:3px 5px;border-radius:25px;color:#1EB2A6;border:1px solid #1EB2A6;
+}
+.teacher-name{
+    font-size:14px;font-weight:600
+}
+.flex-auto{
+    flex:auto;
+}
+.flex-0{
+    flex:0;
+}
+
+/* CSS teacher_future_courses shortcode*/
+#teacher-future-courses h3{height:50px;font-size:18px;font-weight:bold}
+
+.teacher-future-courses-card{
+    background:#fff;
+    border-radius:16px;
+    padding:7px;
+    box-shadow:0 4px 25px rgba(0,0,0,0.07);
+    color:#2D3748;
+}
+.teacher-future-courses-cat-link{
+    font-size:14px;background:#E8F7F6;padding:7px;border-radius:25px;color:#1EB2A6
+}
+.teacher-name{
+    font-size:14px;font-weight:600
+}
+/* CSS teacher_landing_current_courses shortcode */
+.teacher-landing-current-courses-card{
+    background:#fff;
+    border-radius:18px;
+    padding:8.5px;
+    box-shadow:0 4px 4px rgba(0, 0, 0, 0.08);
+    color:#2D3748;
+}
+#teacher-landing-current-courses h2{
+    color:#000;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:3px !important;
+    line-height: 1.5rem;
+}
+.add-to-cart-button-landing{
+    width:36px !important;
+    background-color:rgba(196, 22, 28, 1);
+    border-radius: 4px 4px 4px 4px !important;
+    padding: 5px 8px 5px 8px !important;
+    height:38px;
+}
+.price_sale_percentage_landing{
+    background:rgba(196, 22, 28, 1);
+    border-radius:4px;
+    padding:0 3px;
+    color:#fff;
+    font-size:12px;
+    font-weight:300;
+    line-height:12px;
+    text-align:left;
+    margin-right:7px;
+}
+/* CSS Float Button */
+.sub_fab_btns_wrapper button{
+    width: 200px;
+    height: auto;
+    border-radius: 8px;
+    background: #fff;
+    padding: 15px;
+}
+.sub_fab_btns_wrapper button img{width:100%;}
+.sub_fab_btns_wrapper button:hover{
+    border-radius:8px;
+    background:#eee !important;
+}
+.sub_fab_btns_wrapper button:after{
+    border-radius:8px !important;
+    background:#fff !important;
+    color:#222 !important;
+    border:1px solid #eee !important;
+}
+button.kc_fab_main_btn{
+    right:30px;
+    bottom:30px;
+}
+button.kc_fab_main_btn span{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.sub_fab_btns_wrapper{
+    bottom:105px;
+}
+.booking-button{
+    display: block;
+    width: 100%;
+    border: 1px solid #C4161C;
+    border-radius: 4px;
+    color: #fff;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 20px;
+    padding: 8px 5px;
+}
+@media (max-width: 1000px) { 
+    .teacher-courses-video-sample-owl-next {
+        display: inline-flex !important;
+        right: 0 !important;
+    }
+    .teacher-courses-video-sample-owl-prev {
+        display: inline-flex !important;
+        left: 0 !important;
+    }
+    
+    /* CSS teacher-courses-video-sample-place shortcode */
+    #teacher-courses-video-sample .owl-carousel{
+        margin:auto;
+    }
+    .teacher-courses-video-sample-owl-next,.teacher-courses-video-sample-owl-prev{display:none;}
+}
+@media(max-width:480px){
+    /* CSS for teacher_courses_schedule shortcode */
+    .teacher-courses-schedule-table td{
+        font-size:11px;
+    }
+    
+    /* CSS teacher-courses-video-sample-place shortcode */
+    #teacher-courses-video-sample .owl-carousel{
+        width:95% !important;
+    }
+    .teacher-courses-video-sample-owl-next,.teacher-courses-video-sample-owl-prev{display:none;}
+    
+    /* CSS teacher_current_courses shorcode*/
+    #teacher-current-courses h2{font-size:13px;}
+    .teacher-current-courses-cat-link{font-size:10px;padding:5px 7px}
+    .teacher-name{font-size:10px}
+    
+    /* CSS teacher_future_courses shortcode*/
+    #teacher-future-courses h3{font-size:13px;}
+    .teacher-future-courses-cat-link{font-size:10px;padding:5px 7px}
+    .teacher-name{font-size:10px}
+}
