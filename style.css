@@ -1,0 +1,552 @@
+/* 
+Theme Name: Hello Elementor Child
+Theme URI: https://github.com/elementor/hello-theme/
+Description: Hello Elementor Child is a child theme of Hello Elementor, created by Elementor team
+Author: Elementor Team
+Author URI: https://elementor.com/
+Template: hello-elementor
+Version: 1.0.1
+Text Domain: hello-elementor-child
+License: GNU General Public License v3 or later.
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Tags: flexible-header, custom-colors, custom-menu, custom-logo, editor-style, featured-images, rtl-language-support, threaded-comments, translation-ready
+*/
+
+/*
+    Add your custom styles here
+*/
+a{text-decoration:none;}
+body{
+    background:#ffffff;
+}
+
+.woocommerce div.product p.price, .woocommerce div.product span.price {
+    color: #e91e63 !important;
+    font-size: unset !important;
+}
+
+.shop-sidebar .shop-sidebar-in{
+    background: #FFFFFF;
+    box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.05);
+    border-radius: 25px;
+    padding:30px;
+}
+.shop-sidebar-in ul{
+    padding-left:0;
+    padding-right:0;
+}
+.shop-sidebar-in li{list-style:none;}
+.sa-product{
+    display:flex;
+    flex-direction:column;
+    justify-content: space-between;
+    background: #FFFFFF;
+    padding:10px;
+    border: 1px solid #EAEAEA;
+    border-radius:25px 25px 20px 20px;
+    height:515px;
+}
+.sa-product img{margin-bottom:12px;border-radius:25px 25px 0 0;}
+.woocommerce-loop-product__title{
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 190%;
+    text-align: right;
+    color: #2D3748;
+}
+.widgettitle, .bapf_head h3{
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 148%;
+    color:#2D3748;
+}
+.cat-banne{
+    height:515px;
+}
+.cat-banner img{
+    border-radius:25px; 
+    border: 1px solid #EAEAEA; 
+}
+.sa-product .button{
+    border: 1px solid #E52041 !important;
+    color: #E52041 !important;
+    border-radius: 8px !important;
+    background:transparent !important;
+    width:100%;
+    display:block;
+    text-align:center;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px !important;
+    line-height: 24px;
+}
+.sa-product .woocommerce-loop-product__title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.sa-product .woocommerce-loop-product__title img{
+   width:auto;
+   height:16px;
+   display:inline;
+   margin-bottom:0px;
+}
+.sa-product .packageDoroosTitle{
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 168%;
+    color: #E52041;
+    margin-bottom:10px;
+}
+.sa-product-items-list{
+    margin-bottom:10px;
+}
+.sa-product-items-list li img{
+    width:24px;
+    height:auto;
+    margin-left:5px;
+    margin-bottom:0;
+    border-radius:0;
+}
+.sa-product-items-list li{
+    display:flex;
+    align-items:center;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 168%;
+    color: #777777;
+    margin-bottom:7px;
+}
+.bapf_body input[type="checkbox"]{
+box-sizing: border-box;
+width: 19px;
+height: 19px;
+background: #F9F9F9 !important;
+/* grey/light */
+
+border: 0.5px solid #C4C4C4 !important;
+border-radius: 5px !important;
+margin:0 0 0 7px !important;
+}
+
+.bapf_body ul{
+    padding-right:0;
+    padding-left:0;
+}
+.bapf_body label, .widget_nav_menu ul li a{
+font-style: normal;
+font-weight: 300;
+font-size: 12px !important;
+line-height: 148%;
+color: #636363 !important;
+}
+.widget_nav_menu ul li a:hover{color:#E52041 !important;}
+.shop-sidebar ul.product-categories{padding-left:0;padding-right:0;}
+.shop-sidebar ul.product-categories li{
+    list-style:none;
+}
+.shop-sidebar ul.product-categories li a{
+    font-size:14px;
+}
+.woocommerce-breadcrumb{
+    font-weight:bold;
+}
+.woocommerce-breadcrumb a{
+    font-weight:normal;
+}
+
+.widget, .berocket_single_filter_widget{
+    border-bottom: 0.5px solid #DDDDDD;
+    margin-bottom:15px;
+}
+.deleteBtnFilter .berocket_single_filter_widget{
+    border-bottom: 0;
+    margin-bottom:0;
+}
+.sa-product-ordering{
+    float:right;
+}
+.sa-product-ordering ul{
+    display:flex;
+    flex-direction:row;
+    padding-right:0;
+    padding-left:0;
+}
+.sa-product-ordering ul li{
+    list-style:none;
+    cursor:pointer;
+    color:#929292;
+    padding:0 15px;
+}
+.sa-product-ordering ul li[selected=selected]{
+    color:#E52041 !important;
+}
+form.woocommerce-ordering{display:none !important;}
+.woocommerce-result-count{float:left !important;}
+.woocommerce-result-count span{color:#E52041;}
+.delete-filters button{
+    background:transparent;
+    border:0;
+    color:#E52041 !important;
+    padding:0;
+}
+/*
+.archive .products.row{
+    border-top:0.5px solid #DDDDDD;
+}
+*/
+.woocommerce-breadcrumb{
+    margin-bottom:5em !important;
+}
+
+.text-right{text-align:right;}
+.text-left{text-align:left;}
+
+.rtl{direction:rtl;}
+/*
+.grade-button-tabs .elementor-button{
+    width:200px !important;
+    height:200px !important;
+}
+.grade-button-tabs.selected .elementor-button{
+    background:#FFC317 !important;
+    color:#fff !important;
+}
+
+.grade-button-panel{
+display:none;    
+}
+.grade-button-panel[data-panel="1"]{
+    display:block;
+}*/
+
+.sa-courses-item > .elementor-container.elementor-column-gap-default{
+    height:100%;
+}
+
+img[title] {
+pointer-events: none;
+}
+
+nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
+    cursor:pointer;
+} 
+.play-icon{position:relative;z-index:0;}
+.play-icon:before{
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    z-index: -1;
+    opacity: 0;
+    animation: playanimation 2s infinite;
+    background-color: #C4161C;
+    border-radius:50%;
+    padding: 5px;
+    box-sizing: content-box;
+}
+.multiteacher{
+    display:flex;
+    flex-direction:column;
+}
+.multiteacher li{list-style:none !important;}
+
+.course-teacher-item{
+    background-color: #fff0 !important;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all 0.3s;
+}
+.course-teacher-item .teacher-course-name{
+    text-align:center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height:74px;
+    width:100%;
+}
+.pack-course-info li, .teacher-course-info li{
+    padding:3px;
+}
+.pack-course-info li > div, .teacher-course-info li > div{
+    background:#00000005;
+    border-radius:100px;
+    padding:7px 15px;
+    font-size:13px;
+}
+.pack-courses-items .course-teacher-img{
+    margin-bottom:7px;
+    transition:all 0.3s;
+    background:#fff;
+    width:160px;
+    height:160px;
+}
+.multiteacher-courses-items .course-teacher-img{
+    display:flex;
+    align-items:start;
+    justify-content:center;
+    margin-bottom:15px;
+    width:100%;
+    height:200px;
+    overflow:hidden;
+    background:#f6f6f6;
+    border:1px solid #f0f0f0;
+}
+.multiteacher-courses-items .course-teacher-img img{width:100%;}
+.pack-courses-items .course-teacher-img.active{
+    box-shadow:0 .125rem .25rem #E52041 !important;
+    border:1px solid #E52041 !important;
+    transform: scale(1.1, 1.1);
+    margin-bottom:20px;
+}
+.multiteacher-courses-items .course-teacher-img.active{
+    
+    box-shadow:0 .125rem .25rem #E52041 !important;
+    border:1px solid #E52041 !important;
+    transform: scale(1.1, 1.1);
+    margin-bottom:20px;
+}
+.multiteacher-courses-items .course-teacher-item.active{
+    transform: scale(1.1, 1.1);
+    margin-bottom:40px;
+    opacity:1 !important;
+}
+.multiteacher-course-item:before{
+    content: url(assets/img/Union.svg);
+    width: 184px;
+    height: 24px;
+    display: block;
+    position: absolute;
+    top: -24px;
+    left: calc((100% - 184px) / 2);
+}
+.multiteacher-course-item{
+    width:800px;
+    margin:auto;
+    background:#fff;
+    padding:30px 15px 15px 15px;
+    border-radius:32px;
+    position:relative;
+}
+
+.courses-title h3{
+    font-size:18px;
+    font-weight:bold;
+}
+.first-session-play-icon{
+    cursor:pointer;
+    position: absolute;
+    left: 55px;
+    top: 118px;
+}
+.price-number{
+    color:#E52041;
+    font-weight:700;
+    font-size:18px;
+}
+.price-number-sale{
+    color:#666;
+    font-weight:400;
+    text-decoration:line-through;
+    font-size:16px;
+}
+#wptime-plugin-preloader{
+    -moz-background-size:auto auto !important;
+	-o-background-size:auto auto !important;
+	-webkit-background-size:auto auto !important;
+	background-size:auto auto !important;
+}
+
+.add-to-cart-button.cart-icon {
+    width: 100% !important;
+    border-radius: 5px !important;
+    padding: 0px !important;
+    background: #ED1337 !important;
+    color: #FFFFFF !important;
+    text-align: center !important;
+}
+
+.add-to-cart-button.cart-icon img{
+    width: 100% !important;
+    border-radius: 5px !important;
+    padding: 0px !important;
+    background: #ED1337 !important;
+    color: #FFFFFF !important;
+    text-align: center !important;
+}
+@keyframes playanimation{
+    0% {
+        transform: scale(.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Start Css code for sticky course by mehran saeedi */
+@media (max-width: 768px) {
+    .floating-sticky {
+        display: none;
+        z-index: 2147483647 !important;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        animation: slideUp 0.3s ease-in-out;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+}
+
+
+/* End Css code for sticky course by mehran saeedi */
+
+/* Start Css code for video BY mehran saeedi */
+
+@media (max-width: 480px) {
+    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
+        height: 138px !important; 
+			
+}
+	.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:138px !important;
+		
+	}
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
+        height: 138px !important; 
+    }
+		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:138px !important;
+		
+	}
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
+        height: 118px !important; 
+    }
+		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:118px !important;
+		
+	}
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
+        height: 146px !important; 
+    }
+		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:146px !important;
+		
+	}
+}
+
+
+@media (min-width: 1441px) {
+    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
+        height: 146px !important; 
+    }
+		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:146px !important;
+		
+	}
+}
+
+@media (min-width: 600px) {
+.elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe{
+        height: 138px !important; 
+    }
+		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
+		
+		height:138px !important;
+		
+	}
+}
+.wp-video{
+margin-right:25% !important;
+}
+/* End Css code for video BY mehran saeedi */
+
+.aparat-video-wrapper {
+            background-color: #FFFFFF;
+            box-shadow: -4px 0px 4px 0px rgba(178.5, 178.5, 178.5, 0.25);
+            padding: 10px;
+	        margin: 0px;
+            border-radius: 25px;
+        }
+
+div#post-video-links {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    justify-self: center;
+}
+
+.elementor-2 .elementor-element.elementor-element-3265f80 {
+    --display: flex;
+    --flex-direction: row;
+    --container-widget-width: initial;
+    --container-widget-height: 100%;
+    --container-widget-flex-grow: 1;
+    --container-widget-align-self: stretch;
+    --flex-wrap-mobile: wrap;
+    border-style: solid;
+    --border-style: solid;
+    border-width: 1px;
+    --border-top-width: 1px;
+    --border-right-width: 1px;
+    --border-bottom-width: 1px;
+    --border-left-width: 1px;
+    border-color: #02010133;
+    --border-color: #02010133;
+    --border-radius: 20px;
+    box-shadow: -5px 6px 25px 10px rgba(96.9, 20.202860054347827, 20.202860054347827, .5);
+}
+
+.mehran-2 {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    position: absolute;
+    transition: opacity 0.3s ease-out, max-height 0.4s ease-out;
+    will-change: opacity, max-height;
+}
+
+.mehran-3 {
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+    will-change: opacity;
+}
+
+.mehran-1:hover .mehran-3 {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.mehran-2 li {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    will-change: opacity, transform;
+}
