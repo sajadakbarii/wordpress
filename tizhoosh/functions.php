@@ -715,22 +715,22 @@ add_action('wp_head','add_analytics_script');
 function add_analytics_script(){
     ?>
    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R80HGBSCNW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R80HGBSCNW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-R80HGBSCNW');
+    </script>
 
-  gtag('config', 'G-R80HGBSCNW');
-</script>
-
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-W7FDQSL2');</script>
-<!-- End Google Tag Manager -->
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l][];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5SC396D8');</script>
+    <!-- End Google Tag Manager -->
     <?php
 }
 
@@ -741,7 +741,7 @@ add_action( 'wp_body_open', 'add_analytics_script_body' );
 function add_analytics_script_body() {
 	?>
 	    <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7FDQSL2"
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SC396D8"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
 	<?php
@@ -1052,18 +1052,23 @@ add_action('wp_footer', 'add_chat_widget');
                                 ?>
 <div class="col-6 col-md-4 col-lg-3 course-row-item mb-3 course-row-item-<?php echo esc_attr($pack_courses['item-'.$j]['pack-course-teacher']); ?>">
     <div class="course-teacher-item" data-item="<?php echo $j; ?>" id="teacher-<?php echo esc_attr($pack_courses['item-'.$j]['pack-course-teacher']); ?>">
-        <div class="course-teacher-img-container position-relative">
-            <div class="course-teacher-img border shadow-sm rounded-circle overflow-hidden">
-                <img src="<?php echo esc_url($pack_courses['item-'.$j]['pack-course-teacher-img']); ?>" 
-                     alt="<?php echo esc_attr(get_the_title($pack_courses['item-'.$j]['pack-course-teacher'])); ?>" class="rounded-circle">
+<div class="course-teacher-img-container position-relative">
+    <div class="course-teacher-img border shadow-sm rounded-circle overflow-hidden custom-teacher-img" onclick="hideOverlay(this)">
+        <img src="<?php echo esc_url($pack_courses['item-'.$j]['pack-course-teacher-img']); ?>"
+             alt="<?php echo esc_attr(get_the_title($pack_courses['item-'.$j]['pack-course-teacher'])); ?>" class="rounded-circle w-100 h-100">
+        <div class="fixed-overlay">
+            <span>جزئیات بیشتر</span>
             </div>
-            <?php if (!empty($pack_courses['item-'.$j]['teacher-aparat-code-pack'])): ?>
-                <div class="teacher-aparat-code-pack position-absolute" 
-                     data-video-id="<?php echo esc_attr($pack_courses['item-'.$j]['teacher-aparat-code-pack']); ?>">
-                    <i class="fa fa-play-circle"></i>
-                </div>
-            <?php endif; ?>
+    </div>
+    <?php if (!empty($pack_courses['item-'.$j]['teacher-aparat-code-pack'])): ?>
+        <div class="teacher-aparat-code-pack position-absolute"
+             data-video-id="<?php echo esc_attr($pack_courses['item-'.$j]['teacher-aparat-code-pack']); ?>">
+            <i class="fa fa-play-circle"></i>
         </div>
+    <?php endif; ?>
+</div>
+
+
         <div class="teacher-info text-center mt-2">
             <div class="teacher-name fw-bold"><?php echo esc_html(get_the_title($pack_courses['item-'.$j]['pack-course-teacher'])); ?></div>
             <?php if (!empty($pack_courses['item-'.$j]['pack-course-teacher-description'])): ?>
@@ -1072,6 +1077,7 @@ add_action('wp_footer', 'add_chat_widget');
         </div>
     </div>
 </div>
+
 
 							
                                 <?php
@@ -1134,7 +1140,10 @@ add_action('wp_footer', 'add_chat_widget');
                         }
                         ?>
                     </div>
-                <hr class="my-4">
+                    <?php if ( $i < (count($courses_cat)-1)): ?>
+<img src="https://tizhooshan.tamland.ir/wp-content/uploads/2025/05/Line4.webp" class="img-fluid my-4" style="max-width: 100%; height: auto;">
+ <?php endif; ?>
+
                 </li>
             
             <?php
@@ -1246,7 +1255,65 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
     </script>
+    
+<script>
+function hideOverlay(el) {
+    const overlay = el.querySelector('.fixed-overlay');
+    if (overlay) {
+        el.classList.add('hide-overlay');
+    }
+}
+</script>
+
+
         <style>
+.custom-teacher-img {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto;
+    cursor: pointer;
+    overflow: hidden; 
+}
+
+.fixed-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    padding: 14px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom-left-radius: 90px;
+    border-bottom-right-radius: 90px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    z-index: 2;
+}
+
+.custom-teacher-img.hide-overlay .fixed-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+
+@media (max-width: 768px) {
+    .custom-teacher-img {
+        width: 140px;
+        height: 140px;
+    }
+}
+@media (max-width: 480px) {
+    .custom-teacher-img {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+
             .aparat-popup-overlay {
                 position: fixed;
                 top: 0;
@@ -1589,209 +1656,121 @@ function my_custom_script() {
 add_action('wp_footer', 'my_custom_script');
 
 
+
+
 /**
  * Courses list UI for multi-teacher courses type.
  */ 
-function teachers_course_items_func(){
-    if(is_singular('course')){
-        $courses_cat = get_post_meta( get_the_ID(), 'courses-cat', true );
-        $teachers_courses = get_post_meta( get_the_ID(), 'teachers-course', true );
-        $course_option_page  = jet_engine()->options_pages->registered_pages['courses-options'];
-        $tax = $course_option_page->get( 'tax' );
+
+function teachers_course_items_func() {
+    if (is_singular('course')) {
+        $courses_cat = get_post_meta(get_the_ID(), 'courses-cat', true);
+        $teachers_courses = get_post_meta(get_the_ID(), 'teachers-course', true);
+        $course_option_page = jet_engine()->options_pages->registered_pages['courses-options'];
+        $tax = $course_option_page->get('tax');
         ?>
-            <script type="text/javascript" defer>
-                jQuery(document).ready(function(){
-                    jQuery.fn.shuffle = function() {
-                        var allElems = this.get(),
-                            getRandom = function(max) {
-                                return Math.floor(Math.random() * max);
-                            },
-                            shuffled = jQuery.map(allElems, function(){
-                                var random = getRandom(allElems.length),
-                                    randEl = jQuery(allElems[random]).clone(true)[0];
-                                allElems.splice(random, 1);
-                                return randEl;
-                           });
-                 
-                        this.each(function(i){
-                            jQuery(this).replaceWith(jQuery(shuffled[i]));
-                        });
-                 
-                        return jQuery(shuffled);
-                    };
+        <style>
+        .course-teacher-img-container {
+            position: relative !important;
+            width: 160px !important;
+            height: 160px !important;
+            margin: 0 auto 10px auto !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+        }
+        .course-teacher-img {
+            width: 100% !important;
+            height: 100% !important;
+            position: relative !important;
+        }
+        .course-teacher-img img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 50% !important;
+            display: block !important;
+        }
+        .fixed-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    padding: 14px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom-left-radius: 90px;
+    border-bottom-right-radius: 90px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    z-index: 2;
+}
+        .course-teacher-item h2 {
+            font-size: 16px !important;
+            font-weight: bold !important;
+        }
+        @media (max-width: 768px) {
+            .course-teacher-img-container {
+                width: 120px !important;
+                height: 120px !important;
+            }
+            .fixed-overlay {
+                font-size: 12px !important;
+                height: 36px !important;
+                line-height: 36px !important;
+            }
+        }
+        </style>
+
+        <script type="text/javascript" defer>
+        jQuery(document).ready(function () {
+            jQuery.fn.shuffle = function () {
+                var allElems = this.get(),
+                    getRandom = function (max) {
+                        return Math.floor(Math.random() * max);
+                    },
+                    shuffled = jQuery.map(allElems, function () {
+                        var random = getRandom(allElems.length),
+                            randEl = jQuery(allElems[random]).clone(true)[0];
+                        allElems.splice(random, 1);
+                        return randEl;
+                    });
+
+                this.each(function (i) {
+                    jQuery(this).replaceWith(jQuery(shuffled[i]));
                 });
-            </script>
-            <div class="container multiteacher my-5">
-                <li class="multiteacher-courses-items">
-                    <div class="row courses-wrapper align-items-start justify-content-center">
-                        <div class="row justify-content-center" id="courseRow">
-                        <?php
-                        for($j = 0; $j < count($teachers_courses); $j++){
-                                ?>
-									<div class="col-6 col-md-4 col-lg-3 course-row-item position-relative mb-3 course-row-item-<?php echo $teachers_courses['item-'.$j]['teacher-course-name']; ?>">
-                                        <div class="course-teacher-item shadow-sm rounded overflow-hidden pb-3" data-item="<?php echo $j ?>" id="teacher-<?php echo $teachers_courses['item-'.$j]['teacher-course-name']; ?>">
-                                            <div class="course-teacher-img">
-                                                <img src="<?php echo $teachers_courses['item-'.$j]['teacher-course-img']; ?>">
-                                            </div>
-                                            <div class="text-center mb-3">
-                                                <h2 class="fw-bold" style="font-size:18px"><?php echo get_the_title($teachers_courses['item-'.$j]['teacher-course-name']); ?></h2>
-                                            </div>
-                                            <div class="row w-100">
-                                                <?php if($teachers_courses['item-'.$j]['teacher-aparat-code'] != ""): ?>
-                                                    <div class="col-6 first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code']; ?>">
-                                                        <div class="elementor-widget-container">
-                                                            <a class="w-100 d-block">
-                                                                <button class="w-100" style="background:#11365C;border-radius:15px;font-size:14px">
-                                                                ویدیو جلسه اول
-                                                                </button>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <div class="<?php echo ($teachers_courses['item-'.$j]['teacher-aparat-code'] != "") ? "col-6" : "col-12"; ?>">
-                                                    <button class="w-100" style="border-radius:15px;font-size:14px">
-                                                        جزئیات بیشتر
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <?php //if($teachers_courses['item-'.$j]['teacher-aparat-code'] != ""): ?>
-                                            <!--<div class="first-session-play-icon first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code']; ?>">
-                                                <div class="elementor-widget-container">
-                                                    <a>
-                                                        <img src="<?php //echo UPLOADS_DIR.'/2024/03/play-icon.svg'; ?>" class="first-session-play-icon-img">
-                                                    </a>
-                                                </div>
-                                            </div>-->
-                                        <?php //endif; ?>
+
+                return jQuery(shuffled);
+            };
+            jQuery("#courseRow .course-row-item").shuffle();
+        });
+        </script>
+
+        <div class="container multiteacher my-5">
+            <li class="multiteacher-courses-items">
+                <div class="row courses-wrapper align-items-start justify-content-center">
+                    <div class="row justify-content-center" id="courseRow">
+                        <?php for ($j = 0; $j < count($teachers_courses); $j++) : ?>
+                        <div class="col-6 col-md-4 col-lg-3 course-row-item position-relative mb-4 course-row-item-<?php echo $teachers_courses['item-' . $j]['teacher-course-name']; ?>">
+                            <div class="course-teacher-item text-center" data-item="<?php echo $j ?>" id="teacher-<?php echo $teachers_courses['item-' . $j]['teacher-course-name']; ?>">
+                                <div class="course-teacher-img-container">
+                                    <div class="course-teacher-img">
+                                        <img src="<?php echo esc_url($teachers_courses['item-' . $j]['teacher-course-img']); ?>" alt="<?php echo esc_attr(get_the_title($teachers_courses['item-' . $j]['teacher-course-name'])); ?>">
+                                        <div class="fixed-overlay">جزئیات بیشتر</div>
                                     </div>
-                                    <style>
-                                    /*
-                                            .course-teacher-img{
-                                              --border-angle: 0turn;
-                                              --main-bg: conic-gradient(
-                                                from var(--border-angle),
-                                                #fff,
-                                                #fff 5%,
-                                                #fff 60%,
-                                                #fff 95%
-                                              );
-                                              border: solid 5px transparent;
-                                              --gradient-border: conic-gradient(
-                                                from var(--border-angle),
-                                                transparent 25%,
-                                                #11365C,
-                                                #E52041 99%,
-                                                transparent
-                                              );
-                                              background: var(--main-bg) padding-box, var(--gradient-border) border-box, var(--main-bg) border-box;
-                                              background-position: center center;
-                                              -webkit-animation: bg-spin 3s linear infinite;
-                                                      animation: bg-spin 3s linear infinite;
-                                            }
-                                            @-webkit-keyframes bg-spin {
-                                              to {
-                                                --border-angle: 1turn;
-                                              }
-                                            }
-                                            @keyframes bg-spin {
-                                              to {
-                                                --border-angle: 1turn;
-                                              }
-                                            }
-                                            .course-teacher-img:hover {
-                                              -webkit-animation-play-state: paused;
-                                                      animation-play-state: paused;
-                                            }
-                                            
-                                            @property --border-angle {
-                                              syntax: "<angle>";
-                                              inherits: true;
-                                              initial-value: 0turn;
-                                            }
-                                        */
-                                    </style>
-                                <?php
-                        }
-                        ?>
+                                </div>
+                                <h2 class="mt-2"><?php echo get_the_title($teachers_courses['item-' . $j]['teacher-course-name']); ?></h2>
+                            </div>
                         </div>
-						<!--<style>
-							#courseWrapCarousel svg, #courseWrapCarousel span{width:auto;display:inline;}
-							#courseWrapCarousel .owl-nav{
-								position: absolute;
-								width: 100%;
-								top: calc(50% - 16px);
-								height: 0;
-							}
-							.courseWrapCarousel-owl-next,.courseWrapCarousel-owl-prev{
-								display:flex;
-								align-items:center;
-								justify-content:center;
-								width:32px;
-								height:32px;
-								color:#fff;
-								background: #fff;
-								border-radius:50%;
-								font-size:14px;
-								cursor:pointer;
-								box-shadow:0 4px 25px rgba(0,0,0,0.07);
-								position: absolute;
-								z-index: 2;
-							}
-							.courseWrapCarousel-owl-next{right:-10px;}
-							.courseWrapCarousel-owl-prev{left:-10px;}
-							}
-							#courseWrapCarousel .owl-item{
-								width:277px;
-							}
-							#courseWrapCarousel .owl-stage-outer{
-							    padding-top:15px;
-							    padding-bottom:15px;
-							}
-						</style>-->
-						<script type="text/javascript" defer>
-						jQuery(document).ready(function(){
-						    /*let loopState = false;
-							let count = 0;
-                            jQuery("#courseWrapCarousel div.item-box").each(function() {
-                                count = count + 1;
-                            });
-							if(count > 5){
-							    loopState = true;
-							}else{
-							    loopState = false;
-							}
-							
-						  jQuery("#courseWrapCarousel").owlCarousel({
-							rtl:true,
-							loop:false,
-							margin:30,
-							nav:true,
-							autoplay:true,
-							autoplayTimeout:5000,
-							autoplayHoverPause:true,	
-							rewind:true,
-							navText:['<div class="courseWrapCarousel-owl-next"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.57812 11L6.57812 6L1.57812 1" stroke="#2D3748" stroke-width="1.42857" stroke-linecap="round" stroke-linejoin="round"/></svg></div>','<div class="courseWrapCarousel-owl-prev"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.4375 1L1.4375 6L6.4375 11" stroke="#2D3748" stroke-width="1.42857" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'],
-							responsiveClass:true,
-							responsive:{
-								0:{
-									items:1
-								},
-								600:{
-									items:3
-								},
-								1000:{
-									items:5
-								}
-							}
-						  });*/
-						  jQuery("#courseRow .course-row-item").shuffle();
-						});
-						</script>
-                        <?php
-                        for($j = 0; $j < count($teachers_courses); $j++){
-                                ?>
-                                <div class="multiteacher-course-item shadow-sm teacher-course-info d-none multiteacher-course-item-<?php echo $teachers_courses['item-'.$j]['teacher-course-name']; ?>" data-panel="<?php echo $j ?>" id="multiteacher-course-item-<?php echo $j; ?>">
+                        <?php endfor; ?>
+                    </div>
+
+                    <?php
+                    for ($j = 0; $j < count($teachers_courses); $j++) {
+                         ?>
+                        <div class="multiteacher-course-item shadow-sm teacher-course-info d-none multiteacher-course-item-<?php echo $teachers_courses['item-' . $j]['teacher-course-name']; ?>" data-panel="<?php echo $j ?>" id="multiteacher-course-item-<?php echo $j; ?>">
                                     <div class="row mb-3">
                                         <div class="col-12">
                                             <h2 style="text-align:center">
@@ -2007,57 +1986,59 @@ function teachers_course_items_func(){
                 </li>
         </div>
         <script>
-            window.onload = function(e){
-                var elements = document.getElementsByClassName("course-teacher-item");
-                var teacherCourseInfo = document.getElementsByClassName("teacher-course-info");
-                var myFunction = function() {
-                    for (let i = 0; i < elements.length; i++) {
-                        elements[i].classList.remove("active");
-                        elements[i].style.opacity = "0.5";
-                    }
-                    this.classList.add("active");
-                    let dataItem = this.getAttribute("data-item");
-                    for(let i = 0; i < teacherCourseInfo.length; i++){
-                        teacherCourseInfo[i].classList.add("d-none");
-                    }
-                    document.querySelector("[data-panel='"+dataItem+"']").classList.remove("d-none");
-                    if (isMobile()) {
-                        document.getElementById("multiteacher-course-item-"+dataItem).scrollIntoView();
-                    }
-                };
-                
+        window.onload = function () {
+            const elements = document.getElementsByClassName("course-teacher-item");
+            const teacherCourseInfo = document.getElementsByClassName("teacher-course-info");
+
+            const myFunction = function () {
                 for (let i = 0; i < elements.length; i++) {
-                    elements[i].addEventListener('click', myFunction, false);
+                    elements[i].classList.remove("active");
+                    elements[i].style.opacity = "0.5";
                 }
-                
-                
-                clearInterval(sortCarouselTimer);
-                var sortCarouselTimer = setInterval(function(){
-                    jQuery("#courseRow .course-row-item").shuffle();
-                    for (let i = 0; i < elements.length; i++) {
-                        elements[i].addEventListener('click', myFunction, false);
+                this.classList.add("active");
+                this.style.opacity = "1";
+                const dataItem = this.getAttribute("data-item");
+
+                for (let i = 0; i < teacherCourseInfo.length; i++) {
+                    teacherCourseInfo[i].classList.add("d-none");
+                }
+
+                const detail = document.querySelector("[data-panel='" + dataItem + "']");
+                if (detail) {
+                    detail.classList.remove("d-none");
+                    if (typeof isMobile === "function" && isMobile()) {
+                        detail.scrollIntoView({ behavior: "smooth" });
                     }
-                }, 10000);
-                
-                let url = new URL(window.location.href);
-                let teacherSelected = url.href.substring(url.href.lastIndexOf('#') + 1);
-                if(teacherSelected != url){
-                    clearInterval(sortCarouselTimer);
-                    jQuery(".course-row-item").addClass("d-none");
-                    jQuery(".multiteacher-course-item").addClass("d-none");
-                    jQuery(".course-row-item-"+teacherSelected).removeClass("d-none");
-                    jQuery(".multiteacher-course-item-"+teacherSelected).removeClass("d-none");
-                    jQuery("#teacher-"+teacherSelected).click();
-                    document.getElementById("teacher-"+teacherSelected).scrollIntoView();
                 }
+            };
+
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].addEventListener("click", myFunction, false);
             }
+
+            let sortCarouselTimer = setInterval(function () {
+                jQuery("#courseRow .course-row-item").shuffle();
+            }, 10000);
+
+            const url = new URL(window.location.href);
+            const teacherSelected = url.hash.replace('#', '');
+
+            if (teacherSelected && document.getElementById("teacher-" + teacherSelected)) {
+                clearInterval(sortCarouselTimer);
+                jQuery(".course-row-item").addClass("d-none");
+                jQuery(".multiteacher-course-item").addClass("d-none");
+                jQuery(".course-row-item-" + teacherSelected).removeClass("d-none");
+                jQuery(".multiteacher-course-item-" + teacherSelected).removeClass("d-none");
+                document.getElementById("teacher-" + teacherSelected).click();
+                document.getElementById("teacher-" + teacherSelected).scrollIntoView();
+            }
+        };
         </script>
+
         <?php
     }
 }
-
-add_shortcode('teachers_course_items','teachers_course_items_func');
-
+add_shortcode('teachers_course_items', 'teachers_course_items_func');
 
 /**
  * api for update courses info from LMS
@@ -2622,6 +2603,11 @@ if($button_atts['is_archive'] == true){
         }
         ?>
         <input type="hidden" name="course_numbers" value="<?php echo count($items); ?>">
+        <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
+        <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
+        <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
+        <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
+        <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
     </form>
     <?php
 }
@@ -2880,56 +2866,59 @@ function add_sticky_script() {
     ?>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const target = document.querySelector(".sticky-button"); 
-        if (!target) {
-            console.error("Element with class .sticky-button not found!");
-            return;
-        }
+        const originalButton = document.querySelector(".sticky-button");
+        const footer = document.querySelector("footer");
+
+        if (!originalButton || !footer) return;
+
+        const stickyClone = originalButton.cloneNode(true);
+        stickyClone.classList.add("floating-sticky");
+        document.body.appendChild(stickyClone);
+
+        const originalOffset = originalButton.getBoundingClientRect().top + window.scrollY;
 
         function isMobile() {
-            return window.innerWidth <= 768; 
+            return window.innerWidth <= 768;
         }
 
-        const targetOffset = target.offsetTop;
-
-        function handleScroll() {
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-            if (scrollTop > targetOffset) {
-                if (!target.classList.contains("sticky")) {
-                    target.classList.add("sticky");
-                    target.style.width = `${target.offsetWidth}px`; 
-                    target.style.position = "fixed";
-                    target.style.bottom = "0";
-                }
-            } else {
-                if (target.classList.contains("sticky")) {
-                    target.classList.remove("sticky");
-                    target.style.width = ""; 
-                    target.style.position = "relative";
-                }
-            }
-        }
-
-        if (isMobile()) {
-            window.addEventListener("scroll", handleScroll);
-        }
-
-        window.addEventListener("resize", function () {
+        function updatePosition() {
             if (!isMobile()) {
-                target.classList.remove("sticky");
-                target.style.width = "";
-                target.style.position = "relative";
-                window.removeEventListener("scroll", handleScroll);
-            } else {
-                window.addEventListener("scroll", handleScroll);
+                stickyClone.style.display = "none";
+                return;
             }
-        });
+
+            const scrollY = window.scrollY;
+            const footerTop = footer.getBoundingClientRect().top + window.scrollY;
+            const buttonHeight = stickyClone.offsetHeight;
+            const buffer = 10;
+            const bottomStop = footerTop - buttonHeight - buffer;
+
+            if (scrollY > originalOffset && scrollY < bottomStop) {
+                // sticky فعال
+                stickyClone.style.display = "block";
+                stickyClone.style.position = "fixed";
+                stickyClone.style.bottom = "0";
+                stickyClone.style.left = "0";
+                stickyClone.style.width = "100%";
+            } else if (scrollY >= bottomStop) {
+                // توقف بالای فوتر
+                stickyClone.style.position = "absolute";
+                stickyClone.style.bottom = `${document.body.scrollHeight - footerTop + buffer}px`;
+            } else {
+                // هنوز به نقطه‌ی اسکرول نرسیدیم
+                stickyClone.style.display = "none";
+            }
+        }
+
+        window.addEventListener("scroll", updatePosition);
+        window.addEventListener("resize", updatePosition);
+        updatePosition();
     });
     </script>
     <?php
 }
 add_action('wp_footer', 'add_sticky_script');
+
 
 /* End script code for sticky course by mehran saeedi */
 
@@ -2980,9 +2969,426 @@ function show_selected_grade_of_course() {
     }
 
     return '<div class="parent-grade-container">
-                <a href="' . esc_url(get_term_link($final_grade)) . '" class="custom-grade-btn">'
+                <a href="' . esc_url(get_permalink($post)) . '" class="custom-grade-btn">'
                 . esc_html($final_grade->name) . 
                 '</a>
             </div>';
 }
 add_shortcode('show_grade', 'show_selected_grade_of_course');
+
+
+//کد های مربوط به سرعت سایت 
+
+add_action('send_headers', function () {
+    if (!is_user_logged_in() && !is_admin() && !defined('DOING_AJAX') && !defined('REST_REQUEST')) {
+        header("Cache-Control: public, max-age=86400");
+    }
+});
+
+
+remove_action('wp_head', 'rsd_link');
+remove_action('wp_head', 'wlwmanifest_link');
+remove_action('wp_head', 'wp_generator');
+remove_action('wp_head', 'wp_shortlink_wp_head');
+remove_action('wp_head', 'rest_output_link_wp_head');
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('admin_print_scripts', 'print_emoji_detection_script');
+remove_action('wp_print_styles', 'print_emoji_styles');
+remove_action('admin_print_styles', 'print_emoji_styles');
+add_filter('the_generator', '__return_empty_string');
+
+
+add_filter('heartbeat_send', function($response, $screen_id) {
+    if (!is_admin()) {
+        return false;
+    }
+    return $response;
+}, 10, 2);
+
+
+function disable_feed() { wp_die(__('No feed available.', 'textdomain')); }
+add_action('do_feed', 'disable_feed', 1);
+add_action('do_feed_rdf', 'disable_feed', 1);
+add_action('do_feed_rss', 'disable_feed', 1);
+add_action('do_feed_rss2', 'disable_feed', 1);
+add_action('do_feed_atom', 'disable_feed', 1);
+
+
+function remove_css_js_ver($src) {
+    if (strpos($src, '?ver=')) $src = remove_query_arg('ver', $src);
+    return $src;
+}
+add_filter('style_loader_src', 'remove_css_js_ver', 10, 2);
+add_filter('script_loader_src', 'remove_css_js_ver', 10, 2);
+
+
+add_action('wp_enqueue_scripts', function () {
+    wp_deregister_script('wp-embed');
+}, 100);
+
+
+add_filter('script_loader_tag', function($tag, $handle, $src) {
+    if (is_admin() || strpos($src, 'jquery.min.js') !== false) return $tag;
+    return str_replace(' src', ' defer src', $tag);
+}, 10, 3);
+
+
+add_action('init', function() {
+    add_filter('tiny_mce_plugins', function($plugins) {
+        return array_diff($plugins, ['wpemoji']);
+    });
+}, 9999);
+
+add_action('wp_head', function () {
+    echo '
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+
+    <link rel="preload" href="/wp-content/plugins/happy-elementor-addons/assets/fonts/huge-icons/huge-icons.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/wp-content/plugins/happy-elementor-addons/assets/fonts/happy-icons.woff2" as="font" type="font/woff2" crossorigin>
+
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWebFaNum.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWebFaNum_Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2024/05/Morabba-Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_UltraLight.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_Light.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_Medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_Bold.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb.ttf" as="font" type="font/ttf" crossorigin>
+    ';
+});
+
+
+if (!is_admin() && !is_user_logged_in() && !defined('DOING_AJAX') && !defined('REST_REQUEST')) {
+    ob_start(function($html) {
+        return preg_replace('/\s+/', ' ', $html);
+    });
+}
+
+
+add_action('wp_footer', function () {
+    ?>
+    <script>
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const clarity = document.createElement('script');
+            clarity.src = 'https://www.clarity.ms/tag/obu9nh59t2';
+            clarity.defer = true;
+            document.body.appendChild(clarity);
+
+            const goftino = document.createElement('script');
+            goftino.src = 'https://www.goftino.com/widget/kkkIbA';
+            goftino.defer = true;
+            document.body.appendChild(goftino);
+        }, 1500);
+    });
+    </script>
+    <?php
+});
+
+
+// ****************** بهینه‌سازی اختصاصی نسخه موبایل ******************
+if (!is_user_logged_in()) {
+    header("Cache-Control: public, max-age=86400");
+}
+function optimize_mobile_scripts() {
+    if ( wp_is_mobile() ) {
+
+
+        wp_dequeue_script('jquery');
+        wp_dequeue_script('jquery-migrate');
+        wp_dequeue_script('ovenplayer');
+        wp_dequeue_script('clarity');
+        wp_dequeue_script('gtag-js');
+        wp_dequeue_script('goftino-js');
+        wp_dequeue_script('hls-js');
+        wp_dequeue_script('swiper');
+        wp_dequeue_script('slick');
+        wp_dequeue_script('elementor-frontend');
+
+
+        wp_deregister_script('wp-embed');
+    }
+}
+add_action('wp_enqueue_scripts', 'optimize_mobile_scripts', 999);
+
+function detect_low_speed_mobile() {
+    if (wp_is_mobile()) {
+        echo "
+        <script>
+        if (navigator.connection && (navigator.connection.saveData || 
+            navigator.connection.effectiveType === '2g' || 
+            navigator.connection.effectiveType === '3g')) {
+            document.documentElement.classList.add('low-speed');
+        }
+        </script>
+        ";
+    }
+}
+add_action('wp_head', 'detect_low_speed_mobile', 1);
+
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_print_styles', 'print_emoji_styles');
+
+
+function remove_jquery_migrate_mobile( $scripts ) {
+    if ( wp_is_mobile() && isset( $scripts->registered['jquery'] ) ) {
+        $scripts->registered['jquery']->deps = array_diff( $scripts->registered['jquery']->deps, array('jquery-migrate') );
+    }
+}
+add_action('wp_default_scripts', 'remove_jquery_migrate_mobile');
+
+
+function add_lazy_loading_to_images($content){
+    return str_replace('<img', '<img loading="lazy"', $content);
+}
+add_filter('the_content', 'add_lazy_loading_to_images');
+
+
+function defer_heavy_css_mobile() {
+    if ( wp_is_mobile() ) {
+        ?>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!document.documentElement.classList.contains('low-speed')) {
+                var l = document.createElement("link");
+                l.rel = "stylesheet";
+                l.href = "<?php echo get_stylesheet_directory_uri(); ?>/css/f6d8294.css?ver=df3e2";
+                l.media = "print";
+                l.onload = function() { this.media = "all"; };
+                document.head.appendChild(l);
+            }
+        });
+        </script>
+        <noscript>
+            <link rel="stylesheet" href="<?php echo get_stylesheet_directory_uri(); ?>/css/f6d8294.css?ver=df3e2" />
+        </noscript>
+        <?php
+    }
+}
+add_action('wp_footer', 'defer_heavy_css_mobile');
+
+
+function defer_google_fonts_mobile() {
+    if ( wp_is_mobile() ) {
+        ?>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!document.documentElement.classList.contains('low-speed')) {
+                var gf = document.createElement("link");
+                gf.rel = "stylesheet";
+                gf.href = "https://fonts.googleapis.com/css2?family=IRANSans&display=swap";
+                gf.media = "print";
+                gf.onload = function() { this.media = "all"; };
+                document.head.appendChild(gf);
+            }
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'defer_google_fonts_mobile');
+
+function defer_iframes_mobile($content) {
+    if (wp_is_mobile() && !is_admin()) {
+        $content = preg_replace_callback('/<iframe([^>]*)><\/iframe>/i', function ($matches) {
+            $attrs = $matches[1];
+            return '<iframe loading="lazy"' . $attrs . '></iframe>';
+        }, $content);
+    }
+    return $content;
+}
+add_filter('the_content', 'defer_iframes_mobile', 99);
+
+add_action('wp_head', function () {
+    if (wp_is_mobile()) {
+        echo '<link rel="preload" as="image" href="https://tizhooshan.tamland.ir/wp-content/uploads/2025/05/%D9%87%D9%85%D8%A7%DB%8C%D8%B4-%D8%AC%D9%85%D8%B9-%D8%A8%D9%86%D8%AF%DB%8C-%D8%AA%DB%8C%D8%B2%D9%87%D9%88%D8%B4%D8%A7%D9%86.webp" fetchpriority="high">';
+    }
+}, 1);
+
+
+function remove_unused_css_inline() {
+    if (wp_is_mobile()) {
+        echo '<style>body *:not(:first-child){display:none!important;}</style>';
+    }
+}
+
+
+//loading
+
+
+function is_known_bot() {
+    if (!isset($_SERVER['HTTP_USER_AGENT'])) return false;
+    $bots = [
+        'Googlebot', 'Bingbot', 'Slurp', 'DuckDuckBot', 'YandexBot',
+        'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'WhatsApp', 'TelegramBot'
+    ];
+    foreach ($bots as $bot) {
+        if (stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) return true;
+    }
+    return false;
+}
+
+
+function enqueue_universal_lazyload_script() {
+    if (is_admin() || is_known_bot()) return;
+    ?>
+    <style>
+        .lazy-section-placeholder {
+            background: #f0f0f0;
+            margin: 1rem 0;
+            display: block;
+        }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
+
+        lazyElements.forEach(el => {
+
+            const style = window.getComputedStyle(el);
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'lazy-section-placeholder';
+            placeholder.style.height = el.offsetHeight + 'px';
+            placeholder.style.width = el.offsetWidth + 'px';
+            placeholder.style.marginTop = style.marginTop;
+            placeholder.style.marginBottom = style.marginBottom;
+            placeholder.style.marginLeft = style.marginLeft;
+            placeholder.style.marginRight = style.marginRight;
+            placeholder.style.paddingTop = style.paddingTop;
+            placeholder.style.paddingBottom = style.paddingBottom;
+            placeholder.style.paddingLeft = style.paddingLeft;
+            placeholder.style.paddingRight = style.paddingRight;
+            placeholder.style.boxSizing = style.boxSizing;
+
+            el.style.display = 'none';
+            el.parentNode.insertBefore(placeholder, el);
+
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        el.style.display = '';
+                        placeholder.remove();
+                        obs.unobserve(el);
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
+
+            observer.observe(placeholder);
+        });
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'enqueue_universal_lazyload_script', 100);
+
+function enqueue_mobile_only_lazyload_script() {
+    if (is_admin() || is_known_bot()) return;
+    ?>
+    <style>
+        .lazy-section-placeholder {
+            background: #f0f0f0;
+            margin: 1rem 0;
+            display: block;
+        }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // فقط موبایل
+        if (!/Mobi|Android/i.test(navigator.userAgent)) return;
+
+        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
+
+        lazyElements.forEach(el => {
+            const style = window.getComputedStyle(el);
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'lazy-section-placeholder';
+            placeholder.style.height = el.offsetHeight + 'px';
+            placeholder.style.width = el.offsetWidth + 'px';
+            placeholder.style.marginTop = style.marginTop;
+            placeholder.style.marginBottom = style.marginBottom;
+            placeholder.style.marginLeft = style.marginLeft;
+            placeholder.style.marginRight = style.marginRight;
+            placeholder.style.paddingTop = style.paddingTop;
+            placeholder.style.paddingBottom = style.paddingBottom;
+            placeholder.style.paddingLeft = style.paddingLeft;
+            placeholder.style.paddingRight = style.paddingRight;
+            placeholder.style.boxSizing = style.boxSizing;
+
+            el.style.display = 'none';
+            el.parentNode.insertBefore(placeholder, el);
+
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        el.style.display = '';
+                        placeholder.remove();
+                        obs.unobserve(el);
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
+
+            observer.observe(placeholder);
+        });
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'enqueue_mobile_only_lazyload_script', 100);
+
+
+//loading end
+
+
+function add_elementor_responsive_js() {
+    ?>
+    <script>
+    (function() {
+        function getDevice() {
+
+            var w = window.innerWidth;
+            if (w >= 1025) return 'desktop';
+            if (w >= 768) return 'tablet';
+            return 'phone';
+        }
+
+        function removeHiddenElements() {
+            var device = getDevice();
+
+
+            var classMap = {
+                desktop: 'elementor-hidden-desktop',
+                tablet: 'elementor-hidden-tablet',
+                phone: 'elementor-hidden-phone'
+            };
+
+            var hiddenClass = classMap[device];
+
+            if (!hiddenClass) return;
+
+
+            var elems = document.querySelectorAll('.' + hiddenClass);
+            elems.forEach(function(el) {
+                if (el && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+        }
+
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            removeHiddenElements();
+        } else {
+            window.addEventListener('DOMContentLoaded', removeHiddenElements);
+        }
+    })();
+    </script>
+    <?php
+}
+add_action('wp_footer', 'add_elementor_responsive_js');
+
