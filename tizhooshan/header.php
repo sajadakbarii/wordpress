@@ -24,6 +24,58 @@ $skip_link_url = apply_filters( 'hello_elementor_skip_link_url', '#content' );
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
+
+<link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/litespeed/css/c2b34e4d5e39f87dbcdcf96db9dfb992.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://tizhooshan.tamland.ir/wp-content/litespeed/css/c2b34e4d5e39f87dbcdcf96db9dfb992.css"></noscript>
+
+<script>
+(function () {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const delay = isMobile ? 300 : 1500;
+
+  function lazyLoadImagesAndBackgrounds() {
+    document.querySelectorAll('.swiper-slide-bg').forEach(el => {
+      const bg = el.dataset.bg || el.getAttribute('data-bg') || el.dataset.src;
+      if (bg) el.style.backgroundImage = `url("${bg}")`;
+    });
+
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      if (!img.src || img.src.includes('data:image')) img.src = img.dataset.src;
+      if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+    });
+
+    document.querySelectorAll('img.wmu-preview-img[data-src]').forEach(img => {
+      if (!img.src || img.src.includes('data:image')) img.src = img.dataset.src;
+      if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+    });
+  }
+
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (isMobile) {
+        loadMobileScripts();
+      } else {
+        loadDesktopScripts();
+      }
+      lazyLoadImagesAndBackgrounds();
+    }, delay);
+  });
+
+
+  if (isMobile) {
+    window.addEventListener('DOMContentLoaded', lazyLoadImagesAndBackgrounds);
+  }
+})();
+</script>
+
+
+<style>
+.swiper-slide-bg {
+  transition: background-image 0.5s ease-in-out;
+}
+</style>
+
 <div id="wptime-plugin-preloader"></div>
 <?php wp_body_open(); ?>
 
