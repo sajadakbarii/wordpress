@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  Theme Name:   تم چایلد شاپکس
  Template:     shopex
@@ -9,3 +10,16 @@
 
 /* Import Parent Theme CSS */
 @import url("../shopex/style.css");
+=======
+/*
+ Theme Name:   تم چایلد شاپکس
+ Template:     shopex
+ Description:  تم چایلد برای شاپکس
+ Author:       تام‌لند
+ Version:      1.0.0
+ Text Domain:  shopex-child
+*/
+
+/* Import Parent Theme CSS */
+@import url("../shopex/style.css");
+>>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4

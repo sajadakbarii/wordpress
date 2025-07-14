@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Tam Coin Account Styles
  */
@@ -34,4 +35,42 @@
 
 .tamcoin-info p {
     color: #6c757d;
+=======
+/**
+ * Tam Coin Account Styles
+ */
+#tamcoin-wallet-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.tamcoin-balance-container {
+    margin-bottom: 20px;
+}
+
+.tamcoin-balance {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.tamcoin-balance-value {
+    color: #6c757d;
+}
+
+#tamcoin-refresh-balance {
+    margin-bottom: 15px;
+}
+
+.tamcoin-info h3 {
+    color: #343a40;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+.tamcoin-info p {
+    color: #6c757d;
+>>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 }

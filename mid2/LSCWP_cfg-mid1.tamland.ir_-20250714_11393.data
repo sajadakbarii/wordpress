@@ -1,6 +1,6 @@
 ["_version","7.0.1"]
 
-["hash","cvzPrp8NGxHB1c0qczJDdkKgOz4qTzuL"]
+["hash","eFOBFQkhOpjaHI7JICOviT6Yqj4qlMMI"]
 
 ["api_key",""]
 
@@ -14,7 +14,7 @@
 
 ["news",true]
 
-["guest_uas",["Lighthouse","GTmetrix","Google","Pingdom","bot","PTST","HeadlessChrome"]]
+["guest_uas",["Lighthouse","GTmetrix","Google","Pingdom","bot","spider","PTST","HeadlessChrome"]]
 
 ["guest_ips",["208.70.247.157","172.255.48.130","172.255.48.131","172.255.48.132","172.255.48.133","172.255.48.134","172.255.48.135","172.255.48.136","172.255.48.137","172.255.48.138","172.255.48.139","172.255.48.140","172.255.48.141","172.255.48.142","172.255.48.143","172.255.48.144","172.255.48.145","172.255.48.146","172.255.48.147","52.229.122.240","104.214.72.101","13.66.7.11","13.85.24.83","13.85.24.90","13.85.82.26","40.74.242.253","40.74.243.13","40.74.243.176","104.214.48.247","157.55.189.189","104.214.110.135","70.37.83.240","65.52.36.250","13.78.216.56","52.162.212.163","23.96.34.105","65.52.113.236","172.255.61.34","172.255.61.35","172.255.61.36","172.255.61.37","172.255.61.38","172.255.61.39","172.255.61.40","104.41.2.19","191.235.98.164","191.235.99.221","191.232.194.51","52.237.235.185","52.237.250.73","52.237.236.145","104.211.143.8","104.211.165.53","52.172.14.87","40.83.89.214","52.175.57.81","20.188.63.151","20.52.36.49","52.246.165.153","51.144.102.233","13.76.97.224","102.133.169.66","52.231.199.170","13.53.162.7","40.123.218.94"]]
 
@@ -36,11 +36,7 @@
 
 ["cache-browser",true]
 
-<<<<<<< HEAD
-["cache-exc_useragents",["Google Page Speed Insights","Lighthouse"]]
-=======
-["cache-exc_useragents",["Googlebot","Bingbot","Slurp","DuckDuckBot","YandexBot"]]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
+["cache-exc_useragents",[]]
 
 ["cache-exc_cookies",[]]
 
@@ -56,11 +52,7 @@
 
 ["cache-priv_uri",[]]
 
-<<<<<<< HEAD
-["cache-exc",["\/all-teachers\/","https:\/\/api.tamland.ir\/api\/course\/freeClassList\/-1\/2","\/wp-admin","\/vorood"]]
-=======
-["cache-exc",["\/all-teachers\/","https:\/\/api.tamland.ir\/api\/course\/freeClassList\/-1\/2","\/wp-admin","\/vorood","first-session-video\/test-2\/","\/first-session-video\/","^\/first-session-video\/.*"]]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
+["cache-exc",["\/first-session-video\/%D8%AA%D8%B3%D8%AA-%D9%BE%D9%84%DB%8C%D8%B1\/","\/first-session-video\/","\/first-session-video"]]
 
 ["cache-exc_roles",["administrator"]]
 
@@ -68,9 +60,9 @@
 
 ["cache-ttl_pub",604800]
 
-["cache-ttl_priv",3600]
+["cache-ttl_priv",1800]
 
-["cache-ttl_frontpage",2592000]
+["cache-ttl_frontpage",604800]
 
 ["cache-ttl_feed",604800]
 
@@ -90,9 +82,9 @@
 
 ["purge-upgrade",true]
 
-["purge-stale",true]
+["purge-stale",false]
 
-["purge-post_all",true]
+["purge-post_all",false]
 
 ["purge-post_f",true]
 
@@ -120,21 +112,17 @@
 
 ["purge-hook_all",["switch_theme","wp_create_nav_menu","wp_update_nav_menu","wp_delete_nav_menu","create_term","edit_terms","delete_term","add_link","edit_link","delete_link"]]
 
-<<<<<<< HEAD
 ["esi",false]
-=======
-["esi",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["esi-cache_admbar",false]
 
-["esi-cache_commform",false]
+["esi-cache_commform",true]
 
 ["esi-nonce",["stats_nonce","subscribe_nonce"]]
 
 ["util-instant_click",false]
 
-["util-no_https_vary",true]
+["util-no_https_vary",false]
 
 ["debug-disable_all",false]
 
@@ -164,37 +152,21 @@
 
 ["optm-css_comb_ext_inl",true]
 
-<<<<<<< HEAD
-["optm-ucss",false]
-=======
 ["optm-ucss",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["optm-ucss_inline",true]
 
 ["optm-ucss_whitelist",[]]
 
-<<<<<<< HEAD
-["optm-ucss_file_exc_inline",[]]
+["optm-ucss_file_exc_inline",["https:\/\/mid1.tamland.ir\/wp-content\/litespeed\/css\/43508b9ced1409966076c61a3759a849.css"]]
 
 ["optm-ucss_exc",[]]
 
-["optm-css_exc",[]]
-
-["optm-js_min",true]
-
-["optm-js_comb",true]
-=======
-["optm-ucss_file_exc_inline",["https:\/\/tizhooshan.tamland.ir\/wp-content\/litespeed\/css\/c2b34e4d5e39f87dbcdcf96db9dfb992.css","https:\/\/tizhooshan.tamland.ir\/wp-content\/litespeed\/css\/72d7697c94110dc96845919d128b62fa.css"]]
-
-["optm-ucss_exc",[]]
-
-["optm-css_exc",["https:\/\/tizhooshan.tamland.ir\/wp-content\/litespeed\/css\/c2b34e4d5e39f87dbcdcf96db9dfb992.css","https:\/\/tizhooshan.tamland.ir\/wp-content\/litespeed\/css\/72d7697c94110dc96845919d128b62fa.css"]]
+["optm-css_exc",["https:\/\/mid1.tamland.ir\/wp-content\/litespeed\/css\/43508b9ced1409966076c61a3759a849.css"]]
 
 ["optm-js_min",true]
 
 ["optm-js_comb",false]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["optm-js_comb_ext_inl",true]
 
@@ -214,11 +186,7 @@
 
 ["optm-css_async",true]
 
-<<<<<<< HEAD
 ["optm-ccss_per_url",false]
-=======
-["optm-ccss_per_url",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["optm-ccss_sep_posttype",["page"]]
 
@@ -236,7 +204,7 @@
 
 ["optm-ggfonts_async",true]
 
-["optm-exc_roles",["administrator"]]
+["optm-exc_roles",[]]
 
 ["optm-ccss_con",""]
 
@@ -254,11 +222,7 @@
 
 ["optm-guest_only",true]
 
-<<<<<<< HEAD
-["object",false]
-=======
 ["object",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["object-kind",false]
 
@@ -270,7 +234,7 @@
 
 ["object-persistent",true]
 
-["object-admin",false]
+["object-admin",true]
 
 ["object-transients",false]
 
@@ -290,21 +254,17 @@
 
 ["discuss-avatar_cache_ttl",604800]
 
-<<<<<<< HEAD
 ["optm-localize",false]
-=======
-["optm-localize",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 ["optm-localize_domains",["### Popular scripts ###","https:\/\/platform.twitter.com\/widgets.js","https:\/\/connect.facebook.net\/en_US\/fbevents.js"]]
 
 ["media-lazy",true]
 
-["media-lazy_placeholder","https:\/\/tizhooshan.tamland.ir\/wp-content\/uploads\/2025\/03\/01-2.webp"]
+["media-lazy_placeholder","https:\/\/mid1.tamland.ir\/wp-content\/uploads\/2025\/04\/load.webp"]
 
-["media-placeholder_resp",true]
+["media-placeholder_resp",false]
 
-["media-placeholder_resp_color","#ff0000"]
+["media-placeholder_resp_color","#cfd4db"]
 
 ["media-placeholder_resp_svg",""]
 
@@ -322,11 +282,7 @@
 
 ["media-add_missing_sizes",true]
 
-<<<<<<< HEAD
-["media-lazy_exc",["\/wp-content\/uploads\/2022\/09\/Logo-min-150x43.png","\/wp-content\/uploads\/2025\/04\/03.png","\/wp-content\/uploads\/2025\/04\/04.png","\/wp-content\/uploads\/2025\/04\/Artboard-1-1.png","\/wp-content\/uploads\/2025\/04\/Artboard-1-copy-2.png","\/wp-content\/uploads\/2025\/04\/Artboard-1-copy-3-2.png","\/wp-content\/uploads\/2025\/04\/Artboard-1-copy.png","\/wp-content\/uploads\/2025\/05\/01.webp","\/wp-content\/uploads\/2025\/05\/02.webp","\/wp-content\/uploads\/2025\/03\/Baner-1-1262x395-1.webp","\/wp-content\/uploads\/2025\/02\/1.webp","\/wp-content\/uploads\/2024\/10\/web.webp","\/wp-content\/uploads\/2025\/03\/Artboard-1-8-2.png","\/wp-content\/uploads\/2025\/04\/32.png","\/wp-content\/uploads\/2025\/03\/%D8%AA%D9%88%D9%85%D8%A7%D9%86.png","\/wp-content\/uploads\/2025\/03\/bctd.webp","\/wp-content\/uploads\/2023\/11\/Group-52370-2.webp","\/wp-content\/uploads\/2025\/04\/tiz.webp"]]
-=======
-["media-lazy_exc",["\/wp-content\/uploads\/2025\/05\/\u0647\u0645\u0627\u06cc\u0634-\u062c\u0645\u0639-\u0628\u0646\u062f\u06cc-\u062a\u06cc\u0632\u0647\u0648\u0634\u0627\u0646.webp","\/wp-content\/uploads\/2025\/05\/01.webp"]]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
+["media-lazy_exc",[]]
 
 ["media-lazy_cls_exc",["wmu-preview-img"]]
 
@@ -344,13 +300,13 @@
 
 ["media-vpi_cron",false]
 
-["img_optm-auto",true]
+["img_optm-auto",false]
 
 ["img_optm-ori",true]
 
 ["img_optm-rm_bkup",false]
 
-["img_optm-webp",0]
+["img_optm-webp",1]
 
 ["img_optm-lossless",false]
 
@@ -358,9 +314,9 @@
 
 ["img_optm-webp_attr",["img.src","div.data-thumb","img.data-src","img.data-lazyload","div.data-large_image","img.retina_logo_url","div.data-parallax-image","div.data-vc-parallax-image","video.poster"]]
 
-["img_optm-webp_replace_srcset",false]
+["img_optm-webp_replace_srcset",true]
 
-["img_optm-jpg_quality",82]
+["img_optm-jpg_quality",100]
 
 ["crawler",false]
 
@@ -374,11 +330,11 @@
 
 ["crawler-cookies",[]]
 
-["misc-heartbeat_front",true]
+["misc-heartbeat_front",false]
 
 ["misc-heartbeat_front_ttl",60]
 
-["misc-heartbeat_back",true]
+["misc-heartbeat_back",false]
 
 ["misc-heartbeat_back_ttl",60]
 
@@ -388,7 +344,7 @@
 
 ["cdn",false]
 
-["cdn-ori",["\/\/tizhooshan.tamland.ir\/"]]
+["cdn-ori",["\/\/mid1.tamland.ir\/"]]
 
 ["cdn-ori_dir",["wp-content","wp-includes"]]
 
@@ -414,8 +370,4 @@
 
 ["qc-cname",""]
 
-<<<<<<< HEAD
 ["_cache",true]
-=======
-["_cache",true]
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4

@@ -5,7 +5,7 @@ Description: Hello Elementor Child is a child theme of Hello Elementor, created 
 Author: Elementor Team
 Author URI: https://elementor.com/
 Template: hello-elementor
-Version: 1.0.1
+Version: 1.0.3
 Text Domain: hello-elementor-child
 License: GNU General Public License v3 or later.
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -17,7 +17,7 @@ Tags: flexible-header, custom-colors, custom-menu, custom-logo, editor-style, fe
 */
 a{text-decoration:none;}
 body{
-    background:#ffffff;
+    background:#F8F8F8;
 }
 
 .woocommerce div.product p.price, .woocommerce div.product span.price {
@@ -207,7 +207,6 @@ form.woocommerce-ordering{display:none !important;}
 .text-left{text-align:left;}
 
 .rtl{direction:rtl;}
-/*
 .grade-button-tabs .elementor-button{
     width:200px !important;
     height:200px !important;
@@ -222,7 +221,7 @@ display:none;
 }
 .grade-button-panel[data-panel="1"]{
     display:block;
-}*/
+}
 
 .sa-courses-item > .elementor-container.elementor-column-gap-default{
     height:100%;
@@ -246,7 +245,7 @@ nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
     z-index: -1;
     opacity: 0;
     animation: playanimation 2s infinite;
-    background-color: #C4161C;
+    background-color: #65B630;
     border-radius:50%;
     padding: 5px;
     box-sizing: content-box;
@@ -256,29 +255,29 @@ nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
     flex-direction:column;
 }
 .multiteacher li{list-style:none !important;}
-
 .course-teacher-item{
-    background-color: #fff0 !important;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     cursor:pointer;
     transition:all 0.3s;
+    background:#fff;
+    padding-bottom:15px;
 }
 .course-teacher-item .teacher-course-name{
     text-align:center;
     text-overflow: ellipsis;
     overflow: hidden;
-    height:74px;
+    height:51px;
     width:100%;
 }
 .pack-course-info li, .teacher-course-info li{
     padding:3px;
 }
 .pack-course-info li > div, .teacher-course-info li > div{
-    background:#00000005;
-    border-radius:100px;
+    background:#fafafa;
+    border-radius:15px;
     padding:7px 15px;
     font-size:13px;
 }
@@ -286,23 +285,9 @@ nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
     margin-bottom:7px;
     transition:all 0.3s;
     background:#fff;
-    width:160px;
-    height:160px;
+    width:150px;
+    height:150px;
 }
-<<<<<<< HEAD
-=======
-
-
-@media only screen and (max-width: 767px) {
-
-div#courseRow-3 {
-    padding: 0px !important;
-
-}
-}
-
-
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 .multiteacher-courses-items .course-teacher-img{
     display:flex;
     align-items:start;
@@ -321,14 +306,9 @@ div#courseRow-3 {
     transform: scale(1.1, 1.1);
     margin-bottom:20px;
 }
-.multiteacher-courses-items .course-teacher-img.active{
-    
-    box-shadow:0 .125rem .25rem #E52041 !important;
-    border:1px solid #E52041 !important;
-    transform: scale(1.1, 1.1);
-    margin-bottom:20px;
-}
 .multiteacher-courses-items .course-teacher-item.active{
+    /*box-shadow:0 .125rem .25rem #E52041 !important;
+    border:1px solid #E52041 !important;*/
     transform: scale(1.1, 1.1);
     margin-bottom:40px;
     opacity:1 !important;
@@ -350,32 +330,18 @@ div#courseRow-3 {
     border-radius:32px;
     position:relative;
 }
-
 .courses-title h3{
     font-size:18px;
     font-weight:bold;
 }
-<<<<<<< HEAD
-=======
-
-@media only screen and (max-width: 767px) {
-  .courses-title h3 {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    line-height: 35px !important;
-  }
-}
-
-
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 .first-session-play-icon{
     cursor:pointer;
     position: absolute;
-    left: 55px;
+    left: 95px;
     top: 118px;
 }
 .price-number{
-    color:#E52041;
+    color:#65B630;
     font-weight:700;
     font-size:18px;
 }
@@ -392,23 +358,32 @@ div#courseRow-3 {
 	background-size:auto auto !important;
 }
 
-.add-to-cart-button.cart-icon {
-    width: 100% !important;
-    border-radius: 5px !important;
-    padding: 0px !important;
-    background: #ED1337 !important;
-    color: #FFFFFF !important;
-    text-align: center !important;
+.add-to-cart-button.cart-icon{
+    width:36px !important;
+    border-radius: 4px 4px 4px 4px !important;
+    padding: 3px 8px 3px 8px !important;
+    height:38px;
+}
+.add-to-cart-button.cart-icon:hover{
+    background:#C4161C !important;
+}
+.add-to-cart-button.cart-icon img{
+    width:100%;
 }
 
-.add-to-cart-button.cart-icon img{
-    width: 100% !important;
-    border-radius: 5px !important;
-    padding: 0px !important;
-    background: #ED1337 !important;
-    color: #FFFFFF !important;
-    text-align: center !important;
+.rank-math-breadcrumb a{
+    color:#fff !important;
 }
+.rank-math-breadcrumb{
+    color:#eee !important;
+}
+
+@media(max-width:800px){
+    .multiteacher-course-item{
+        width:95%;
+    }
+}
+
 @keyframes playanimation{
     0% {
         transform: scale(.5);
@@ -419,199 +394,98 @@ div#courseRow-3 {
         opacity: 0;
     }
 }
-
-/* Start Css code for sticky course by mehran saeedi */
-@media (max-width: 768px) {
-    .floating-sticky {
-        display: none;
-        z-index: 2147483647 !important;
-        background: white;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        animation: slideUp 0.3s ease-in-out;
-    }
-
-    @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
+.selecto1 p.gform_required_legend {
+    display: none !important;
 }
-
-
-/* End Css code for sticky course by mehran saeedi */
-
-/* Start Css code for video BY mehran saeedi */
-
-@media (max-width: 480px) {
-<<<<<<< HEAD
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 138px !important; 
-=======
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 138px !important; 
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
-			
+.selecto1.elementor-widget-eael-gravity-form{
+    width:100%;
 }
-	.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:138px !important;
-		
-	}
-}
-
-@media (min-width: 481px) and (max-width: 768px) {
-<<<<<<< HEAD
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 138px !important; 
-    }
-=======
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 138px !important; 
-    }
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
-		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:138px !important;
-		
-	}
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-<<<<<<< HEAD
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 118px !important; 
-    }
-=======
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 118px !important; 
-    }
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
-		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:118px !important;
-		
-	}
-}
-
-@media (min-width: 1025px) and (max-width: 1440px) {
-<<<<<<< HEAD
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 146px !important; 
-    }
-=======
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 146px !important; 
-    }
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
-		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:146px !important;
-		
-	}
-}
-
-
-@media (min-width: 1441px) {
-<<<<<<< HEAD
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 146px !important; 
-    }
-=======
-    .elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe {
-        height: 146px !important; 
-    }
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
-		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:146px !important;
-		
-	}
-}
-
-@media (min-width: 600px) {
-.elementor-8342 .elementor-element.elementor-element-5c2da8e .h_iframe-aparat_embed_frame iframe{
-        height: 138px !important; 
-    }
-		.elementor-9150 .elementor-element.elementor-element-deb2c1b .h_iframe-aparat_embed_frame iframe{
-		
-		height:138px !important;
-		
-	}
-}
-.wp-video{
-margin-right:25% !important;
-}
-/* End Css code for video BY mehran saeedi */
-
-.aparat-video-wrapper {
-            background-color: #FFFFFF;
-            box-shadow: -4px 0px 4px 0px rgba(178.5, 178.5, 178.5, 0.25);
-            padding: 10px;
-	        margin: 0px;
-            border-radius: 25px;
-        }
-
-div#post-video-links {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 10px;
-    justify-self: center;
-}
-
-.elementor-2 .elementor-element.elementor-element-3265f80 {
-    --display: flex;
-    --flex-direction: row;
-    --container-widget-width: initial;
-    --container-widget-height: 100%;
-    --container-widget-flex-grow: 1;
-    --container-widget-align-self: stretch;
-    --flex-wrap-mobile: wrap;
+.selecto1 select#input_7_3 {
+    border-color: #60A933;
     border-style: solid;
-    --border-style: solid;
-    border-width: 1px;
-    --border-top-width: 1px;
-    --border-right-width: 1px;
-    --border-bottom-width: 1px;
-    --border-left-width: 1px;
-    border-color: #02010133;
-    --border-color: #02010133;
-    --border-radius: 20px;
-    box-shadow: -5px 6px 25px 10px rgba(96.9, 20.202860054347827, 20.202860054347827, .5);
+    border-width: 2px;
 }
 
-.mehran-2 {
-    opacity: 0;
-    visibility: hidden;
-    max-height: 0;
-    overflow: hidden;
+#gform_7{
+	display:flex;
+}
+#gform_7 .gform_body{
+	width:75%
+}
+#gform_7 .gform_footer{
+	width:25%;
+	margin:0;
+	padding:0 7px
+}
+
+@media(max-width:480px){
+	#gform_7 .gform_body{
+		width:100%
+	}
+	#gform_7 .gform_footer{
+		width:100%;
+		padding:0;
+	}
+	#gform_7{
+		flex-direction:column
+	}
+}
+.selecto2 p.gform_required_legend{
+    display: none !important;
+}
+
+
+.selecto2 select#input_4_3 {
+    border-color: #60A933;
+    border-style: solid;
+    border-width: 2px;
+}
+@media (min-width: 768px) {
+    .elementor-11256 .elementor-element.elementor-element-61240a6 {
+        width: 250px;
+    }
+}
+.elementor-2 .elementor-element.elementor-element-e740c13 .elementor-divider-separator {
+    border-radius: 50px;
+}
+
+.selecto4 .e-hotspot__label span {
+            font-size: 11px;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 27.5px;
+    font-weight: 700;
     position: absolute;
-    transition: opacity 0.3s ease-out, max-height 0.4s ease-out;
-    will-change: opacity, max-height;
+    top: 0;
+    text-wrap: nowrap
 }
-
-.mehran-3 {
-    opacity: 1;
-    transition: opacity 0.3s ease-out;
-    will-change: opacity;
+.elementor-repeater-item-eab24cf div, .elementor-repeater-item-06119c1 div {
+    font-size: 20px
 }
-
-.mehran-1:hover .mehran-3 {
-    opacity: 0;
-    visibility: hidden;
+.elementor-repeater-item-7c4e0ca div, .elementor-repeater-item-100912c div, .elementor-repeater-item-0c90633 div, .elementor-repeater-item-fd5ed9c div, .elementor-repeater-item-893c47b div {
+	font-size: 16px
 }
-
-.mehran-2 li {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-    will-change: opacity, transform;
+.elementor-2 .elementor-element .elementor-divider-separator {
+    border-radius: 50px;
 }
-<<<<<<< HEAD
-=======
-
-.courses-title  {
-font-size: 14px !important;
-font-weight: 700 !important;   
-line-height: 35px !important; 
+@media (min-width: 768px) {
+    #aparatHtml .h_iframe-aparat_embed_framev2 {
+        height: 340px !important;
+    }
 }
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
+@media (max-width: 767px) {
+    #aparatHtml .h_iframe-aparat_embed_framev2 {
+		width: 426px !important;
+        height: 240px !important;
+    }
+}
+@media (max-width: 480px) {
+    #aparatHtml .h_iframe-aparat_embed_framev2 {
+		width: 291px !important;
+        height: 164px !important;
+    }
+}
+.dialog-type-lightbox{
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
