@@ -39,7 +39,7 @@ function add_custom_button_to_products_page() {
         var hasNewProduct = false;
         var addedProduct = 0;
         let tamshopAttr = {};
-        const token = btoa("ck_f92acec278157ab36d8fd804322801e517a2a14d:cs_6526bfdff3b0afcd441a17f00431d7e9d52432f9");
+        const token = btoa("ck_9f4beb4f30c7ff4d7fe458035da45274cf1272bf:cs_2dabbcd8423ea8d632269cde1b2118c251b8dacc");
         // Function to get product properties
         
         jQuery(document).ready(function ($) {
@@ -1028,66 +1028,61 @@ function add_custom_button_to_update_products() {
     <script type="text/javascript">
         //const token = btoa("ck_f92acec278157ab36d8fd804322801e517a2a14d:cs_6526bfdff3b0afcd441a17f00431d7e9d52432f9");
         // Function to get product properties
-        
+        const externalProducts = [];
         jQuery(document).ready(function ($) {
-            // Function to call any API and return a promise
-            function callApi(url, method, headers, data) {
-                return new Promise(function(resolve, reject) {
-                    $.ajax({
-                        url: url,
-                        method: method,
-                        timeout: 0,
-                        headers: headers,
-                        data: data
-                    })
-                    .done(function(response) {
-                        resolve(response); // Resolve with the response data
-                    })
-                    .fail(function(error) {
-                        reject(error); // Reject on error
-                    });
-                });
-            }
             // Add the custom button at the end of the buttons section
-            const customButton = $('<a href="<?php echo admin_url("admin-post.php?action=add_new_woocommerce_product"); ?>" id="tamshop-update-product-button" class="page-title-action update-custom-action-button">بروزرسانی اطلاعات محصولات تامشاپ</a>');
+            const customButton = $('<a href="#" id="tamshop-update-product-button" class="page-title-action update-custom-action-button">بروزرسانی اطلاعات محصولات تامشاپ</a>');
             $('.wrap .page-title-action:last').after(customButton);
             
             // Woocommerce Product Sync Script
             // Supports: Simple, Variable, and Downloadable Products
-            
-            const axios = require('axios');
-            
-            const woocommerceAPI = axios.create({
-              baseURL: 'https://yourstore.com/wp-json/wc/v3/',
-              auth: {
-                username: 'ck_your_consumer_key',
-                password: 'cs_your_consumer_secret'
-              },
-              headers: { 'Content-Type': 'application/json' }
+            $(".update-custom-action-button").click(function(){
+                
+                // Sample external product data (you can replace this with actual API call)
+                
+                syncProducts();
             });
             
-            // Sample external product data (you can replace this with actual API call)
-            const externalProducts = [];
             
             async function getAllWCProducts() {
-              let allProducts = [], page = 1;
-              while (true) {
-                const res = await woocommerceAPI.get('products', { params: { per_page: 100, page } });
-                if (res.data.length === 0) break;
-                allProducts.push(...res.data);
-                page++;
-              }
-              return allProducts;
+                var woocommerceAPI = {
+                    url: "https://tamyar.ir/wp-json/wc/v3/products",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Basic " + token
+                    }
+                };
+            
+                let allProducts = [], page = 1;
+            
+                while (true) {
+                    const response = await fetch(`${woocommerceAPI.url}?per_page=100&page=${page}`, {
+                        method: "GET",
+                        headers: woocommerceAPI.headers
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!data || data.length === 0) break;
+            
+                    allProducts.push(...data);
+                    page++;
+                }
+            
+                return allProducts;
             }
+
             
             async function syncProducts() {
               try {
                 const existingProducts = await getAllWCProducts();
-                const wcProductsBySku = Object.fromEntries(existingProducts.map(p => [p.sku, p]));
-            
+                console.log(existingProducts);
+                //const wcProductsBySku = Object.fromEntries(existingProducts.map(p => [p.sku, p]));
+                const tamMeta = p.meta_data?.find(meta => meta.key === 'tamshop-product-id');
+                console.log(tamMeta);
                 for (const product of externalProducts) {
                   const existing = wcProductsBySku[product.sku];
-                  await updateProductIfNeeded(existing, product);
+                  await updateProductIfNeeded(tamMeta, product);
                 }
             
                 console.log('✅ Product sync completed.');
@@ -1115,7 +1110,7 @@ function add_custom_button_to_update_products() {
               }
             }
             
-            syncProducts();
+            
 
         });
     </script>
@@ -1144,3 +1139,164 @@ function add_custom_button_to_update_products() {
     </style>
 <?php
 }
+
+function get_tamyar_product_id_from_cart_products() {
+    $custom_ids = array();
+
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        // اگر محصول متغیر بود، اولویت با variation_id
+        $product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+
+        // گرفتن مقدار فیلد سفارشی
+        $custom_id = get_post_meta($product_id, 'tamshop-product-id', true);
+
+        if (!empty($custom_id)) {
+            $custom_ids[] = $custom_id;
+        }
+    }
+
+    // خروجی به صورت رشته جدا شده با ویرگول
+    return implode(',', $custom_ids);
+}
+
+add_filter('woocommerce_package_rates', 'tamyar_shipping_adjustment', 10, 2);
+function tamyar_shipping_adjustment($rates, $package) {
+    $token = $_COOKIE['tamshToken'];
+    $totalShippingCost = 0;
+    $tamyarProductIDs = get_tamyar_product_id_from_cart_products();
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => 'https://api.tamland.ir/api/shop/shippingCosts/'.$tamyarProductIDs,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'GET',
+      CURLOPT_HTTPHEADER => array(
+        'Authorization: Bearer '.$token
+      ),
+    ));
+    
+    $response = curl_exec($curl);
+    
+    curl_close($curl);
+    
+    $data = json_decode($response, true); // پارامتر true برای تبدیل به آرایه است
+
+    foreach ($data as $item) {
+        if (isset($item['fldShippingCost'])) {
+            $number = intval($item['fldShippingCost']);
+            $totalShippingCost += $number;
+        }
+    }
+
+    foreach ($rates as $rate_key => $rate) {
+        // تغییر هزینه حمل به صورت دستی
+        $rates[$rate_key]->cost += $totalShippingCost;
+
+        // اگر مالیات وجود داشته باشه، باید اینم تنظیم کنی:
+        if (isset($rates[$rate_key]->taxes)) {
+            foreach ($rates[$rate_key]->taxes as $tax_id => $tax) {
+                $rates[$rate_key]->taxes[$tax_id] += 0; // یا مقدار جدید
+            }
+        }
+    }
+    
+    return $rates;
+}
+add_action('init', 'check_login_and_sync_wallet');
+
+function check_login_and_sync_wallet() {
+    // فقط یکبار اجرا بشه، نه در هر بار بارگذاری
+    if (is_user_logged_in() && !isset($_COOKIE['wallet_synced'])) {
+        $user = wp_get_current_user();
+        $username = $user->user_login;
+        // ذخیره کوکی برای جلوگیری از اجرای مجدد در هر بار رفرش
+        setcookie('wallet_synced', '1', time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
+        
+        // اجرای تابع همگام‌سازی
+        update_wallet_balance_from_api($username, $user->ID);
+    }
+}
+
+function update_wallet_balance_from_api($username, $user) {
+    $user_id = $user;
+    // آدرس API و اطلاعات ارسالی (در صورت نیاز)
+$token = $_COOKIE['tamshToken'];
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://api.tamland.ir/api/user/myWallet/?user='.$username,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer '.$token
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+
+    $data = json_decode($response, true);
+
+    // بررسی ساختار درست
+    if (!isset($data[0]['balanceWallet'])) {
+        error_log('Invalid API structure or balanceWallet not found. Response: ' . $response);
+        return false;
+    }
+
+    $new_balance = intval($data[0]['balanceWallet']);
+    $currency = get_woocommerce_currency(); // یا مقدار دلخواه مثل get_woocommerce_currency()
+    global $wpdb;
+    $table = $wpdb->prefix . 'woo_wallet_transactions';
+    
+    $existing = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM $table WHERE user_id = %d AND details = %s", $user_id, 'اعتبار شما در پنل تاملند')
+    );
+    
+    if ($existing > 0) {
+        // بروزرسانی رکورد موجود
+        $wpdb->update(
+            $table,
+            [
+                'amount'   => $new_balance,
+                'balance'  => $new_balance,
+                'currency' => $currency,
+                'date'     => current_time('mysql')
+            ],
+            [
+                'user_id' => $user_id,
+                'details' => 'اعتبار شما در پنل تاملند'
+            ],
+            ['%f', '%f', '%s', '%s'],
+            ['%d', '%s']
+        );
+    } else {
+        // درج رکورد جدید
+        $wpdb->insert(
+            $table,
+            [
+                'user_id'  => $user_id,
+                'amount'   => $new_balance,
+                'balance'  => $new_balance,
+                'currency' => $currency,
+                'type'     => 'credit',
+                'date'     => current_time('mysql'),
+                'details'  => 'اعتبار شما در پنل تاملند'
+            ],
+            ['%d', '%f', '%f', '%s', '%s', '%s', '%s']
+        );
+    }
+
+
+
+}
+
