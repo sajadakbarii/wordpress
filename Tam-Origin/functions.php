@@ -13,18 +13,19 @@
  */
 define( 'CHILD_THEME_ASTRA_CHILD_VERSION', '1.0.2' );
 
+$secret_key = defined('TAMLAND_PURCHASE_SECTRET_KEY') ? TAMLAND_PURCHASE_SECTRET_KEY : '';
+
 /**
  * Enqueue styles
  */
 function child_enqueue_styles() {
-    
     wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri(). '/assets/css/bootstrap.min.css' );
     wp_enqueue_style( 'bootstrap-rtl', get_stylesheet_directory_uri(). '/assets/css/bootstrap.rtl.min.css' );
     wp_enqueue_style( 'bootstrap-utilities', get_stylesheet_directory_uri(). '/assets/css/bootstrap-utilities.min.css' );
     wp_enqueue_style( 'bootstrap-utilities-rtl', get_stylesheet_directory_uri(). '/assets/css/bootstrap-utilities.rtl.min.css' );
     wp_enqueue_style( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/css/owl.carousel.min.css' );
 	wp_enqueue_style( 'kc-fab', get_stylesheet_directory_uri(). '/assets/css/kc.fab.css' );
-	wp_enqueue_style( 'astra-child-theme-css', get_stylesheet_directory_uri() . '/style.css', array('astra-theme-css'), '2.8.33', 'all' );
+	wp_enqueue_style( 'astra-child-theme-css', get_stylesheet_directory_uri() . '/style.css', array('astra-theme-css'), '2.8.35', 'all' );
 	
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.3.2', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '2.3.4', true );
@@ -266,6 +267,8 @@ function teacher_landing_current_courses_func(){
                 }elseif($course['course-type'] == 'course-pack'){
                     $course_type = 'بسته';
                 }
+                
+                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $course['price_tax'], $secret_key);
             ?>
                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                     <div class="teacher-landing-current-courses-card">
@@ -281,6 +284,7 @@ function teacher_landing_current_courses_func(){
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             </div>
                         <?php endif; ?>
@@ -297,6 +301,7 @@ function teacher_landing_current_courses_func(){
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             <?php endif; ?>
 
@@ -319,6 +324,12 @@ function teacher_landing_current_courses_func(){
                                             <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                             <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                             <input type="hidden" name="course_numbers" value="1">
+                                            <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                            <input type="hidden" name="secure_token" value="<?= $token ?>">
                                         </form>
                                     </div>
                                     <?php endif; ?>
@@ -361,7 +372,7 @@ add_shortcode('teacher_current_courses','teacher_current_courses_func');
 function teacher_current_courses_func() {
     $teacher_current_courses = get_post_meta(get_the_ID(), 'teacher-current-courses', true);
     if (!$teacher_current_courses) return;  // اطمینان از وجود داده‌ها
-
+    
     ?>
     <div class="teacher-current-courses-place container-fluid">
         <div class="row" id="teacher-current-courses">
@@ -372,7 +383,10 @@ function teacher_current_courses_func() {
                     $course_type = 'چند استاده';
                 }elseif($course['course-type'] == 'course-pack'){
                     $course_type = 'بسته';
+                }elseif($course['course-type'] == 'azmoon'){
+                    $course_type = 'آزمون';
                 }
+                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $course['price_tax'], $secret_key);
             ?>
                 <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <div class="teacher-current-courses-card">
@@ -408,6 +422,7 @@ function teacher_current_courses_func() {
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             <?php endif; ?>
 
@@ -430,6 +445,12 @@ function teacher_current_courses_func() {
                                             <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                             <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                             <input type="hidden" name="course_numbers" value="1">
+                                            <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                            <input type="hidden" name="secure_token" value="<?= $token ?>">
                                         </form>
                                     </div>
                                     <?php endif; ?>
@@ -899,6 +920,50 @@ function unset_url_field($fields){
     return $fields;
 }
 
+function change_comment_form_email_to_mobile($fields) {
+    // Remove the default email field
+    unset($fields['email']);
+
+    // Add a mobile field instead
+    $fields['mobile'] = '<p class="comment-form-mobile ast-grid-common-col ast-width-lg-33 ast-width-md-4 ast-float">
+        <label for="mobile" class="screen-reader-text">شماره موبایل <span class="required">*</span></label>
+        <input id="mobile" name="mobile" type="text" value="" size="30" maxlength="11" required placeholder="شماره موبایل"/>
+    </p>
+    <style>
+    #mobile{
+        border-radius: 8px;
+        border: 1px solid #c9d4dd;
+        background-color: #fff;
+    }
+    </style>
+    ';
+
+    return $fields;
+}
+add_filter('comment_form_default_fields', 'change_comment_form_email_to_mobile');
+
+function save_mobile_field_with_comment($comment_id) {
+    if (isset($_POST['mobile'])) {
+        $mobile = sanitize_text_field($_POST['mobile']);
+        add_comment_meta($comment_id, 'mobile', $mobile);
+    }
+}
+add_action('comment_post', 'save_mobile_field_with_comment');
+
+function append_mobile_to_comment_text($comment_text, $comment) {
+    //if (is_admin()) return $comment_text; // Don't show in admin list view
+
+    if (is_admin()) {
+        $mobile = get_comment_meta($comment->comment_ID, 'mobile', true);
+        if ($mobile) {
+            $comment_text .= '<p><strong>شماره موبایل:</strong> ' . esc_html($mobile) . '</p>';
+        }
+    }
+
+    return $comment_text;
+}
+add_filter('comment_text', 'append_mobile_to_comment_text', 10, 2);
+
 
 add_filter('mime_types', 'dd_add_jfif_files');
 function dd_add_jfif_files($mimes){
@@ -929,7 +994,7 @@ function restrict_numbers_script() {
             }
         }
 
-        jQuery('#input_12_4, #input_12_1, #input_16_9').on('input', function() {
+        jQuery('#input_12_4, #input_12_1, #input_16_9, #input_22_1').on('input', function() {
             restrictNumbers(this);
         });
     });
@@ -977,10 +1042,10 @@ function google_analytics_code() {
     
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-MQQ8757K');</script>
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WLFCW7GM');</script>
     <!-- End Google Tag Manager -->
 
     <!-- Google Optimize -->
@@ -993,8 +1058,8 @@ add_action('wp_head', 'google_analytics_code', 10);
 function after_body_mine(){
     ?>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MQQ8757K"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLFCW7GM"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <?php
 }
@@ -1016,11 +1081,11 @@ function sa_clarity(){
 add_action('wp_footer', 'sa_clarity', 101);
 
 function sa_add_media(){
-    ?>
-    <script type="text/javascript" src="https://s1.mediaad.org/serve/15107/retargeting.js" async></script>
-    <?php
+    if ( !is_singular( 'luckywheel' ) ) { ?>
+        <script type="text/javascript" src="https://s1.mediaad.org/serve/15107/retargeting.js" async></script>
+    <?php }
 }
-add_action('wp_head', 'sa_add_media', 100);
+add_action('wp_footer', 'sa_add_media', 100);
 
 function add_lazy_load_to_videos($content) {
     $content = str_replace('<iframe', '<iframe loading="lazy"', $content);
@@ -1031,7 +1096,7 @@ function add_lazy_load_to_videos($content) {
 add_filter('the_content', 'add_lazy_load_to_videos');
 
 
-add_filter( 'rest_authentication_errors', function( $result ) {
+/*add_filter( 'rest_authentication_errors', function( $result ) {
     // If a previous authentication check was applied,
     // pass that result along without modification.
     if ( true === $result || is_wp_error( $result ) ) {
@@ -1052,7 +1117,7 @@ add_filter( 'rest_authentication_errors', function( $result ) {
     // on logged-in requests
     return $result;
 });
-
+*/
 class CourseUpdater {
 
     public function __construct() {
@@ -1161,7 +1226,7 @@ function add_url_to_things() {
     ?>
     <script type="text/javascript">
     jQuery(document).ready(function() {
-        var url = 'tel:02191004008';
+        var url = 'tel:02153344';
 
         jQuery('.elementor-element-0ce045e .elementor-icon-box-description').each(function() {
             var headingText = jQuery(this).text();
@@ -1511,18 +1576,18 @@ function hero_section_func(){
 				<div class="part part-7-2">
 					<div class="part part-7-2-1" data-href="https://mid1.tamland.ir/">
 							<img 
-							  src="https://tamland.ir/wp-content/uploads/2024/06/4k-1@72x-80.webp"
+							  src="https://tamland.ir/wp-content/uploads/2024/07/desktop-ebtedaye.webp"
 							  srcset="
-								https://tamland.ir/wp-content/uploads/2024/06/4k-1@72x-80.webp 1280w,
-								https://tamland.ir/wp-content/uploads/2024/06/4k-1@72x-80.webp 1920w"
+                              https://tamland.ir/wp-content/uploads/2024/07/desktop-ebtedaye.webp 1280w,
+                              https://tamland.ir/wp-content/uploads/2024/07/desktop-ebtedaye.webp 1920w"
 							  sizes="
 								(max-width: 1280px) 1280px,
 								1920px"
 							  width="1268" 
 							  height="94" 
 							  class="part-img-back" 
-							  title="پنجمی‌ها و ششمی‌ها، دبستان" 
-							  alt="پنجمی‌ها و ششمی‌ها، دبستان" 
+							  title="چهارمی‌ها و ششمی‌ها، دبستان" 
+							  alt="چهارمی‌ها و ششمی‌ها، دبستان" 
 							  width="100%" height="auto" 
 							  fetchpriority="high" 
 							  decoding="defer"
@@ -1549,23 +1614,23 @@ function hero_section_func(){
 				</div>
 			</div>
 			<div class="part part-8">
-				<div class="part part-8-1" data-href="https://lms.tamland.ir/tamshop">
+				<div class="part part-8-1" data-href="https://tamyar.ir/">
 							<img 
-							  src="https://tamland.ir/wp-content/uploads/2024/08/1920-10-copy@72x-80.webp"
+							  src="https://tamland.ir/wp-content/uploads/2025/08/desktop-TAMYAR.webp"
 							  srcset="
-								https://tamland.ir/wp-content/uploads/2024/08/1920-10-copy@72x-80.webp 1280w,
-								https://tamland.ir/wp-content/uploads/2024/08/1920-10-copy@72x-80.webp 1920w"
+                              https://tamland.ir/wp-content/uploads/2025/08/desktop-TAMYAR.webp 1280w,
+                              https://tamland.ir/wp-content/uploads/2025/08/desktop-TAMYAR.webp 1920w"
 							  sizes="
 								(max-width: 1280px) 1280px,
 								1920px"
 							  width="1268" 
 							  height="94" 
 							  class="part-img-back" 
-							  title="تام‌شاپ" 
-							  alt="تام‌شاپ" 
+							  title="تام‌یار" 
+							  alt="تام‌یار" 
 							  fetchpriority="high" 
 							  decoding="defer"
-							>
+							> 
 				</div>
 				<div class="part part-8-2" data-href="https://konkoor.tamland.ir/field/هنر/">
 							<img 
@@ -2287,3 +2352,571 @@ function hero_section_duplicate_func(){
 </style>
 <?php
 }
+
+
+/**
+ * Shortcode: [ads_slide_banner_single_post] 
+*/
+add_shortcode('ads_slide_banner_single_post','ads_slide_banner_single_post_func');
+function ads_slide_banner_single_post_func(){
+    // گرفتن دسته‌بندی پست جاری
+    $categories = get_the_category();
+    
+    if (!empty($categories)) {
+        // گرفتن اولین دسته‌بندی (در صورت وجود چند دسته‌بندی)
+        $category_id = $categories[0]->term_id;
+    
+        // گرفتن فیلد Repeater برای دسته‌بندی
+        $ads_banner = get_term_meta($category_id, 'ads-banner', true);
+    
+        if (!empty($ads_banner)) {
+            ?>
+            <div class="ads-slide-banner-single-post">
+                <div class="ads-slide-banner-single-post-wrapper d-flex align-items-center">
+                    <div class="ads-slide-banner-single-post-owl-next">
+                        <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.57812 11L6.57812 6L1.57812 1" stroke="#2D3748" stroke-width="1.42857" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="owl-carousel" id="ads-slide-banner-single-post">
+                        <?php foreach ($ads_banner as $key => $banner): ?>
+                            <div>
+                                <div class="item-box">
+                                    <a href="<?php echo esc_url($banner['ads-link']); ?>" target="_blank">
+                                        <img src="<?php echo esc_url($banner['ads-image']); ?>" alt="<?php echo esc_attr($banner['ads-banner-title']); ?>">
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="ads-slide-banner-single-post-owl-prev">
+                        <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.4375 1L1.4375 6L6.4375 11" stroke="#2D3748" stroke-width="1.42857" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+        <script type="text/javascript">
+            jQuery(document).ready(function(){
+                var $carousel = jQuery("#ads-slide-banner-single-post");
+
+                if($carousel.find('.owl-nav').hasClass('disabled')){
+                    jQuery('.ads-slide-banner-single-post-owl-next, .ads-slide-banner-single-post-owl-prev').addClass('d-none');
+                }
+
+                jQuery('.ads-slide-banner-single-post-owl-next').click(function(){
+                    $carousel.trigger('next.owl.carousel');
+                });
+
+                jQuery('.ads-slide-banner-single-post-owl-prev').click(function(){
+                    $carousel.trigger('prev.owl.carousel');
+                });
+
+                $carousel.owlCarousel({
+                    rtl:true,
+                    loop:true,
+                    margin:0,
+                    nav:true,
+                    dots:false,
+                    autoplay:true,
+                    responsiveClass:true,
+                    mouseDrag:true,
+                    responsive:{
+                        0: { items: 1 },
+                        600: { items: 1 },
+                        1000: { items: 1 }
+                    }
+                });
+            });
+        </script>
+        <?php
+    }
+    }
+}
+
+
+/**
+ * Shortcode: [ads_banner_betweentext_singlepost pos="0"] 
+*/
+add_shortcode('ads_banner_betweentext_singlepost', 'ads_banner_betweentext_singlepost_func');
+
+function ads_banner_betweentext_singlepost_func($atts) {
+    // گرفتن مقدار pos از پارامترهای شورت‌کد
+    $atts = shortcode_atts(array(
+        'pos' => 0,
+    ), $atts);
+
+    $pos = intval($atts['pos']);
+    
+    // گرفتن دسته‌بندی پست جاری
+    $categories = get_the_category();
+    
+    if (!empty($categories)) {
+        // گرفتن اولین دسته‌بندی
+        $category_id = $categories[0]->term_id;
+        
+        // گرفتن فیلد Repeater برای دسته‌بندی
+        // اگر از ACF استفاده می‌کنی:
+        // $ads_banner = get_field('ads-banner-between-text', 'category_' . $category_id);
+        
+        $ads_banner_between_text = get_term_meta($category_id, 'ads-banner-between-text', true);
+        
+        // بررسی اینکه مقدار pos موجود باشد
+        if (!empty($ads_banner_between_text)) {
+            $banner = $ads_banner_between_text['item-'.$pos];
+            ob_start(); // Start output buffering
+            if(!empty($banner)){
+            ?>
+            <div class="ads-banner-betweentext-singlepost d-block">
+                <a href="<?php if ( isset($banner['ads-link-between-text']) ) { echo esc_url($banner['ads-link-between-text']); } ?>" target="_blank">
+                    <img src="<?php if ( isset($banner['ads-image-between-text']) ) { echo esc_url($banner['ads-image-between-text']); } ?>" alt="<?php if ( isset($banner['ads-banner-between-text-title']) ) { echo esc_attr($banner['ads-banner-between-text-title']); } ?>">
+                </a>
+            </div>
+            <?php
+            }
+            return ob_get_clean(); // Return the buffered content
+        }
+    }
+
+    return ''; // در صورت نبودن مقدار معتبر، چیزی نمایش نده
+}
+
+add_filter('wp_img_tag_add_loading_attr', 'custom_disable_lazyload_on_parent_class', 10, 3);
+function custom_disable_lazyload_on_parent_class($value, $image, $context) {
+    // بررسی اگر تصویر کلاس lazy خاصی نداره، یا توی یک بلاک خاص قرار داره
+    if (
+        strpos($image, 'class="') !== false &&
+        (strpos($image, 'no-lazy') !== false || strpos($image, 'swiper-slide-bg') !== false)
+    ) {
+        return false;
+    }
+    return $value;
+}
+
+function get_estimated_reading_time($content = '', $wpm = 210) {
+    if (empty($content)) {
+        global $post;
+        $content = $post->post_content;
+    }
+
+    $clean_text = wp_strip_all_tags(strip_shortcodes($content));
+    $word_count = str_word_count($clean_text);
+    $minutes = ceil($word_count / $wpm);
+
+    return "<span class='reading-time'>Estimated reading time: {$minutes} min</span>";
+}
+
+add_shortcode('reading_time', function () {
+    return get_estimated_reading_time();
+});
+
+
+function enqueue_reading_time_script() {
+    ?>
+    <script>
+    function estimateReadingTimeByClass(className, wordsPerMinute = 210) {
+        const element = document.querySelector(`.${className}`);
+        if (!element) return;
+
+        const text = element.innerText || element.textContent || "";
+        const wordCount = text.trim().split(/\s+/).length;
+        const minutes = Math.ceil(wordCount / wordsPerMinute);
+
+        const readingTimeElement = document.createElement("p");
+        readingTimeElement.textContent = `Estimated reading time: ${minutes} min`;
+        readingTimeElement.className = "reading-time";
+
+        element.parentNode.insertBefore(readingTimeElement, element);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        estimateReadingTimeByClass("articleblog2");
+    });
+    </script>
+    <?php
+}
+
+add_shortcode('reading_time_js', function () {
+    add_action('wp_footer', 'enqueue_reading_time_script');
+    return '';
+});
+
+
+
+function tamland_preload_homepage_video() {
+  if ( is_front_page() ) {
+    echo '<link rel="preload" as="video" href="https://tamland.ir/wp-content/uploads/2024/08/IMG_3202.mp4" type="video/mp4">' . "\n";
+  }
+}
+add_action( 'wp_head', 'tamland_preload_homepage_video' );
+add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
+
+
+// گرفتن یک نوشته تبلیغاتی رندوم
+function get_current_related_ad_post() {
+    static $ad_post = null;
+
+    if ($ad_post !== null) {
+        return $ad_post;
+    }
+
+    $post_id = get_the_ID();
+    if (!$post_id) return null;
+
+    $terms_field = wp_get_post_terms($post_id, 'field', ['fields' => 'ids']);
+    $terms_grade = wp_get_post_terms($post_id, 'publish-year', ['fields' => 'ids']);
+
+    if (empty($terms_field) && empty($terms_grade)) {
+        return null;
+    }
+
+    $args = [
+        'post_type' => 'ads',
+        'posts_per_page' => 1,
+        'orderby' => 'rand',
+        'tax_query' => [
+            'relation' => 'OR',
+            [
+                'taxonomy' => 'field',
+                'field' => 'term_id',
+                'terms' => $terms_field,
+            ],
+            [
+                'taxonomy' => 'publish-year',
+                'field' => 'term_id',
+                'terms' => $terms_grade,
+            ]
+        ]
+    ];
+
+    $ads = get_posts($args);
+    $ad_post = !empty($ads) ? $ads[0] : null;
+    return $ad_post;
+}
+
+// شورتکد برای لینک ویدیو تبلیغاتی
+function get_related_ad_video_func() {
+    $ad_post = get_current_related_ad_post();
+    $video_url = $ad_post ? get_post_meta($ad_post->ID, 'ad_video', true) : '';
+    return esc_url($video_url ?: '');
+}
+add_shortcode('get_related_ad_video', 'get_related_ad_video_func');
+
+// شورتکد برای لینک صفحه تبلیغاتی
+function get_related_ad_page_link_func() {
+    $ad_post = get_current_related_ad_post();
+    $page_link = $ad_post ? get_post_meta($ad_post->ID, 'ad_link', true) : '';
+    return esc_url($page_link ?: 'https://konkoor.tamland.ir');
+}
+add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
+
+function tamland_check_email_and_post() {
+    // مشخصات ایمیل هاست
+    $hostname = '{mail.tamland.ir:993/imap/ssl}INBOX'; // دامنه خودت رو جایگزین کن
+    $username = 'sajadakbari@tamland.ir'; // ایمیل هاست
+    $password = 'Sajad@6477'; // رمز عبور ایمیل
+
+    // اتصال به سرور ایمیل
+    $inbox = imap_open($hostname, $username, $password) or die('Cannot connect to email server: ' . imap_last_error());
+
+    // فقط ایمیل‌های خوانده‌نشده
+    $emails = imap_search($inbox, 'UNSEEN');
+
+    if ($emails) {
+        rsort($emails); // از جدید به قدیم
+
+        foreach ($emails as $email_number) {
+            $overview = imap_fetch_overview($inbox, $email_number, 0);
+            $message = imap_fetchbody($inbox, $email_number, 1); // قسمت متنی
+
+            $title = isset($overview[0]->subject) ? $overview[0]->subject : 'بدون عنوان';
+            $content = trim($message);
+
+            // ایجاد پست جدید در دسته‌بندی خاص
+            $new_post = array(
+                'post_title'    => $title,
+                'post_content'  => $content,
+                'post_status'   => 'publish',
+                'post_author'   => 1,
+                'post_category' => array(5), // شناسه دسته موردنظر
+            );
+
+            wp_insert_post($new_post);
+
+            // علامت‌گذاری به‌عنوان خوانده‌شده
+            imap_setflag_full($inbox, $email_number, "\\Seen");
+        }
+    }
+
+    imap_close($inbox);
+}
+
+// ثبت کران جاب
+function tamland_schedule_email_check() {
+    if (!wp_next_scheduled('tamland_check_email_event')) {
+        wp_schedule_event(time(), 'hourly', 'tamland_check_email_event');
+    }
+}
+add_action('wp', 'tamland_schedule_email_check');
+
+// اتصال رویداد به تابع
+add_action('tamland_check_email_event', 'tamland_check_email_and_post');
+
+
+
+add_action('wp_ajax_send_contact_email', 'send_contact_email');
+add_action('wp_ajax_nopriv_send_contact_email', 'send_contact_email');
+
+
+
+function add_najva_push_notification_script() {
+    ?>
+        <script>
+            var s=document.createElement("script");
+            s.src="https://van.najva.com/static/js/main-script.js";
+            s.defer=!0;
+            s.id="najva-mini-script";
+            s.setAttribute("data-najva-id","73d870e1-3a20-4e07-aa33-346b9c3fa6ad");
+            document.head.appendChild(s);
+        </script>
+    <?php
+    }
+    add_action('wp_head', 'add_najva_push_notification_script');
+    
+    
+
+
+
+add_shortcode( 'lwt_time_gate_v2', 'lwt_final_time_gate_shortcode' );
+function lwt_final_time_gate_shortcode( $atts, $content = null ) {
+
+    if ( ! is_singular() ) return '';
+
+    $is_time_to_show = false;
+    $post_id = get_the_ID();
+    $post_type_slug = 'lw';
+
+    if (get_post_type($post_id) != $post_type_slug) {
+        return do_shortcode($content);
+    }
+    
+    $schedule_items = get_post_meta( $post_id, 'weekly_schedule', true );
+
+    if ( ! empty( $schedule_items ) && is_array( $schedule_items ) ) {
+        $current_day_num = current_time('w');
+        $current_time_str = current_time('H:i');
+
+        foreach ( $schedule_items as $item ) {
+            if ( isset($item['day_of_week'], $item['start_time'], $item['end_time']) ) {
+                $day = $item['day_of_week'];
+                $start_time = $item['start_time'];
+                $end_time = $item['end_time'];
+
+                if ( $current_day_num == $day && $current_time_str >= $start_time && $current_time_str <= $end_time ) {
+                    $is_time_to_show = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if ( $is_time_to_show ) {
+        return do_shortcode( $content );
+    } else {
+        
+        $unique_id = 'gate_' . uniqid();
+
+        $output_css = "
+        <style>
+            #{$unique_id} {
+                position: relative;
+                padding: 40px 0;
+            }
+            #{$unique_id} .gated-content-wrapper {
+                pointer-events: none;
+            }
+            #{$unique_id} .inactive-wheel-overlay {
+                display: flex;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 30;
+                justify-content: center;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.28);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            #{$unique_id} .message-box {
+                background-color: #ffffff;
+                color: #333333;
+                padding: 30px 40px;
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            #{$unique_id} .message-box h3,
+            #{$unique_id} .message-box p {
+                color: #333333;
+                margin: 0;
+            }
+            #{$unique_id} .message-box h3 {
+                margin-bottom: 10px;
+            }
+            #{$unique_id} .gated-content-wrapper .gform_wrapper {
+                display: none !important;
+            }
+            #{$unique_id} .gated-content-wrapper #lwt-pointer-container {
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
+        </style>";
+        
+        $output_html = "
+        <div id='{$unique_id}'>
+            <div class='inactive-wheel-overlay'>
+                <div class='message-box'>
+                    <h3>گردونه الان غیرفعاله</h3>
+                    <p>سر کلاس بعدی استاد گردونه فعال میشه!</p>
+                </div>
+            </div>
+            <div class='gated-content-wrapper'>" 
+                . do_shortcode( $content ) . 
+            "</div>
+        </div>";
+
+        return $output_css . $output_html;
+    }
+}
+
+
+//tamyar
+
+// تابع برای لود داده‌های API (فقط برای حالت مستقیم)
+function get_teacher_products_data() {
+    if ( is_singular( 'teacher' ) && ! function_exists( 'jet_engine' ) ) {
+        $teacher_slug = get_post_field( 'post_name', get_the_ID() );
+        if ( empty( $teacher_slug ) ) {
+            error_log( 'Error: teacher_slug is empty for post ID: ' . get_the_ID() );
+            return false;
+        }
+
+        $consumer_key = 'ck_1a35a7af1912254ffe912e701e3f390164e78523'; 
+        $secret_key = 'cs_dd4ebe8904d400e16484fcb848021ab6a9717a39'; 
+
+        $api_url = 'https://tamyar.ir/wp-json/wc/v3/products?teacher=' . urlencode( $teacher_slug ) . '&per_page=10';
+
+        $response = wp_remote_get( $api_url, array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode( $consumer_key . ':' . $secret_key )
+            )
+        ));
+
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Error: API request failed - ' . $response->get_error_message() . ' for URL: ' . $api_url );
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $products = json_decode( $body, true );
+        if ( ! is_array( $products ) ) {
+            error_log( 'Error: Invalid API response - ' . $body );
+            return false;
+        }
+
+        return $products;
+    }
+    return false; // در Listing Grid، داده‌ها از endpoint میاد
+}
+
+// شورتکد برای نمایش نام محصول
+function display_teacher_product_name( $atts ) {
+    $output = '';
+    // اگر در Listing Grid هستیم، از داده فعلی استفاده می‌کنیم
+    if ( function_exists( 'jet_engine' ) && isset( $atts['in_listing'] ) && $atts['in_listing'] ) {
+        $product = jet_engine()->listings->data->get_current_object();
+        if ( $product instanceof WP_Post ) {
+            $name = get_post_meta( $product->ID, 'name', true ); // از متا
+            if ( ! $name ) $name = $product->post_title; // پیش‌فرض
+            $slug = get_post_meta( $product->ID, 'slug', true );
+            if ( ! $slug ) $slug = $product->post_name; // پیش‌فرض
+            $product_url = 'https://tamyar.ir/product/' . $slug . '/';
+            $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank">' . esc_html( $name ) . '</a>';
+        } else {
+            $output .= 'داده محصول ناموجود';
+        }
+    } else {
+        // برای حالت مستقیم، از API استفاده می‌کنیم
+        $products = get_teacher_products_data();
+        if ( ! $products ) return 'خطا در لود محصولات';
+        foreach ( $products as $product ) {
+            $product_url = 'https://tamyar.ir/product/' . $product['slug'] . '/';
+            $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank">' . esc_html( $product['name'] ) . '</a><br>';
+        }
+    }
+    return $output;
+}
+add_shortcode( 'teacher_product_name', 'display_teacher_product_name' );
+
+// شورتکد برای نمایش قیمت محصول
+function display_teacher_product_price( $atts ) {
+    $output = '';
+    if ( function_exists( 'jet_engine' ) && isset( $atts['in_listing'] ) && $atts['in_listing'] ) {
+        $product = jet_engine()->listings->data->get_current_object();
+        if ( $product instanceof WP_Post ) {
+            $price = get_post_meta( $product->ID, 'price', true ); // از متا
+            if ( ! $price ) $price = 'قیمت ناموجود'; // پیش‌فرض
+            $slug = get_post_meta( $product->ID, 'slug', true );
+            if ( ! $slug ) $slug = $product->post_name; // پیش‌فرض
+            $product_url = 'https://tamyar.ir/product/' . $slug . '/';
+            $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank">' . esc_html( $price ) . '</a>';
+        } else {
+            $output .= 'داده محصول ناموجود';
+        }
+    } else {
+        $products = get_teacher_products_data();
+        if ( ! $products ) return 'خطا در لود محصولات';
+        foreach ( $products as $product ) {
+            $product_url = 'https://tamyar.ir/product/' . $product['slug'] . '/';
+            $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank">' . esc_html( $product['price'] ) . '</a><br>';
+        }
+    }
+    return $output;
+}
+add_shortcode( 'teacher_product_price', 'display_teacher_product_price' );
+
+// شورتکد برای نمایش تصویر محصول
+function display_teacher_product_image( $atts ) {
+    $output = '';
+    if ( function_exists( 'jet_engine' ) && isset( $atts['in_listing'] ) && $atts['in_listing'] ) {
+        $product = jet_engine()->listings->data->get_current_object();
+        if ( $product instanceof WP_Post ) {
+            $images = get_post_meta( $product->ID, 'images', true ); // از متا
+            $slug = get_post_meta( $product->ID, 'slug', true );
+            if ( ! $slug ) $slug = $product->post_name; // پیش‌فرض
+            $product_url = 'https://tamyar.ir/product/' . $slug . '/';
+            if ( is_array( $images ) && ! empty( $images ) && isset( $images[0]['src'] ) ) {
+                $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank"><img src="' . esc_url( $images[0]['src'] ) . '" alt="' . esc_attr( get_post_meta( $product->ID, 'name', true ) ?: $product->post_title ) . '" style="max-width:100px; margin:5px;"></a>';
+            } else {
+                $output .= 'داده تصویر ناموجود';
+            }
+        } else {
+            $output .= 'داده تصویر ناموجود';
+        }
+    } else {
+        $products = get_teacher_products_data();
+        if ( ! $products ) return 'خطا در لود محصولات';
+        foreach ( $products as $product ) {
+            if ( ! empty( $product['images'] ) ) {
+                $product_url = 'https://tamyar.ir/product/' . $product['slug'] . '/';
+                $output .= '<a href="' . esc_url( $product_url ) . '" target="_blank"><img src="' . esc_url( $product['images'][0]['src'] ) . '" alt="' . esc_attr( $product['name'] ) . '" style="max-width:100px; margin:5px;"></a>';
+            }
+        }
+    }
+    return $output;
+}
+add_shortcode( 'teacher_product_image', 'display_teacher_product_image' );
