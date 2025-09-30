@@ -727,11 +727,11 @@ function add_analytics_script(){
     </script>
 
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l][];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-5SC396D8');</script>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5SC396D8');</script>
     <!-- End Google Tag Manager -->
     <?php
 }
@@ -744,7 +744,7 @@ function add_analytics_script_body() {
 	?>
 	    <!-- Google Tag Manager (noscript) -->
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SC396D8"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
 	<?php
 }
@@ -1750,7 +1750,7 @@ function teachers_course_items_func() {
         });
         </script>
 
-        <div class="container multiteacher my-5">
+        <div class="container multiteacher my-5" style="display:none">
             <li class="multiteacher-courses-items">
                 <div class="row courses-wrapper align-items-start justify-content-center">
                     <div class="row justify-content-center" id="courseRow">
@@ -2034,6 +2034,8 @@ function teachers_course_items_func() {
                 document.getElementById("teacher-" + teacherSelected).click();
                 document.getElementById("teacher-" + teacherSelected).scrollIntoView();
             }
+            
+            jQuery('.container.multiteacher').fadeIn(500);
         };
         </script>
 
@@ -2980,14 +2982,6 @@ function show_selected_grade_of_course() {
 }
 add_shortcode('show_grade', 'show_selected_grade_of_course');
 
-<<<<<<< HEAD
-//کد های مربوط به سرعت سایت 
-
-if (!is_user_logged_in()) {
-    header("Cache-Control: public, max-age=86400");
-}
-
-=======
 
 
 //کد های مربوط به سرعت سایت 
@@ -3006,7 +3000,6 @@ add_action('send_headers', function () {
         }
     }
 }, 1); 
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 
 remove_action('wp_head', 'rsd_link');
 remove_action('wp_head', 'wlwmanifest_link');
@@ -3020,9 +3013,6 @@ remove_action('admin_print_styles', 'print_emoji_styles');
 add_filter('the_generator', '__return_empty_string');
 
 
-<<<<<<< HEAD
-add_filter('heartbeat_send', '__return_false');
-=======
 add_filter('heartbeat_send', function($response, $screen_id) {
     if (!is_admin()) {
         return false;
@@ -3031,7 +3021,6 @@ add_filter('heartbeat_send', function($response, $screen_id) {
 }, 10, 2);
 
 
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
 function disable_feed() { wp_die(__('No feed available.', 'textdomain')); }
 add_action('do_feed', 'disable_feed', 1);
 add_action('do_feed_rdf', 'disable_feed', 1);
@@ -3065,39 +3054,13 @@ add_action('init', function() {
     });
 }, 9999);
 
-<<<<<<< HEAD
-
-add_filter('gform_disable_css', '__return_true');
-add_filter('gform_disable_js', '__return_true');
-
-
 add_action('wp_head', function () {
     echo '
-
-=======
-add_action('wp_head', function () {
-    echo '
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
-<<<<<<< HEAD
-
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/plugins/happy-elementor-addons/assets/fonts/huge-icons/huge-icons.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/plugins/happy-elementor-addons/assets/fonts/happy-icons.woff2" as="font" type="font/woff2" crossorigin>
-
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWebFaNum.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWebFaNum_Bold.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2024/05/Morabba-Bold.woff2" as="font" type="font/woff2" crossorigin>
-
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_UltraLight.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_Light.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_Medium.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_Bold.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="https://tizhooshan.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb.ttf" as="font" type="font/ttf" crossorigin>
-=======
     <link rel="preload" href="/wp-content/plugins/happy-elementor-addons/assets/fonts/huge-icons/huge-icons.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/wp-content/plugins/happy-elementor-addons/assets/fonts/happy-icons.woff2" as="font" type="font/woff2" crossorigin>
 
@@ -3110,39 +3073,10 @@ add_action('wp_head', function () {
     <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_Medium.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb_Bold.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="/wp-content/uploads/2022/09/IRANSansWeb.ttf" as="font" type="font/ttf" crossorigin>
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
     ';
 });
 
 
-<<<<<<< HEAD
-if (!is_admin() && !is_user_logged_in()) {
-    ob_start(function($html) {
-        return preg_replace('/\s+/', ' ', $html);
-    });
-}
-
-add_action('wp_footer', function () {
-  ?>
-  <script>
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const clarity = document.createElement('script');
-        clarity.src = 'https://www.clarity.ms/tag/obu9nh59t2';
-        clarity.defer = true;
-        document.body.appendChild(clarity);
-
-        const goftino = document.createElement('script');
-        goftino.src = 'https://www.goftino.com/widget/kkkIbA';
-        goftino.defer = true;
-        document.body.appendChild(goftino);
-      }, 1500);
-    });
-  </script>
-  <?php
-});
-
-=======
 if (!is_admin() && !is_user_logged_in() && !defined('DOING_AJAX') && !defined('REST_REQUEST')) {
     $uri = $_SERVER['REQUEST_URI'];
     if (!preg_match('#^/first-session-video/#', $uri)) {
@@ -3525,4 +3459,23 @@ function get_related_ad_page_link_func() {
     return esc_url($page_link ?: '#');
 }
 add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
->>>>>>> cb98cdc711d2ea53ba0421fa77901203fc804fe4
+
+
+function my_child_theme_gtm_head_script() {
+    ?>
+   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5SC396D8');</script>
+    <?php
+}
+add_action( 'wp_head', 'my_child_theme_gtm_head_script' );
+
+function my_child_theme_gtm_body_noscript() {
+    ?>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SC396D8"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <?php
+}
+add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
