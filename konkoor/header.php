@@ -18,7 +18,6 @@ $skip_link_url = apply_filters( 'hello_elementor_skip_link_url', '#content' );
 <!doctype html>
 <html <?php language_attributes(); ?>>
 <head>
-	<link rel="preload" href="<?php echo site_url(); ?>/wp-content/uploads/2025/05/12-1.webp" as="image">
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="<?php echo esc_attr( $viewport_content ); ?>">
 	<?php wp_head(); ?>
