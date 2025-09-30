@@ -15,7 +15,7 @@ define('UPLOADS_DIR', site_url().'/wp-content/uploads');
 $secret_key = defined('TAMLAND_PURCHASE_SECTRET_KEY') ? TAMLAND_PURCHASE_SECTRET_KEY : '';
 
  add_theme_support( 'widgets' );
- 
+
 function hello_elementor_child_enqueue_scripts() {
     wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri(). '/assets/css/bootstrap.min.css' );
     wp_enqueue_style( 'bootstrap-rtl', get_stylesheet_directory_uri(). '/assets/css/bootstrap.rtl.min.css' );
@@ -1250,7 +1250,7 @@ function teachers_course_items_func(){
                 };
             });
         </script>
-            <div class="container multiteacher my-5">
+            <div class="container multiteacher my-5" style="display:none">
                 <li class="multiteacher-courses-items">
                     <div class="row courses-wrapper align-items-start justify-content-center">
                         <div class="row justify-content-center" id="courseRow">
@@ -1554,6 +1554,8 @@ function teachers_course_items_func(){
                     jQuery("#teacher-"+teacherSelected).click();
                     document.getElementById("teacher-"+teacherSelected).scrollIntoView();
                 }
+                
+                jQuery('.container.multiteacher').fadeIn(500);
             }
         </script>
         <?php
@@ -2079,45 +2081,6 @@ function ads_banner_2nd_func($atts){
 <?php
 }
 
-
-/**
-    * Add Iran mobile format 
-*/
-add_filter( 'gform_phone_formats', 'ir_phone_format', 10, 2 );
-
-function ir_phone_format( $phone_formats ) {
-    $phone_formats['ir'] = array(
-        'label'       => 'شماره موبایل ایران',
-        'mask'        => '',
-        'regex'       => '/09(0[0-9]|1[0-9]|9[0-9]|3[0-9]|2[0-9])-?[0-9]{3}-?[0-9]{4}/',
-        'instruction' => 'شماره وارد شده صحیح نمی‌باشد',
-    );
- 
-    return $phone_formats;
-}
-
-function restrict_numbers_script() {
-    ?>
-    <script type="text/javascript">
-    jQuery(document).ready(function() {
-        function restrictNumbers(input) {
-            const allowedChars = /^[0-9]*$/;
-            if (!allowedChars.test(input.value)) {
-                input.value = input.value.replace(/[^0-9]/g, '');
-            }
-        }
-
-        // Apply the function to input fields with specific IDs
-        jQuery('#input_1_2, #input_3_2, #input_2_2').on('input', function() {
-            restrictNumbers(this);
-        });
-    });
-    </script>
-    <?php
-}
-add_action('wp_footer', 'restrict_numbers_script');
-
-
 function update_view_more_button_url(){
     if(is_singular('teacher')){
         $post_id = get_the_ID();
@@ -2436,3 +2399,114 @@ function get_related_ad_page_link_func() {
     return esc_url($page_link ?: '#');
 }
 add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
+
+// count words of short description of exam
+function count_chars_of_exam_short_desc() {
+    global $post;
+    if ( ! $post ) return 0;
+
+    $field_value = get_post_meta( $post->ID, 'exam-short-desc', true );
+    if ( ! $field_value ) return 0;
+
+    $clean_text = strip_tags( $field_value );
+    $char_count = strlen( trim( $clean_text ) );
+
+    return $char_count;
+}
+add_shortcode( 'exam_short_desc_char_count', 'count_chars_of_exam_short_desc' );
+
+
+
+
+add_filter( 'gform_phone_formats', 'ir_phone_format', 10, 2 );
+function ir_phone_format( $phone_formats ) {
+    $phone_formats['ir'] = array(
+        'label'       => 'شماره موبایل ایران',
+        'mask'        => '',
+        'regex'       => '/^09(0[1-5]|1[0-9]|2[0-2]|3[0-9]|9[0-4])[0-9]{7}$/',
+        'instruction' => 'لطفاً یک شماره موبایل معتبر ۱۱ رقمی وارد کنید (مثال: 09123456789)',
+    );
+ 
+    return $phone_formats;
+}
+
+add_filter( 'gform_field_css_class', 'auto_add_class_to_iran_phone_fields', 10, 3 );
+function auto_add_class_to_iran_phone_fields( $classes, $field, $form ) {
+    if ( $field->type == 'phone' && $field->phoneFormat == 'ir' ) {
+        $classes .= ' gf-iran-phone-auto';
+    }
+    return $classes;
+}
+
+add_action('wp_footer', 'live_phone_formatter_script');
+function live_phone_formatter_script() {
+    if ( ! class_exists('GFCommon') || ! is_callable(array('GFCommon', 'has_form_on_page')) || ! GFCommon::has_form_on_page() ) {
+        return;
+    }
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        $(document).on('input', '.gf-iran-phone-auto input[type="tel"]', function() {
+            const convertPersianToArabicNumbers = (str) => {
+                const persian = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+                const arabic = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+                const english = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+                return str.split('').map(
+                    c => english[persian.indexOf(c)] || english[arabic.indexOf(c)] || c
+                ).join('');
+            };
+            let value = $(this).val();
+            value = convertPersianToArabicNumbers(value);
+            value = value.replace(/[^0-9]/g, '');
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            $(this).val(value);
+        });
+    });
+    </script>
+    <?php
+}
+
+
+
+add_action('wp_footer', 'add_yektanet_script_to_footer');
+function add_yektanet_script_to_footer() {
+    if (is_page('course-checkout')) {
+        ?>
+<script>
+    !function (t, e, n) {
+        t.yektanetAnalyticsObject = n, t[n] = t[n] || function () {
+            t[n].q.push(arguments)
+        }, t[n].q = t[n].q || [];
+        var a = new Date, r = a.getFullYear().toString() + "0" + a.getMonth() + "0" + a.getDate() + "0" + a.getHours(),
+            c = e.getElementsByTagName("script")[0], s = e.createElement("script");
+        s.id = "ua-script-DSLcJKBG"; s.dataset.analyticsobject = n;
+        s.async = 1; s.type = "text/javascript";
+        s.src = "https://cdn.yektanet.com/rg_woebegone/scripts_v3/DSLcJKBG/rg.complete.js?v=" + r, c.parentNode.insertBefore(s, c)
+    }(window, document, "yektanet");
+</script>
+        <?php
+    }
+}
+
+
+
+function my_child_theme_gtm_head_script() {
+    ?>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NSNB5N6K');</script>
+    <?php
+}
+add_action( 'wp_head', 'my_child_theme_gtm_head_script' );
+
+function my_child_theme_gtm_body_noscript() {
+    ?>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NSNB5N6K"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <?php
+}
+add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
