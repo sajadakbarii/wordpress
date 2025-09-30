@@ -6,22 +6,215 @@ function shopex_child_enqueue_styles() {
 }
 add_action('wp_enqueue_scripts', 'shopex_child_enqueue_styles');
 
-/*
-// تغییر آدرس ورود ووکامرس
-add_filter('woocommerce_login_redirect', 'custom_login_redirect', 10, 2);
-function custom_login_redirect($redirect, $user) {
-    return site_url('/lms-login/'); // آدرس صفحه سفارشی شما
+
+
+function tamyar_add_orders_pagination_endpoint() {
+    add_rewrite_endpoint( 'orders/page', EP_PAGES );
+}
+add_action( 'init', 'tamyar_add_orders_pagination_endpoint' );
+
+add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
+// remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+// remove_action( 'woocommerce_before_cart', 'woocommerce_cart_coupon', 10 );
+// remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals_coupon_form', 10 );
+
+function add_google_analytics() {
+  ?>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S0TXBW0FLK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S0TXBW0FLK');
+  </script>
+  <!-- End Google Analytics -->
+  <?php
+}
+add_action('wp_head', 'add_google_analytics');
+
+function teacher_list_from_products_shortcode($atts){
+    $atts = shortcode_atts([
+        'count'   => 0,  
+        'columns' => 3,  
+    ], $atts, 'teacher_list');
+
+
+    $product_q = new WP_Query([
+        'post_type'      => 'product',
+        'post_status'    => 'publish',
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'posts_per_page' => -1,
+    ]);
+    $product_ids = $product_q->posts;
+
+    if (empty($product_ids)) {
+        return '<p>محصولی یافت نشد.</p>';
+    }
+
+    // 2) از روی آیدیِ محصولات، ترم‌های teacher را بگیر
+    $terms = get_terms([
+        'taxonomy'   => 'teacher',
+        'hide_empty' => true,          // فقط اساتیدی که واقعاً به محصول وصل‌اند
+        'object_ids' => $product_ids,  // مهم: از خودِ محصولات انتخاب کن
+    ]);
+
+    if (empty($terms) || is_wp_error($terms)) {
+        return '<p>استادی یافت نشد.</p>';
+    }
+
+    // 3) با هر رفرش، ترتیب اساتید عوض شود
+    shuffle($terms);
+
+    // 4) محدودیت تعداد (در صورت نیاز)
+    if (intval($atts['count']) > 0) {
+        $terms = array_slice($terms, 0, intval($atts['count']));
+    }
+
+    // 5) خروجی HTML
+    ob_start();
+    echo '<div class="teacher-list grid cols-'.intval($atts['columns']).'">';
+    foreach ($terms as $t) {
+        $link = get_term_link($t);
+
+        // اگر برای taxonomy تصویر ذخیره می‌کنی (مثلاً با ACF یا افزونهٔ ترم‌امیج)، این خط می‌تونه تصویر رو نشون بده
+        $thumb_id = get_term_meta($t->term_id, 'thumbnail_id', true);
+        $img_html = $thumb_id ? wp_get_attachment_image($thumb_id, 'thumbnail') : '';
+
+        echo '<div class="teacher-item">';
+        echo   '<a href="'.esc_url($link).'">';
+        echo     $img_html;
+        echo     '<h3>'.esc_html($t->name).'</h3>';
+        echo   '</a>';
+        echo '</div>';
+    }
+    echo '</div>';
+
+    return ob_get_clean();
+}
+add_shortcode('teacher_list', 'teacher_list_from_products_shortcode');
+
+
+
+
+add_action('wp_enqueue_scripts', function () {
+
+    $should_load_blockui = false;
+
+
+    if (wp_script_is('awf', 'enqueued') || wp_script_is('yith-ywar-frontend', 'enqueued')) {
+        $should_load_blockui = true;
+    }
+
+    if ($should_load_blockui) {
+        if (!wp_script_is('jquery-blockui', 'registered')) {
+            wp_register_script(
+                'jquery-blockui',
+                plugins_url('woocommerce/assets/js/jquery-blockui/jquery.blockUI.min.js'),
+                array('jquery'),
+                '2.70',
+                true
+            );
+        }
+
+        if (!wp_script_is('jquery-blockui', 'enqueued')) {
+            wp_enqueue_script('jquery-blockui');
+        }
+    }
+}, 5);
+
+
+add_filter( 'woocommerce_account_menu_items', 'add_cart_tab_to_my_account', 50 );
+function add_cart_tab_to_my_account( $items ) {
+    $items['my-cart'] = 'سبد خرید';
+    return $items;
 }
 
-// تغییر آدرس ثبت‌نام ووکامرس
-add_action('template_redirect', 'custom_registration_redirect');
-function custom_registration_redirect() {
-    if (is_account_page() && isset($_GET['action']) && $_GET['action'] === 'register') {
-        wp_redirect(site_url('/lms-login/')); // آدرس صفحه سفارشی شما
-        exit;
-    }
+
+add_action( 'woocommerce_account_my-cart_endpoint', 'my_account_cart_content' );
+function my_account_cart_content() {
+    echo '<h2>سبد خرید</h2>';
+    echo do_shortcode('[woocommerce_cart]');
 }
-*/
+
+// اضافه کردن فیلد teacher به REST API محصولات
+add_filter( 'woocommerce_rest_product_schema', function( $schema ) {
+    $schema['properties']['teacher'] = array(
+        'description' => __( 'Teachers terms.', 'textdomain' ),
+        'type'        => 'array',
+        'context'     => array( 'view', 'edit' ),
+        'items'       => array(
+            'type' => 'object',
+            'properties' => array(
+                'id'   => array( 'type' => 'integer' ),
+                'name' => array( 'type' => 'string' ),
+                'slug' => array( 'type' => 'string' ),
+            ),
+        ),
+    );
+    return $schema;
+});
+
+// نمایش teacher داخل response
+add_filter( 'woocommerce_rest_prepare_product_object', function( $response, $object, $request ) {
+    $terms = wp_get_post_terms( $object->get_id(), 'teacher' );
+    $data = array();
+    foreach ( $terms as $term ) {
+        $data[] = array(
+            'id'   => $term->term_id,
+            'name' => $term->name,
+            'slug' => $term->slug,
+        );
+    }
+    $response->data['teacher'] = $data;
+    return $response;
+}, 10, 3 );
+
+// ذخیره teacher از طریق API
+add_action( 'woocommerce_rest_insert_product_object', function( $object, $request, $creating ) {
+    if ( isset( $request['teacher'] ) && is_array( $request['teacher'] ) ) {
+        $ids = array_map( function( $term ) {
+            return is_array( $term ) && isset( $term['id'] ) ? intval( $term['id'] ) : intval( $term );
+        }, $request['teacher'] );
+
+        wp_set_post_terms( $object->get_id(), $ids, 'teacher' );
+    }
+}, 10, 3 );
+
+
+
+// اجازه فیلتر محصولات بر اساس taxonomy=teacher در wc/v3
+add_filter('woocommerce_rest_product_object_query', function($args, $request){
+  $teacher      = $request->get_param('teacher');       // slug, comma-separated
+  $teacher_term = $request->get_param('teacher_term');  // term_id, comma-separated
+
+  $tax_query = isset($args['tax_query']) ? $args['tax_query'] : [];
+
+  if (!empty($teacher)) {
+    $tax_query[] = [
+      'taxonomy' => 'teacher',
+      'field'    => 'slug',
+      'terms'    => array_map('trim', explode(',', $teacher)),
+      'operator' => 'IN',
+    ];
+  }
+
+  if (!empty($teacher_term)) {
+    $tax_query[] = [
+      'taxonomy' => 'teacher',
+      'field'    => 'term_id',
+      'terms'    => array_map('intval', array_map('trim', explode(',', $teacher_term))),
+      'operator' => 'IN',
+    ];
+  }
+
+  if (!empty($tax_query)) {
+    $args['tax_query'] = $tax_query;
+  }
+  return $args;
+}, 10, 2);
+
 
 add_action('admin_footer', 'add_custom_button_to_products_page');
 function add_custom_button_to_products_page() {
@@ -35,11 +228,13 @@ function add_custom_button_to_products_page() {
     <script type="text/javascript">
         var tamshopIds = []; // آرایه برای ذخیره tamshop-product-id
         var shopProductIds = [];
+        var shopProductsDetails = {};
         var tamshopCatIds = [];
+        var tamshopTeacherIds = [];
         var hasNewProduct = false;
         var addedProduct = 0;
-        let tamshopAttr = {};
-        const token = btoa("ck_f92acec278157ab36d8fd804322801e517a2a14d:cs_6526bfdff3b0afcd441a17f00431d7e9d52432f9");
+        
+        const token = btoa("ck_9f4beb4f30c7ff4d7fe458035da45274cf1272bf:cs_2dabbcd8423ea8d632269cde1b2118c251b8dacc");
         // Function to get product properties
         
         jQuery(document).ready(function ($) {
@@ -62,7 +257,7 @@ function add_custom_button_to_products_page() {
                 });
             }
             // Add the custom button at the end of the buttons section
-            const customButton = $('<a href="<?php echo admin_url("admin-post.php?action=add_new_woocommerce_product"); ?>" id="tamshop-update-product-button" class="page-title-action custom-action-button">افزودن محصولات جدید تامشاپ</a>');
+            const customButton = $('<a href="<?php echo admin_url("admin-post.php?action=add_new_woocommerce_product"); ?>" id="tamshop-update-product-button" class="page-title-action custom-action-button">افزودن و بروزرسانی محصولات تام‌یار</a>');
             $('.wrap .page-title-action:last').after(customButton);
             
             // Handle button click
@@ -95,6 +290,27 @@ function add_custom_button_to_products_page() {
                     });
                 });
                 
+                //Get All Of Teachers Taxonomies  in Woocommerce
+                var wcGettamshopTeachersIds_settings = {
+                  "url": "https://tamyar.ir/wp-json/wp/v2/teacher",
+                  "method": "GET",
+                  "timeout": 0,
+                  "headers": {
+                    "Authorization": "Basic " + token
+                  },
+                  data: {
+                    per_page: 50, // Set to the maximum value for the number of products per page (default is usually 10)
+                    page: 1 // Start from page 1
+                  }
+                };
+                $.ajax(wcGettamshopTeachersIds_settings).done(function (wcGettamshopTeachersIds_response) {
+                    wcGettamshopTeachersIds_response.forEach(function (product_teacher) {
+                        var key = product_teacher.tamshop_product_teacher_id;
+                        var value = product_teacher.id;
+                       tamshopTeacherIds.push({ [key]: value });
+                    });
+                });
+                //console.log(tamshopTeacherIds);
                 var wcGettamshopIds_settings = {
                     url: "https://tamyar.ir/wp-json/wc/v3/products",
                     method: "GET",
@@ -143,12 +359,34 @@ function add_custom_button_to_products_page() {
                             };
                             const getShopProducts_response = await callApi(getShopProducts_settings.url, getShopProducts_settings.method, getShopProducts_settings.headers, getShopProducts_settings.data);
                             //console.log("Next API getShopProducts_response:", getShopProducts_response);
-                            for(i = 0;i <= getShopProducts_response.data.length;i++){
-                                if(i < getShopProducts_response.data.length){
                                     // ساختن آرایه shopProductIds از پاسخ API
                                 shopProductIds = getShopProducts_response.data.map(function (product) {
                                     return product['fldPkProduct'];
                                 });
+                                
+                                shopProductsDetails = getShopProducts_response.data.map(function(product) {
+                                    let D_regularPrice = product['fldAmountTamPriceAdmin'].toString();
+                                    let D_tamcoinPercentage = parseFloat(product['fldCoinPercentage']);
+                                    let D_tamcoinToPrice = Math.floor(((D_tamcoinPercentage * D_regularPrice) / 100) / 10000) * 10000;
+                                    
+                                    return {
+                                        'fldPkProduct': product['fldPkProduct'],
+                                        'fldProductTitle': product['fldProductTitle'],
+                                        'fldAmountTamPriceAdmin': product['fldAmountTamPriceAdmin'],
+                                        'fldProductImageUrl': product['fldProductImageUrl'],
+                                        'fldFKFirstCategory': product['fldFKFirstCategory']
+                                                                .split(',')
+                                                                .map(cat => cat.trim())
+                                                                .filter(cat => cat.length > 0),
+                                        'fldPkDetailProduct': product['fldPkDetailProduct'],
+                                        'fldCoinPercentage': product['fldCoinPercentage'],
+                                        'tamcoinToPrice': D_tamcoinToPrice
+                                    };
+                                });
+                                //console.log(shopProductsDetails);
+                            
+                            for(i = 0;i <= getShopProducts_response.data.length;i++){
+                                if(i < getShopProducts_response.data.length){
                                     var product = getShopProducts_response.data[i];  // آیتم جاری از آرایه getShopProducts_response.data
                                     let tamshopId = product['fldPkProduct'];
                                     if ($.inArray(Number(getShopProducts_response.data[i]['fldPkProduct']), tamshopIds.map(Number)) == -1) {
@@ -159,10 +397,18 @@ function add_custom_button_to_products_page() {
                                         let title = product['fldProductTitle'];
                                         let regularPrice = product['fldAmountTamPriceAdmin'].toString();
                                         let featureImg = product['fldProductImageUrl'];
-                                        let category = product['fldFKFirstCategory'];
+                                        let category = product['fldFKFirstCategory']
+                                                                .split(',')
+                                                                .map(cat => cat.trim())
+                                                                .filter(cat => cat.length > 0); // حذف مقادیر خالی
+                                        let wc_categories = [];
+                                        
+                                        let teacher = product['fldFkSellerCo'];
+                                        //console.log(teacher);
+                                        let wc_teachers = [];
                                         let productDetailsId = product['fldPkDetailProduct'];
-                                        let tamcoinPercentage = parseInt(product['fldCoinPercentage']);
-                                        let tamcoinToPrice = (tamcoinPercentage * regularPrice) / 100;
+                                        let tamcoinPercentage = parseFloat(product['fldCoinPercentage']);
+                                        let tamcoinToPrice = Math.floor(((tamcoinPercentage * regularPrice) / 100) / 10000) * 10000;
                                         
                                         var productDetails_settings = {
                                             "url": "https://api.tamland.ir/api/shop/GetProdDetail/"+productDetailsId,
@@ -171,13 +417,47 @@ function add_custom_button_to_products_page() {
                                         };
                                         
                                         const productDetails_response = await callApi(productDetails_settings.url, productDetails_settings.method);
-                                        console.log("Next API productDetails_response:", productDetails_response);
+                                        //console.log("Next API productDetails_response:", productDetails_response);
                                         let productDescription = productDetails_response[0]?.fldProductDescription;
                                         
-                                        let foundObject = tamshopCatIds.find(obj => obj.hasOwnProperty(category));
-                                        let wc_cat_id = foundObject ? foundObject[category] : 0;
+                                        category.forEach(cat => {
+                                                let foundObject = tamshopCatIds.find(obj => obj.hasOwnProperty(cat));
+                                                if (foundObject) {
+                                                    let catId = parseInt(foundObject[cat]); // تبدیل قطعی به عدد
+                                                    //console.log("cat:", cat, "mapped ID:", catId, "type:", typeof catId);
+                                                    if (!isNaN(catId)) {
+                                                        wc_categories.push({ id: catId });
+                                                    }else{
+                                                        wc_categories.push({ id: 0 });
+                                                    }
+                                                }
+                                            });
                                         
-                                        tamshopAttr = {};
+                                        if (wc_categories.length === 0) {
+                                            wc_categories.push({ id: 0 });
+                                        } 
+                                        //console.log(wc_categories);
+                                        if (Array.isArray(teacher)) {
+                                            teacher.forEach(teach => {
+                                                let foundObject = tamshopTeacherIds.find(obj => obj.hasOwnProperty(teach));
+                                                if (foundObject) {
+                                                    let teachId = parseInt(foundObject[teach]);
+                                                    wc_teachers.push({ id: isNaN(teachId) ? 0 : teachId });
+                                                }
+                                            });
+                                        } else {
+                                            let foundObject = tamshopTeacherIds.find(obj => obj.hasOwnProperty(teacher));
+                                            if (foundObject) {
+                                                let teachId = parseInt(foundObject[teacher]);
+                                                wc_teachers.push({ id: isNaN(teachId) ? 0 : teachId });
+                                            }
+                                        }
+
+
+                                        if (wc_teachers.length === 0) {
+                                            wc_teachers.push({ id: 0 });
+                                        } 
+
                                         var ProductPropertySettings = {
                                             url: "https://api.tamland.ir/api/shop/getProductProperty/" + tamshopId + "/-1",
                                             method: "GET",
@@ -186,15 +466,83 @@ function add_custom_button_to_products_page() {
                                         $("#isUpdating p").text("در حال افزودن محصول " + title);
                                         const ProductPropertyResponse = await callApi(ProductPropertySettings.url, ProductPropertySettings.method);
                                         //console.log("Next API ProductPropertyResponse:", ProductPropertyResponse);
+
+                                        let tamshopAttr = {
+                                            size: [],
+                                            color: [],
+                                            other: {}
+                                        };
+                                        
+                                        // مقداردهی اولیه به صورت Set برای حذف خودکار مقادیر تکراری
+                                        tamshopAttr.size  = new Set(tamshopAttr.size || []);
+                                        tamshopAttr.color = new Set(tamshopAttr.color || []);
+                                        tamshopAttr.other = tamshopAttr.other || {};
                                         ProductPropertyResponse.forEach(function(property) {
-                                            if (property['fldFkProperty'] == 1) {
-                                                tamshopAttr["size"] = property['fldPropertyValueTitle'].split(',');
-                                            } else if (property['fldFkProperty'] == 2) {
-                                                tamshopAttr["color"] = property['fldPropertyValueTitle'].split(',');
-                                            }
+                                            let rawValue = property.fldPropertyValueTitle ? String(property.fldPropertyValueTitle).trim() : "";
+                                            
+                                            // جدا کردن مقادیر با ویرگول
+                                            let values = rawValue ? rawValue.split(",").map(v => v.trim()).filter(v => v) : [];
+                                        
+                                            values.forEach(value => {
+                                                if (property.fldFkProperty == 1) {
+                                                    tamshopAttr.size.add(value);
+                                                } 
+                                                else if (property.fldFkProperty == 2) {
+                                                    tamshopAttr.color.add(value);
+                                                } 
+                                                else {
+                                                    if (!tamshopAttr.other[property.fldFkProperty]) {
+                                                        tamshopAttr.other[property.fldFkProperty] = {
+                                                            name: property.fldTitleProperty,
+                                                            options: new Set()
+                                                        };
+                                                    }
+                                                    tamshopAttr.other[property.fldFkProperty].options.add(value);
+                                                }
+                                            });
                                         });
                                         
-                                        if($.isEmptyObject(tamshopAttr)){
+                                        // در نهایت اگر نیاز داری دوباره به آرایه تبدیل کنی:
+                                        tamshopAttr.size  = Array.from(tamshopAttr.size);
+                                        tamshopAttr.color = Array.from(tamshopAttr.color);
+                                        
+                                        Object.keys(tamshopAttr.other).forEach(key => {
+                                            tamshopAttr.other[key].options = Array.from(tamshopAttr.other[key].options);
+                                        });
+                                                                                
+                                        // حالا attributes رو بسازیم
+                                        let attributes = [
+                                            {
+                                                id: 1,
+                                                name: "رنگ",
+                                                position: 0,
+                                                visible: false,
+                                                variation: true,
+                                                options: Array.isArray(tamshopAttr.color) ? tamshopAttr.color.filter(Boolean) : [],
+                                            },
+                                            {
+                                                id: 5,
+                                                name: "سایز",
+                                                position: 1,
+                                                visible: false,
+                                                variation: true,
+                                                options: Array.isArray(tamshopAttr.size) ? tamshopAttr.size.filter(Boolean) : [],
+                                            }
+                                        ];
+                                        // بقیه ویژگی‌ها رو اضافه کن
+                                        let positionCounter = 2;
+                                        
+                                        for (let key in tamshopAttr.other) {
+                                            attributes.push({
+                                                name: tamshopAttr.other[key].name,
+                                                position: positionCounter++,
+                                                visible: true,
+                                                variation: false,
+                                                options: Array.isArray(tamshopAttr.other[key].options) ? tamshopAttr.other[key].options.filter(Boolean) : []
+                                            });
+                                        }
+                                        //console.log(tamshopAttr);
+                                        if (!tamshopAttr.color.length && !tamshopAttr.size.length) {
                                                         
                                                         var wc_settings = {
                                                           "url": "https://tamyar.ir/wp-json/wc/v3/products",
@@ -209,11 +557,9 @@ function add_custom_button_to_products_page() {
                                                             "type": "simple",
                                                             "regular_price": regularPrice,
                                                             "description": productDescription,
-                                                            "categories": [
-                                                              {
-                                                                "id": wc_cat_id
-                                                              }
-                                                            ],
+                                                            "categories": wc_categories,
+                                                            "teacher": wc_teachers,
+                                                            "attributes": attributes,
                                                             "meta_data": [
                                                               {
                                                                 "key": "tamshop-product-id",
@@ -252,29 +598,9 @@ function add_custom_button_to_products_page() {
                                                             "name": title,
                                                             "type": "variable",
                                                             "description": productDescription,
-                                                            "categories": [
-                                                              {
-                                                                "id": wc_cat_id
-                                                              }
-                                                            ],
-                                                            "attributes": [
-                                                                {
-                                                                  "id": 1,
-                                                                  "name": "رنگ",
-                                                                  "position": 0,
-                                                                  "visible": false,
-                                                                  "variation": true,
-                                                                  "options": tamshopAttr.color ? tamshopAttr.color : '',
-                                                                },
-                                                                {
-                                                                  "id": 5,
-                                                                  "name": "سایز",
-                                                                  "position": 1,
-                                                                  "visible": false,
-                                                                  "variation": true,
-                                                                  "options": tamshopAttr.size ? tamshopAttr.size : '',
-                                                                }
-                                                              ],
+                                                            "categories": wc_categories,
+                                                            "teacher": wc_teachers,
+                                                            "attributes": attributes,
                                                             "meta_data": [
                                                               {
                                                                 "key": "tamshop-product-id",
@@ -348,7 +674,7 @@ function add_custom_button_to_products_page() {
                                     $(this).closest('.notice').fadeOut();
                                 });
                             }
-
+                            
                             async function fetchAllProducts(page = 1, products = []) {
                               const res = await fetch(`/wp-json/wc/v3/products?per_page=100&page=${page}`, {
                                 credentials: 'include',
@@ -366,6 +692,62 @@ function add_custom_button_to_products_page() {
                               return fetchAllProducts(page + 1, products.concat(current));
                             }
                             
+                            function getSelectedProductIds() {
+                              const checkboxes = document.querySelectorAll('table.wp-list-table tbody th.check-column input[type="checkbox"]:checked');
+                              return Array.from(checkboxes).map(cb => cb.value); // value همون product_id هست
+                            }
+                            
+                            async function fetchSelectedProducts() {
+                              const ids = getSelectedProductIds();
+                            
+                              if (ids.length === 0) {
+                                console.log("هیچ محصولی انتخاب نشده");
+                                return [];
+                              }
+                            
+                              // چون wc/v3/products?id=1,2,3 ساپورت نمی‌کنه باید یکی یکی بگیری
+                              const requests = ids.map(id => 
+                                fetch(`/wp-json/wc/v3/products/${id}`, {
+                                  credentials: 'include',
+                                  headers: { 
+                                    'Content-Type': 'application/json',
+                                    "Authorization": "Basic " + token 
+                                  }
+                                }).then(res => res.json())
+                              );
+                            
+                              return Promise.all(requests);
+                            }
+
+                            async function fetchCategories(catnumber, token) {
+                              try {
+                                const response = await fetch('/wp-json/wp/v2/product_cat?per_page=100', {
+                                  credentials: 'include',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Basic ' + token
+                                  }
+                                });
+                            
+                                const categories = await response.json();
+                            
+                                const matchedCategory = categories.find(cat =>
+                                  cat.tamshop_product_cat_id == catnumber
+                                );
+                            
+                                if (matchedCategory) {
+                                  return matchedCategory.id;
+                                } else {
+                                  return null; // اگر چیزی پیدا نشد
+                                }
+                            
+                              } catch (error) {
+                                console.error('خطا در دریافت دسته‌بندی‌ها:', error);
+                                return null;
+                              }
+                            }
+
+                            
                             async function fetchProductVariations(productId, page = 1, variations = []) {
                               const res = await fetch(`/wp-json/wc/v3/products/${productId}/variations?per_page=100&page=${page}`, {
                                 credentials: 'include',
@@ -382,8 +764,76 @@ function add_custom_button_to_products_page() {
                             
                               return fetchProductVariations(productId, page + 1, variations.concat(current));
                             }
+                            /**
+                             * Old updateProductData
+                             * 
+                            async function updateProductData(productId, stockStatus, name, price, imageUrl, categoryId, maxCoin, isVariation, parentId) {
+                                let payload = {};
+                              // ساخت payload داینامیک
+                              payload = {
+                                stock_status: stockStatus,
+                                manage_stock: false
+                              };
                             
-                            async function updateStockStatus(productId, status, isVariation = false, parentId = null) {
+                              if (name !== null) payload.name = name;
+                              if (price !== null) payload.regular_price = price.toString();
+                              let metaData = [];
+                              
+                                if (maxCoin !== null && maxCoin !== undefined) {
+                                    metaData.push({
+                                        key: "max_prctamcoins_required",
+                                        value: maxCoin.toString()
+                                    });
+                                }
+                              if (imageUrl !== null) {
+                                metaData.push({
+                                   "key": "_harikrutfiwu_url",
+                                    "value": {
+                                        "img_url": "https://stream.tamland.ir/tamland/1402/shop/"+imageUrl,
+                                        "width": "",
+                                        "height": ""
+                                    }
+                                  });
+                              }
+                              
+                              if (metaData.length > 0) {
+                                payload.meta_data = metaData;
+                              }
+    
+                              if (categoryId !== null) {
+                                payload.categories = categoryId;
+                              }
+                              
+                            const url = isVariation
+                                ? `/wp-json/wc/v3/products/${parentId}/variations/${productId}`
+                                : `/wp-json/wc/v3/products/${productId}`;
+                                
+                              try {
+                                   //console.log(JSON.stringify(payload));
+                                const res = await fetch(url, {
+                                  method: 'PUT',
+                                  credentials: 'include',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Basic ' + token
+                                  },
+                                  body: JSON.stringify(payload)
+                                });
+                            
+                                if (!res.ok) {
+                                  const error = await res.text();
+                                  console.error(`❌ Failed to update product ${productId}:`, error);
+                                } else {
+                                  console.log(`✅ Product ${productId} updated successfully`);
+                                  
+                                }
+                              } catch (err) {
+                                console.error(`❌ Error updating product ${productId}:`, err);
+                              }
+                            }*/
+
+
+                            /*async function updateStockStatus(productId, status, isVariation = false, parentId = null) {
                               const url = isVariation
                                 ? `/wp-json/wc/v3/products/${parentId}/variations/${productId}`
                                 : `/wp-json/wc/v3/products/${productId}`;
@@ -407,53 +857,353 @@ function add_custom_button_to_products_page() {
                                 const error = await res.text();
                                 console.error(`❌ Failed to update stock for ${productId}`, error);
                               }
+                            }*/
+                            async function updateProductData(productId, stockStatus, name, price, imageUrl, categoryId, maxCoin, isVariation, parentId, attributes) {
+                                let payload = {
+                                    stock_status: stockStatus,
+                                    manage_stock: false
+                                };
+                            
+                                // عنوان
+                                if (name !== null) payload.name = name;
+                            
+                                // قیمت
+                                if (price !== null) payload.regular_price = price.toString();
+                            
+                                // متا دیتا
+                                let metaData = [];
+                                if (maxCoin !== null && maxCoin !== undefined) {
+                                    metaData.push({
+                                        key: "max_prctamcoins_required",
+                                        value: maxCoin.toString()
+                                    });
+                                }
+                                if (imageUrl !== null) {
+                                    metaData.push({
+                                        "key": "_harikrutfiwu_url",
+                                        "value": {
+                                            "img_url": "https://stream.tamland.ir/tamland/1402/shop/" + imageUrl,
+                                            "width": "",
+                                            "height": ""
+                                        }
+                                    });
+                                }
+                                if (metaData.length > 0) {
+                                    payload.meta_data = metaData;
+                                }
+                            
+                                // دسته‌بندی فقط برای محصول ساده
+                                if (!isVariation && categoryId !== null) {
+                                    payload.categories = categoryId;
+                                }
+                            
+                                // ویژگی‌ها
+                                if (attributes && attributes.length > 0) {
+                                    payload.attributes = attributes;
+                                }
+                                
+                                
+                                
+                                if(isVariation){
+                                    // آدرس API
+                                    const parent_url = `/wp-json/wc/v3/products/${parentId}`;
+                                
+                                    try {
+                                        const parent_res = await fetch(parent_url, {
+                                            method: 'PUT',
+                                            credentials: 'include',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': 'Basic ' + token
+                                            },
+                                            body: JSON.stringify(payload)
+                                        });
+                                
+                                        if (!parent_res.ok) {
+                                            const error = await parent_res.text();
+                                            console.error(`❌ Failed to update product ${parentId}:`, error);
+                                        } else {
+                                            console.log(`✅ Product ${parentId} updated successfully`);
+                                        }
+                                    } catch (err) {
+                                        console.error(`❌ Error updating product ${parentId}:`, err);
+                                    }
+                                
+                                    const url = `/wp-json/wc/v3/products/${parentId}/variations/${productId}`;
+                            
+                                    try {
+                                        const res = await fetch(url, {
+                                            method: 'PUT',
+                                            credentials: 'include',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': 'Basic ' + token
+                                            },
+                                            body: JSON.stringify(payload)
+                                        });
+                                
+                                        if (!res.ok) {
+                                            const error = await res.text();
+                                            console.error(`❌ Failed to update product ${productId}:`, error);
+                                        } else {
+                                            console.log(`✅ Product ${productId} updated successfully`);
+                                        }
+                                    } catch (err) {
+                                        console.error(`❌ Error updating product ${productId}:`, err);
+                                    }
+                                }else{
+                                    // آدرس API
+                                    const url = `/wp-json/wc/v3/products/${productId}`;
+                                
+                                    try {
+                                        const res = await fetch(url, {
+                                            method: 'PUT',
+                                            credentials: 'include',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': 'Basic ' + token
+                                            },
+                                            body: JSON.stringify(payload)
+                                        });
+                                
+                                        if (!res.ok) {
+                                            const error = await res.text();
+                                            console.error(`❌ Failed to update product ${productId}:`, error);
+                                        } else {
+                                            console.log(`✅ Product ${productId} updated successfully`);
+                                        }
+                                    } catch (err) {
+                                        console.error(`❌ Error updating product ${productId}:`, err);
+                                    }
+                                }
+                                
                             }
                             
+                            /**
+                             * Old processAndUpdateProduct
+                             * 
+                             * 
+                            async function processAndUpdateProduct(item, parentId = null, isVariation = false) {
+                                const tamMeta = item.meta_data?.find(meta => meta.key === 'tamshop-product-id');
+                                if (!tamMeta) return;
                             
+                                const tamId = parseInt(tamMeta.value);
+                                let stock = null, newtitle = null, newprice = null, newimg = null, newcoin = null;
+                                let needsUpdate = false;
+                            
+                                // بررسی موجودی
+                                if (!shopProductIds.includes(tamId)) {
+                                    console.log(`❌ NOT IN API → Marking out of stock:`, tamId);
+                                    stock = 'outofstock';
+                                    needsUpdate = true;
+                                } else {
+                                    console.log(`✅ FOUND IN API → Marking in stock:`, tamId);
+                                    stock = 'instock';
+                                    needsUpdate = true;
+                                }
+                            
+                                // پیدا کردن محصول در دیتای API
+                                let matchedProduct = shopProductsDetails.find(p => p.fldPkProduct === tamId);
+                            
+                                if (matchedProduct) {
+                                    // بررسی عنوان
+                                    if (item.name !== matchedProduct.fldProductTitle) {
+                                        newtitle = matchedProduct.fldProductTitle;
+                                        needsUpdate = true;
+                                    }
+                            
+                                    // بررسی قیمت
+                                    if (item.regular_price !== matchedProduct.fldAmountTamPriceAdmin) {
+                                        newprice = matchedProduct.fldAmountTamPriceAdmin;
+                                        needsUpdate = true;
+                                    }
+                            
+                                    // بررسی تصویر
+                                    let imgMeta = item.meta_data?.find(meta => meta.key === '_harikrutfiwu_url');
+                                    let expectedImg = "https://stream.tamland.ir/tamland/1402/shop/" + matchedProduct.fldProductImageUrl;
+                            
+                                    if (!imgMeta || imgMeta.value.img_url !== expectedImg) {
+                                        newimg = matchedProduct.fldProductImageUrl;
+                                        needsUpdate = true;
+                                    }
+                            
+                                    // بررسی کوین
+                                    let coinMeta = item.meta_data?.find(meta => meta.key === 'max_prctamcoins_required');
+                                    if (!coinMeta || coinMeta.value !== matchedProduct.tamcoinToPrice) {
+                                        newcoin = matchedProduct.tamcoinToPrice;
+                                        needsUpdate = true;
+                                    }
+                                }
+                            
+                                // فقط برای محصول ساده دسته‌بندی لازم هست
+                                let wc_categories = null;
+                                if (!isVariation && matchedProduct) {
+                                    wc_categories = [];
+                                    matchedProduct.fldFKFirstCategory.forEach(cat => {
+                                        let foundObject = tamshopCatIds.find(obj => obj.hasOwnProperty(cat));
+                                        if (foundObject) {
+                                            let catId = parseInt(foundObject[cat]);
+                                            wc_categories.push({ id: !isNaN(catId) ? catId : 0 });
+                                        }
+                                    });
+                                }
+                            
+                                // آپدیت محصول در ووکامرس
+                                if (needsUpdate) {
+                                    await updateProductData(
+                                        item.id,
+                                        stock,
+                                        newtitle,
+                                        newprice,
+                                        newimg,
+                                        wc_categories,
+                                        newcoin,
+                                        isVariation,
+                                        parentId
+                                    );
+                                    updatedCount++;
+                                }
+                            }
+                            */
+                            
+                            async function processAndUpdateProduct(item, parentId = null, isVariation = false) {
+                                    const tamMeta = item.meta_data?.find(meta => meta.key === 'tamshop-product-id');
+                                    if (!tamMeta) return;
+                                
+                                    const tamId = parseInt(tamMeta.value);
+                                    let stock = null, newtitle = null, newprice = null, newimg = null, newcoin = null, newAttributes = null, variationId = null;
+                                    let needsUpdate = false;
+                                
+                                    // بررسی موجودی
+                                    if (!shopProductIds.includes(tamId)) {
+                                        console.log(`❌ NOT IN API → Marking out of stock:`, tamId);
+                                        stock = 'outofstock';
+                                        needsUpdate = true;
+                                    } else {
+                                        console.log(`✅ FOUND IN API → Marking in stock:`, tamId);
+                                        stock = 'instock';
+                                        needsUpdate = true;
+                                    }
+                                
+                                    // پیدا کردن محصول در دیتای API
+                                    let matchedProduct = shopProductsDetails.find(p => p.fldPkProduct === tamId);
+                                
+                                    if (matchedProduct) {
+                                        // بررسی عنوان
+                                        if (item.name !== matchedProduct.fldProductTitle) {
+                                            newtitle = matchedProduct.fldProductTitle;
+                                            needsUpdate = true;
+                                        }
+                                
+                                        
+                                        if(isVariation){
+                                            const variations = await fetchProductVariations(parentId);
+                                            for (const variation of variations) {
+                                                variationId = variation.id;
+                                                if (variation.regular_price !== matchedProduct.fldAmountTamPriceAdmin) {
+                                                    newprice = matchedProduct.fldAmountTamPriceAdmin;
+                                                    needsUpdate = true;
+                                                }
+                                            }
+                                        }else{
+                                            // بررسی قیمت
+                                            if (item.regular_price !== matchedProduct.fldAmountTamPriceAdmin) {
+                                                newprice = matchedProduct.fldAmountTamPriceAdmin;
+                                                needsUpdate = true;
+                                            }
+                                        }
+                                
+                                        // بررسی تصویر
+                                        let imgMeta = item.meta_data?.find(meta => meta.key === '_harikrutfiwu_url');
+                                        let expectedImg = "https://stream.tamland.ir/tamland/1402/shop/" + matchedProduct.fldProductImageUrl;
+                                
+                                        if (!imgMeta || imgMeta.value.img_url !== expectedImg) {
+                                            newimg = matchedProduct.fldProductImageUrl;
+                                            needsUpdate = true;
+                                        }
+                                
+                                        // بررسی کوین
+                                        let coinMeta = item.meta_data?.find(meta => meta.key === 'max_prctamcoins_required');
+                                        if (!coinMeta || coinMeta.value !== matchedProduct.tamcoinToPrice) {
+                                            newcoin = matchedProduct.tamcoinToPrice;
+                                            needsUpdate = true;
+                                        }
+                                // بررسی ویژگی‌ها (attributes)
+                                        if (matchedProduct.fldAttributes && matchedProduct.fldAttributes.length > 0) {
+                                            let wcAttributes = matchedProduct.fldAttributes.map(attr => ({
+                                                id: parseInt(attr.id),
+                                                name: attr.name,
+                                                option: attr.value
+                                            }));
+                                
+                                            // مقایسه ویژگی‌ها با محصول فعلی
+                                            let currentAttrs = item.attributes || [];
+                                            let diff = JSON.stringify(currentAttrs) !== JSON.stringify(wcAttributes);
+                                            if (diff) {
+                                                newAttributes = wcAttributes;
+                                                needsUpdate = true;
+                                            }
+                                        }
+                                    }
+                                
+                                    // دسته‌بندی فقط برای محصول ساده
+                                    let wc_categories = null;
+                                    if (!isVariation && matchedProduct) {
+                                        wc_categories = [];
+                                        matchedProduct.fldFKFirstCategory.forEach(cat => {
+                                            let foundObject = tamshopCatIds.find(obj => obj.hasOwnProperty(cat));
+                                            if (foundObject) {
+                                                let catId = parseInt(foundObject[cat]);
+                                                wc_categories.push({ id: !isNaN(catId) ? catId : 0 });
+                                            }
+                                        });
+                                    }
+                                
+                                    // اگر نیاز به آپدیت بود
+                                    if (needsUpdate) {
+                                        await updateProductData(
+                                            variationId,
+                                            stock,
+                                            newtitle,
+                                            newprice,
+                                            newimg,
+                                            wc_categories,
+                                            newcoin,
+                                            isVariation,
+                                            parentId,
+                                            newAttributes
+                                        );
+                                    }
+                            }
+
                             async function syncInventory() {
-                              const allProducts = await fetchAllProducts();
+                              //const allProducts = await fetchAllProducts();
+                              const selectedProducts = await fetchSelectedProducts();
+                                //console.log(selectedProducts);
                               let updatedCount = 0;
-                              for (const product of allProducts) {
+                              for (const product of selectedProducts) {
+                                  let stock = null;
+                                let newtitle = null;
+                                let newprice = null;
+                                let newcoin = null;
+                                let newimg = null;
+                                let productCat = null;
+                                let needsUpdate = false;
                                   $("#isUpdating p").text("در حال بروزرسانی" + product.id + "- " + product.name);
                                 if (product.type === "variable") {
-                                    //console.log('yes is variable');
-                                  const variations = await fetchProductVariations(product.id);
-                                  for (const variation of variations) {
-                                    const tamMeta = product.meta_data?.find(meta => meta.key === 'tamshop-product-id');
-                                    if (!tamMeta) continue;
-                                    //console.log("tamMeta: "+ tamMeta);
-                                    const tamId = parseInt(tamMeta.value);
-                                    //console.log("tamId: "+ tamId);
-                                    if (!shopProductIds.includes(tamId)) {
-                                      //console.log(`❌ NOT IN API → Marking out of stock:`, tamId);
-                                      await updateStockStatus(variation.id, 'outofstock', true, product.id);
-                                      updatedCount++;
-                                    } else {
-                                      //console.log(`✅ FOUND IN API → Marking in stock:`, tamId);
-                                      await updateStockStatus(variation.id, 'instock', true, product.id);
-                                    }
-                                  }
+                                    await processAndUpdateProduct(product, product.id, true);
+                                    // ورییشن‌ها رو بگیر
                                 } else {
-                                  const tamMeta = product.meta_data?.find(meta => meta.key === 'tamshop-product-id');
-                                  if (!tamMeta) continue;
-                            
-                                  const tamId = parseInt(tamMeta.value);
-                            
-                                  if (!shopProductIds.includes(tamId)) {
-                                    //console.log(`❌ NOT IN API → Marking out of stock:`, tamId);
-                                    await updateStockStatus(product.id, 'outofstock');
-                                    updatedCount++;
-                                  } else {
-                                    //console.log(`✅ FOUND IN API → Marking in stock:`, tamId);
-                                    await updateStockStatus(product.id, 'instock');
-                                  }
+                                    // محصول ساده
+                                    await processAndUpdateProduct(product, null, false);
                                 }
+
                               }
                             
                               alert(`همگام‌سازی موجودی انجام شد. ${updatedCount} مورد به خارج از موجودی تغییر یافت.`);
-                              setTimeout(function () {
+                              /*setTimeout(function () {
                                         window.location.reload();
-                                    }, 5000);
+                                    }, 5000);*/
                             }
                             
                             syncInventory();
@@ -715,11 +1465,11 @@ if (!empty($response_json['data']) && is_array($response_json['data'])) {
 }
 
 }
-
+/*
 // Add a new column to the Orders Table in My Account
 add_filter('woocommerce_my_account_my_orders_columns', 'add_lms_order_id_column');
 function add_lms_order_id_column($columns) {
-    $columns['lms_order_id'] = __('شناسه سفارش در تامشاپ', 'textdomain');
+    $columns['lms_order_id'] = __('شناسه سفارش در تام‌یار', 'textdomain');
     $columns['lms_tracking_code'] = __('کد پیگیری', 'textdomain');
     $columns['lms_tracking_link'] = __('لینک پیگیری', 'textdomain');
     return $columns;
@@ -746,7 +1496,7 @@ function populate_lms_tracking_link_column($order) {
     $lms_tracking_link = $order->get_meta('lms_tracking_link');
     echo $lms_tracking_link ? esc_html('<a href="'.$lms_tracking_link.'">'.__('مشاهده وضعیت پستی', 'textdomain').'</a>') : __('ثبت نشده است', 'textdomain');
 }
-
+*/
 add_filter('woocommerce_rest_pre_insert_product_object', function ($product, $request) {
     $images = $request->get_param('images');
 
@@ -777,6 +1527,44 @@ function add_custom_meta_to_category_api() {
                 $term_id = $object['id'];
                 // Get the custom meta value.
                 $meta_value = get_term_meta( $term_id, 'tamshop-product-cat-id', true ); // Replace 'your_meta_key' with the actual key.
+                return $meta_value;
+            },
+            'schema' => array(
+                'description' => 'Custom meta field description',
+                'type'        => 'string', // Adjust type as needed (e.g., string, array, etc.).
+                'context'     => array( 'view', 'edit' ),
+            ),
+        )
+    );
+    
+    register_rest_field(
+        'product', // The product.
+        'max_prctamcoins_required', // The key that will appear in the API response.
+        array(
+            'get_callback' => function ( $object ) {
+                // Fetch the term ID.
+                $p_id = $object['id'];
+                // Get the custom meta value.
+                $meta_value = get_term_meta( $p_id, 'max_prctamcoins_required', true ); // Replace 'your_meta_key' with the actual key.
+                return $meta_value;
+            },
+            'schema' => array(
+                'description' => 'Custom meta field description',
+                'type'        => 'string', // Adjust type as needed (e.g., string, array, etc.).
+                'context'     => array( 'view', 'edit' ),
+            ),
+        )
+    );
+    
+    register_rest_field(
+        'teacher', // The taxonomy slug.
+        'tamshop_product_teacher_id', // The key that will appear in the API response.
+        array(
+            'get_callback' => function ( $object ) {
+                // Fetch the term ID.
+                $term_id = $object['id'];
+                // Get the custom meta value.
+                $meta_value = get_term_meta( $term_id, 'teacher-lms-id', true ); // Replace 'your_meta_key' with the actual key.
                 return $meta_value;
             },
             'schema' => array(
@@ -830,14 +1618,18 @@ add_action('woocommerce_payment_complete', 'after_payment_gateway', 10, 1);
 function after_payment_gateway($order_id) {
     // Ensure $order is a WC_Order object
     $order = wc_get_order($order_id);
-    print_r($order);
-    if ($order->get_status() == 'processing' || $order->get_status() == 'completed') {
-        // کدهایی که بعد از پرداخت موفق باید اجرا شوند
-        $paymentStatus = 1;
-        error_log("کاربر به صفحه تشکر از خرید بازگشت: سفارش شماره " . $order_id);
+    error_log($order);
+    
+    if ( $order ) {
+        $user_id = $order->get_customer_id();
+        // Or, equivalently, $customer_id = $order->get_user_id();
+    } else {
+        // Handle case where order is not found
+        $user_id = 0; // Or other appropriate handling
     }
-    $user_id = get_current_user_id(); // دریافت شناسه کاربری کاربر فعلی
     $fldUserCo = get_user_meta($user_id, 'fldUserCo', true);
+    error_log('userco is: '.$fldUserCo);
+    error_log('user type: '.gettype($fldUserCo));
     
     // Initialize an array to store product details
     $products = [];
@@ -846,47 +1638,92 @@ function after_payment_gateway($order_id) {
     $items = $order->get_items();
     foreach ($items as $item_id => $item) {
         // Get product ID and quantity
-        $product_id = $item->get_product_id();
-        $product_count = $item->get_quantity();
+        $product = $item->get_product();
+        $product_id = (int) $item->get_product_id();
+        $tamshop_product_id = get_post_meta($product_id, 'tamshop-product-id', true);
+        $product_count = (int) $item->get_quantity();
 
         // Get product variations (attributes)
         $product_variations = [];
-        $variation_data = $item->get_variation_attributes(); // Get selected variations
-        if (!empty($variation_data)) {
-            foreach ($variation_data as $attribute => $value) {
-                $product_variations[] = ucfirst(str_replace('attribute_', '', $attribute)) . ': ' . ucfirst($value);
-            }
+        if ( $product && $product->is_type( 'variation' ) ) {
+            $product_variations = $product->get_variation_attributes();
+            // ادامه‌ی کد شما با استفاده از $variation_attributes
         }
+
         $product_properties = implode(', ', $product_variations); // Convert variations to a string
 
         // Add product details to the $products array
         $products[] = [
-            'ProductId' => $product_id,
+            'ProductId' => $tamshop_product_id,
             'ProductCount' => $product_count,
             'ProductProperties' => $product_properties
         ];
     }
+    if(!empty($order->get_meta('_tamcoin_discount'))){
+        $tamcoin_discount = (int) $order->get_meta('_tamcoin_discount');
+    }else{
+        $tamcoin_discount = 0;
+    }
     
-    $tamcoin_discount = $order->get_meta('_tamcoin_discount');
+    if(!empty($order->get_transaction_id())){
+        $transaction_id = $order->get_transaction_id();
+    }else{
+        $transaction_id = "";
+    }
+    
+    $price = (int)$order->get_total();
+    
+    $billing_address = $order->get_billing_address_1() . ' ' . $order->get_billing_address_2();
+    $shipping_address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
 
+    // مقایسه بین آدرس صورتحساب و حمل و نقل
+    if ($shipping_address && $shipping_address !== $billing_address) {
+        error_log('کاربر تیک ارسال به آدرس حمل‌ونقل را زده است.');
+        $city = $order->get_shipping_city();
+        $postal_code = (string)$order->get_shipping_postcode();
+        $address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
+    } else {
+        error_log('کاربر از همان آدرس صورتحساب استفاده کرده است.');
+        $city = $order->get_billing_city();
+        $postal_code = (string)$order->get_billing_postcode();
+        $address = $order->get_billing_address_1() . ' ' . $order->get_billing_address_2();
+    }
+    
+    $p_d_td = $price - $tamcoin_discount;
+    error_log('Difrent is: '.$p_d_td);
+    error_log('Order Status is: '.$order->get_status());
+    if ($order->get_status() == 'processing' || $order->get_status() == 'completed') {
+        // کدهایی که بعد از پرداخت موفق باید اجرا شوند
+        if( $p_d_td < 0 ){
+            $paymentStatus = 0;
+        }elseif ($p_d_td == $price){
+            $paymentStatus = 1;
+        }elseif (($p_d_td > 0) && ($p_d_td < $price)){
+            $paymentStatus = 2;
+        }
+        
+        //error_log("کاربر به صفحه تشکر از خرید بازگشت: سفارش شماره " . $order_id);
+    }
+    
     // Example: Build the final payload
+    error_log('Tamcoin Discount: '.$tamcoin_discount);
     $payload = [
         'UserCo' => $fldUserCo,
-        'Price' => $order->get_total(),
+        'Price' => $price,
         'OrderId' => $order_id,
         'Tamcoin' => $tamcoin_discount,
-        'TrackingCode' => '', // Add tracking code if available
+        'TrackingCode' => $transaction_id, // Add tracking code if available
         'Transport' => 1, // Replace with actual transport code
         'PaymentStatus' => $paymentStatus, // Replace with actual payment status
-        'City' => $order->get_billing_city(),
-        'PostalCode' => $order->get_billing_postcode(),
-        'Address' => $order->get_billing_address_1() . ' ' . $order->get_billing_address_2(),
+        'City' => $city,
+        'PostalCode' => $postal_code,
+        'Address' => $address,
         'Description' => $order->get_customer_note(),
         'Products' => $products // Add the products array here
     ];
 
     // Example: Log the payload (for debugging)
-    error_log(print_r($payload, true));
+    error_log('Payload is: '.print_r($payload, true));
 
     // Now you can use $payload to send to your API
     send_to_api($payload);
@@ -924,55 +1761,6 @@ function send_to_api($payload) {
     curl_close($ch);
 }
 
-
-
-
-
-/* function custom_menu_hover_script() {
-//     ?>
-//     <script>
-//     document.addEventListener("DOMContentLoaded", function () {
-//         const menuItems = document.querySelectorAll(".elementor-element-828ca35 .menu-item a, .mega-menu");
-//         const overlay = document.querySelector(".menu-hover-overlay");
-
-//         let hoverTimeout;
-
-//         function showOverlay() {
-//             overlay.style.opacity = "1";
-//             overlay.style.visibility = "visible";
-//             overlay.style.pointerEvents = "auto";
-//         }
-
-//         function hideOverlay() {
-//             overlay.style.opacity = "0";
-//             overlay.style.visibility = "hidden";
-//             overlay.style.pointerEvents = "none";
-//         }
-
-//         function checkHoverState() {
-//             clearTimeout(hoverTimeout);
-//             hoverTimeout = setTimeout(() => {
-//                 const menuHovered = Array.from(menuItems).some(item => item.matches(':hover'));
-//                 const overlayHovered = overlay.matches(':hover');
-//                 if (!menuHovered && !overlayHovered) {
-//                     hideOverlay();
-//                 }
-//             }, 1); // Delay avoids flicker
-//         }
-
-//         menuItems.forEach(item => {
-//             item.addEventListener("mouseenter", showOverlay);
-//             item.addEventListener("mouseleave", checkHoverState);
-//         });
-
-//         overlay.addEventListener("mouseleave", checkHoverState);
-//         overlay.addEventListener("mouseenter", showOverlay);
-//     });
-//     </script>
-//     <?php
-// }
-// add_action('wp_footer', 'custom_menu_hover_script', 100);
-*/
 function custom_overlay_script() {
     ?>
     <script>
@@ -1016,131 +1804,595 @@ function custom_overlay_script() {
 }
 add_action('wp_footer', 'custom_overlay_script');
 
-add_action('admin_footer', 'add_custom_button_to_update_products');
-function add_custom_button_to_update_products() {
-    // Check if we are on the All Products page
-    $screen = get_current_screen();
-    if ($screen->id !== 'edit-product') {
-        return;
+function show_wc_stock_status_shortcode() {
+    if (!is_product()) {
+        return '';
     }
 
-    ?>
-    <script type="text/javascript">
-        //const token = btoa("ck_f92acec278157ab36d8fd804322801e517a2a14d:cs_6526bfdff3b0afcd441a17f00431d7e9d52432f9");
-        // Function to get product properties
-        
-        jQuery(document).ready(function ($) {
-            // Function to call any API and return a promise
-            function callApi(url, method, headers, data) {
-                return new Promise(function(resolve, reject) {
-                    $.ajax({
-                        url: url,
-                        method: method,
-                        timeout: 0,
-                        headers: headers,
-                        data: data
-                    })
-                    .done(function(response) {
-                        resolve(response); // Resolve with the response data
-                    })
-                    .fail(function(error) {
-                        reject(error); // Reject on error
-                    });
-                });
-            }
-            // Add the custom button at the end of the buttons section
-            const customButton = $('<a href="<?php echo admin_url("admin-post.php?action=add_new_woocommerce_product"); ?>" id="tamshop-update-product-button" class="page-title-action update-custom-action-button">بروزرسانی اطلاعات محصولات تامشاپ</a>');
-            $('.wrap .page-title-action:last').after(customButton);
-            
-            // Woocommerce Product Sync Script
-            // Supports: Simple, Variable, and Downloadable Products
-            
-            const axios = require('axios');
-            
-            const woocommerceAPI = axios.create({
-              baseURL: 'https://yourstore.com/wp-json/wc/v3/',
-              auth: {
-                username: 'ck_your_consumer_key',
-                password: 'cs_your_consumer_secret'
-              },
-              headers: { 'Content-Type': 'application/json' }
-            });
-            
-            // Sample external product data (you can replace this with actual API call)
-            const externalProducts = [];
-            
-            async function getAllWCProducts() {
-              let allProducts = [], page = 1;
-              while (true) {
-                const res = await woocommerceAPI.get('products', { params: { per_page: 100, page } });
-                if (res.data.length === 0) break;
-                allProducts.push(...res.data);
-                page++;
-              }
-              return allProducts;
-            }
-            
-            async function syncProducts() {
-              try {
-                const existingProducts = await getAllWCProducts();
-                const wcProductsBySku = Object.fromEntries(existingProducts.map(p => [p.sku, p]));
-            
-                for (const product of externalProducts) {
-                  const existing = wcProductsBySku[product.sku];
-                  await updateProductIfNeeded(existing, product);
-                }
-            
-                console.log('✅ Product sync completed.');
-              } catch (err) {
-                console.error('❌ Sync error:', err.response?.data || err);
-              }
-            }
-            
-            async function updateProductIfNeeded(existing, newData) {
-              const changes = {};
-              if (existing.name !== newData.name) changes.name = newData.name;
-              if (existing.regular_price !== newData.price) changes.regular_price = newData.price.toString();
-              if (existing.stock_quantity !== newData.stock_quantity) changes.stock_quantity = newData.stock_quantity;
-            
-              if (newData.downloadable && JSON.stringify(existing.downloads) !== JSON.stringify(newData.downloads)) {
-                changes.downloadable = true;
-                changes.downloads = newData.downloads;
-              }
-            
-              if (Object.keys(changes).length > 0) {
-                await woocommerceAPI.put(`products/${existing.id}`, changes);
-                console.log(`🔄 Updated: ${newData.name}`);
-              } else {
-                console.log(`✅ No changes: ${newData.name}`);
-              }
-            }
-            
-            syncProducts();
+    global $product;
+    if (!$product || !is_a($product, 'WC_Product')) {
 
-        });
-    </script>
+        $product_id = get_the_ID();
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            return '';
+        }
+    }
+
+
+    $in_stock_style = 'background: #e6f9ee; color: #108043; border-radius: 8px; padding: 4px 20px; display: inline-block; font-weight: 600; font-size: 14px; border: 1px solid #a7e2c7; margin: 10px 0;';
+    $out_stock_style = 'background: #ffe6e6; color: #cc0000; border-radius: 8px; padding: 4px 20px; display: inline-block; font-weight: 600; font-size: 14px; border: 1px solid #ffcccc; margin: 10px 0;';
+
+    if ($product->is_in_stock()) {
+        $status_text = 'موجود';
+        $style = $in_stock_style;
+    } else {
+        $status_text = 'ناموجود';
+        $style = $out_stock_style;
+    }
+
+    return '<div style="' . $style . '">' . esc_html($status_text) . '</div>';
+}
+add_shortcode('wc_stock_status', 'show_wc_stock_status_shortcode');
+
+add_action('wp_logout','force_logout_redirect', 9999);
+
+function force_logout_redirect() {
+
+    if ( is_user_logged_in() ) {
+        wp_destroy_current_session();
+        wp_clear_auth_cookie();
+    }
+
+    wp_redirect(home_url());
+    exit();
+}
+
+
+function get_tamyar_product_id_from_cart_products() {
+    $custom_ids = array();
+
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        // اگر محصول متغیر بود، اولویت با variation_id
+        $product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+
+        // گرفتن مقدار فیلد سفارشی
+        $custom_id = get_post_meta($product_id, 'tamshop-product-id', true);
+
+        if (!empty($custom_id)) {
+            $custom_ids[] = $custom_id;
+        }
+    }
+
+    // خروجی به صورت رشته جدا شده با ویرگول
+    return implode(',', $custom_ids);
+}
+
+
+//speed code 
+
+
+add_action('send_headers', function () {
+    if (!is_user_logged_in() && !is_admin() && !defined('DOING_AJAX') && !defined('REST_REQUEST')) {
+
+        $uri = $_SERVER['REQUEST_URI'];
+
+
+        if (preg_match('#^/first-session-video/#', $uri)) {
+            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+            header("Pragma: no-cache");
+        } else {
+            header("Cache-Control: public, max-age=86400");
+        }
+    }
+}, 1); 
+
+remove_action('wp_head', 'rsd_link');
+remove_action('wp_head', 'wlwmanifest_link');
+remove_action('wp_head', 'wp_generator');
+remove_action('wp_head', 'wp_shortlink_wp_head');
+remove_action('wp_head', 'rest_output_link_wp_head');
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('admin_print_scripts', 'print_emoji_detection_script');
+remove_action('wp_print_styles', 'print_emoji_styles');
+remove_action('admin_print_styles', 'print_emoji_styles');
+add_filter('the_generator', '__return_empty_string');
+
+
+add_filter('heartbeat_send', function($response, $screen_id) {
+    if (!is_admin()) {
+        return false;
+    }
+    return $response;
+}, 10, 2);
+
+
+function disable_feed() { wp_die(__('No feed available.', 'textdomain')); }
+add_action('do_feed', 'disable_feed', 1);
+add_action('do_feed_rdf', 'disable_feed', 1);
+add_action('do_feed_rss', 'disable_feed', 1);
+add_action('do_feed_rss2', 'disable_feed', 1);
+add_action('do_feed_atom', 'disable_feed', 1);
+
+
+function remove_css_js_ver($src) {
+    if (strpos($src, '?ver=')) $src = remove_query_arg('ver', $src);
+    return $src;
+}
+add_filter('style_loader_src', 'remove_css_js_ver', 10, 2);
+add_filter('script_loader_src', 'remove_css_js_ver', 10, 2);
+
+
+add_action('wp_enqueue_scripts', function () {
+    wp_deregister_script('wp-embed');
+}, 100);
+
+
+add_filter('script_loader_tag', function($tag, $handle, $src) {
+    if (is_admin() || strpos($src, 'jquery.min.js') !== false) return $tag;
+    return str_replace(' src', ' defer src', $tag);
+}, 10, 3);
+
+
+add_action('init', function() {
+    add_filter('tiny_mce_plugins', function($plugins) {
+        return array_diff($plugins, ['wpemoji']);
+    });
+}, 9999);
+
+add_action('wp_head', function () {
+    echo '
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://tamyar.ir" crossorigin>
+    <link rel="preconnect" href="https://stream.tamland.ir" crossorigin>
+
+
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//tamyar.ir">
+    <link rel="dns-prefetch" href="//stream.tamland.ir">
+
+
+    <link rel="preload" href="https://tamyar.ir/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" as="script">
+    <link rel="preload" href="https://tamyar.ir/wp-content/plugins/elementor/assets/lib/swiper/swiper.min.js?ver=5.3.6" as="script">
     
+    
+
+    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/17.png" as="image">
+    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/10.png" as="image">
+    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/49.png" as="image">
+    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/18.png" as="image">
+    <link rel="preload" href="https://stream.tamland.ir/tamland/1402/shop/Tamland_product_2025-08-01-06-05-44.jpg" as="image">
+    ';
+});
+
+
+if (!is_user_logged_in()) {
+    header("Cache-Control: public, max-age=86400");
+ }
+
+function detect_low_speed_mobile() {
+    if (wp_is_mobile()) {
+        echo "
+        <script>
+        if (navigator.connection && (navigator.connection.saveData || 
+            navigator.connection.effectiveType === '2g' || 
+            navigator.connection.effectiveType === '3g')) {
+            document.documentElement.classList.add('low-speed');
+        }
+        </script>
+        ";
+    }
+}
+add_action('wp_head', 'detect_low_speed_mobile', 1);
+
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_print_styles', 'print_emoji_styles');
+
+
+function remove_jquery_migrate_mobile( $scripts ) {
+    if ( wp_is_mobile() && isset( $scripts->registered['jquery'] ) ) {
+        $scripts->registered['jquery']->deps = array_diff( $scripts->registered['jquery']->deps, array('jquery-migrate') );
+    }
+}
+add_action('wp_default_scripts', 'remove_jquery_migrate_mobile');
+
+
+function add_lazy_loading_to_images($content){
+    return str_replace('<img', '<img loading="lazy"', $content);
+}
+add_filter('the_content', 'add_lazy_loading_to_images');
+
+function defer_heavy_css_mobile() {
+    if ( wp_is_mobile() ) {
+        ?>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!document.documentElement.classList.contains('low-speed')) {
+                var l = document.createElement("link");
+                l.rel = "stylesheet";
+                l.href = "<?php echo get_stylesheet_directory_uri(); ?>/css/f6d8294.css?ver=df3e2";
+                l.media = "print";
+                l.onload = function() { this.media = "all"; };
+                document.head.appendChild(l);
+            }
+        });
+        </script>
+
+        <?php
+    }
+}
+add_action('wp_footer', 'defer_heavy_css_mobile');
+
+
+function defer_google_fonts_mobile() {
+    if ( wp_is_mobile() ) {
+        ?>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!document.documentElement.classList.contains('low-speed')) {
+                var gf = document.createElement("link");
+                gf.rel = "stylesheet";
+                gf.href = "https://fonts.googleapis.com/css2?family=IRANSans&display=swap";
+                gf.media = "print";
+                gf.onload = function() { this.media = "all"; };
+                document.head.appendChild(gf);
+            }
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'defer_google_fonts_mobile');
+
+
+function defer_iframes_mobile($content) {
+    if (wp_is_mobile() && !is_admin()) {
+        $content = preg_replace_callback('/<iframe([^>]*)><\/iframe>/i', function ($matches) {
+            $attrs = $matches[1];
+            return '<iframe loading="lazy"' . $attrs . '></iframe>';
+        }, $content);
+    }
+    return $content;
+}
+add_filter('the_content', 'defer_iframes_mobile', 99);
+
+/*
+add_action('wp_head', function () {
+    if (wp_is_mobile()) {
+        echo '<link rel="preload" as="image" href="https://tizhooshan.tamland.ir/wp-content/uploads/2025/05/%D9%87%D9%85%D8%A7%DB%8C%D8%B4-%D8%AC%D9%85%D8%B9-%D8%A8%D9%86%D8%AF%DB%8C-%D8%AA%DB%8C%D8%B2%D9%87%D9%88%D8%B4%D8%A7%D9%86.webp" fetchpriority="high">';
+    }
+}, 1);
+*/
+
+function remove_unused_css_inline() {
+    if (wp_is_mobile()) {
+        echo '<style>body *:not(:first-child){display:none!important;}</style>';
+    }
+}
+
+
+//loading
+
+function is_known_bot() {
+    if (!isset($_SERVER['HTTP_USER_AGENT'])) return false;
+    $bots = [
+        'Googlebot', 'Bingbot', 'Slurp', 'DuckDuckBot', 'YandexBot',
+        'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'WhatsApp', 'TelegramBot'
+    ];
+    foreach ($bots as $bot) {
+        if (stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) return true;
+    }
+    return false;
+}
+
+
+function enqueue_universal_lazyload_script() {
+    if (is_admin() || is_known_bot()) return;
+    ?>
     <style>
-        .update-custom-action-button {
-            background-color: #7247ff !important;
-            border-color:#7247ff !important;
-            color: #fff !important;
-            text-decoration: none;
-            margin-left: 10px;
-        }
-        .update-custom-action-button:hover {
-            background-color: #c4161c !important;
-            border-color:#c4161c !important;
-        }
-        .update-custom-action-button.success {
-            background-color: #00e6a4 !important;
-            border-color:#00e6a4 !important;
-        }
-        .update-custom-action-button.disabled {
-            background-color: #666 !important;
-            border-color:#666 !important;
-            cursor:default;
+        .lazy-section-placeholder {
+            background: #f0f0f0;
+            margin: 1rem 0;
+            display: block;
         }
     </style>
-<?php
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
+
+        lazyElements.forEach(el => {
+
+            const style = window.getComputedStyle(el);
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'lazy-section-placeholder';
+            placeholder.style.height = el.offsetHeight + 'px';
+            placeholder.style.width = el.offsetWidth + 'px';
+            placeholder.style.marginTop = style.marginTop;
+            placeholder.style.marginBottom = style.marginBottom;
+            placeholder.style.marginLeft = style.marginLeft;
+            placeholder.style.marginRight = style.marginRight;
+            placeholder.style.paddingTop = style.paddingTop;
+            placeholder.style.paddingBottom = style.paddingBottom;
+            placeholder.style.paddingLeft = style.paddingLeft;
+            placeholder.style.paddingRight = style.paddingRight;
+            placeholder.style.boxSizing = style.boxSizing;
+
+            el.style.display = 'none';
+            el.parentNode.insertBefore(placeholder, el);
+
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        el.style.display = '';
+                        placeholder.remove();
+                        obs.unobserve(el);
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
+
+            observer.observe(placeholder);
+        });
+    });
+    </script>
+    <?php
 }
+add_action('wp_footer', 'enqueue_universal_lazyload_script', 100);
+
+function enqueue_mobile_only_lazyload_script() {
+    if (is_admin() || is_known_bot()) return;
+    ?>
+    <style>
+        .lazy-section-placeholder {
+            background: #f0f0f0;
+            margin: 1rem 0;
+            display: block;
+        }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // فقط موبایل
+        if (!/Mobi|Android/i.test(navigator.userAgent)) return;
+
+        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
+
+        lazyElements.forEach(el => {
+            const style = window.getComputedStyle(el);
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'lazy-section-placeholder';
+            placeholder.style.height = el.offsetHeight + 'px';
+            placeholder.style.width = el.offsetWidth + 'px';
+            placeholder.style.marginTop = style.marginTop;
+            placeholder.style.marginBottom = style.marginBottom;
+            placeholder.style.marginLeft = style.marginLeft;
+            placeholder.style.marginRight = style.marginRight;
+            placeholder.style.paddingTop = style.paddingTop;
+            placeholder.style.paddingBottom = style.paddingBottom;
+            placeholder.style.paddingLeft = style.paddingLeft;
+            placeholder.style.paddingRight = style.paddingRight;
+            placeholder.style.boxSizing = style.boxSizing;
+
+            el.style.display = 'none';
+            el.parentNode.insertBefore(placeholder, el);
+
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        el.style.display = '';
+                        placeholder.remove();
+                        obs.unobserve(el);
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
+
+            observer.observe(placeholder);
+        });
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'enqueue_mobile_only_lazyload_script', 100);
+
+
+//loading end
+//end speed code
+
+
+/**
+ * حمل و نقل با LMS
+ 
+add_filter('woocommerce_package_rates', 'tamyar_shipping_adjustment', 10, 2);
+function tamyar_shipping_adjustment($rates, $package) {
+    $token = $_COOKIE['tamshToken'];
+    $totalShippingCost = 0;
+    $tamyarProductIDs = get_tamyar_product_id_from_cart_products();
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => 'https://api.tamland.ir/api/shop/shippingCosts/'.$tamyarProductIDs,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'GET',
+      CURLOPT_HTTPHEADER => array(
+        'Authorization: Bearer '.$token
+      ),
+    ));
+    
+    $response = curl_exec($curl);
+    
+    curl_close($curl);
+    
+    $data = json_decode($response, true); // پارامتر true برای تبدیل به آرایه است
+
+    foreach ($data as $item) {
+        if (isset($item['fldShippingCost'])) {
+            $number = intval($item['fldShippingCost']);
+            $totalShippingCost += $number;
+        }
+    }
+
+    foreach ($rates as $rate_key => $rate) {
+        // تغییر هزینه حمل به صورت دستی
+        $rates[$rate_key]->cost += $totalShippingCost;
+
+        // اگر مالیات وجود داشته باشه، باید اینم تنظیم کنی:
+        if (isset($rates[$rate_key]->taxes)) {
+            foreach ($rates[$rate_key]->taxes as $tax_id => $tax) {
+                $rates[$rate_key]->taxes[$tax_id] += 0; // یا مقدار جدید
+            }
+        }
+    }
+    
+    return $rates;
+}
+*/
+
+/**
+ * سینک کردن موجودی کیف پول با LMS
+ * 
+
+add_action('init', 'check_login_and_sync_wallet');
+
+function check_login_and_sync_wallet() {
+    // فقط یکبار اجرا بشه، نه در هر بار بارگذاری
+    if (is_user_logged_in() && !isset($_COOKIE['wallet_synced'])) {
+        $user = wp_get_current_user();
+        $username = $user->user_login;
+        // ذخیره کوکی برای جلوگیری از اجرای مجدد در هر بار رفرش
+        setcookie('wallet_synced', '1', time() + 3600, COOKIEPATH, COOKIE_DOMAIN);
+        
+        // اجرای تابع همگام‌سازی
+        update_wallet_balance_from_api($username, $user->ID);
+    }
+}
+
+function update_wallet_balance_from_api($username, $user) {
+    $user_id = $user;
+    // آدرس API و اطلاعات ارسالی (در صورت نیاز)
+$token = $_COOKIE['tamshToken'];
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://api.tamland.ir/api/user/myWallet/?user='.$username,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer '.$token
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+
+    $data = json_decode($response, true);
+
+    // بررسی ساختار درست
+    if (!isset($data[0]['balanceWallet'])) {
+        error_log('Invalid API structure or balanceWallet not found. Response: ' . $response);
+        return false;
+    }
+
+    $new_balance = intval($data[0]['balanceWallet']);
+    $currency = get_woocommerce_currency(); // یا مقدار دلخواه مثل get_woocommerce_currency()
+    global $wpdb;
+    $table = $wpdb->prefix . 'woo_wallet_transactions';
+    
+    $existing = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM $table WHERE user_id = %d AND details = %s", $user_id, 'اعتبار شما در پنل تاملند')
+    );
+    
+    if ($existing > 0) {
+        // بروزرسانی رکورد موجود
+        $wpdb->update(
+            $table,
+            [
+                'amount'   => $new_balance,
+                'balance'  => $new_balance,
+                'currency' => $currency,
+                'date'     => current_time('mysql')
+            ],
+            [
+                'user_id' => $user_id,
+                'details' => 'اعتبار شما در پنل تاملند'
+            ],
+            ['%f', '%f', '%s', '%s'],
+            ['%d', '%s']
+        );
+    } else {
+        // درج رکورد جدید
+        $wpdb->insert(
+            $table,
+            [
+                'user_id'  => $user_id,
+                'amount'   => $new_balance,
+                'balance'  => $new_balance,
+                'currency' => $currency,
+                'type'     => 'credit',
+                'date'     => current_time('mysql'),
+                'details'  => 'اعتبار شما در پنل تاملند'
+            ],
+            ['%d', '%f', '%f', '%s', '%s', '%s', '%s']
+        );
+    }
+
+
+
+}
+*/
+
+add_action('wp_footer', function() { ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.price-values .price-value').forEach(function(el) {
+        var number = el.textContent.replace(/\D/g, '');
+        if(number.length > 3) {
+            el.textContent = Number(number).toLocaleString('fa-IR');
+        }
+    });
+});
+</script>
+<?php });
+
+function randomize_teacher_cards_js() {
+    if (is_page('teachers')) {
+        ?>
+        <style>
+            .teachers-list{opacity:0;transition: opacity 0.5s ease;}
+        </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const teacherList = document.querySelector(".teachers-list");
+                const container = document.querySelector(".teachers-list .jet-listing-grid__items"); 
+                if (!container) return;
+            
+                const cards = Array.from(container.querySelectorAll(".jet-listing-grid__item"));
+                
+                // الگوریتم تصادفی برای جابجا کردن کارت‌ها
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cards[i], cards[j]] = [cards[j], cards[i]];
+                }
+            
+                // کارت‌ها رو دوباره به DOM اضافه کن
+                cards.forEach(card => container.appendChild(card));
+                
+                teacherList.style.opacity = 1;
+            });
+        </script>
+        <?php
+    }
+}
+add_action('wp_head', 'randomize_teacher_cards_js');
