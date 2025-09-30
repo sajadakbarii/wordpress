@@ -5,7 +5,7 @@ Description: Hello Elementor Child is a child theme of Hello Elementor, created 
 Author: Elementor Team
 Author URI: https://elementor.com/
 Template: hello-elementor
-Version: 1.0.3
+Version: 1.0.5
 Text Domain: hello-elementor-child
 License: GNU General Public License v3 or later.
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -470,6 +470,7 @@ nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
 @media (min-width: 768px) {
     #aparatHtml .h_iframe-aparat_embed_framev2 {
         height: 340px !important;
+		width: 604px !important;
     }
 }
 @media (max-width: 767px) {
@@ -484,7 +485,17 @@ nav.elementor-nav-menu--dropdown ul li.menu-item a.has-submenu{
         height: 164px !important;
     }
 }
-.dialog-type-lightbox{
+.elementor-popup-modal.dialog-type-lightbox {
+	  background-color: rgba(0,0,0,.8) !important;
+	  display: flex;
+	  pointer-events: none;
+	  -webkit-user-select: auto;
+	  -moz-user-select: auto;
+	  user-select: auto;
+	  justify-content: center;
+	  align-items: center;
+}
+#aparatHtml{
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
