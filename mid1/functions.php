@@ -43,7 +43,7 @@ function hello_elementor_child_enqueue_scripts() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.2.0', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '1.0.0', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.5.28', true );
+	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.5.33', true );
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_enqueue_scripts', 20 );
 
@@ -726,147 +726,6 @@ function add_float_button(){
 add_action('wp_footer','add_float_button');
 
 
-/*Start Goftino*/
-function add_chat_widget() {
-    
-    if (!is_page('course-checkout') && !is_page('return-payment-gateway')) {
-    ?>
-    <style>
-        #Goftino_tamland {
-            background: rgb(255, 0, 44);
-            border-radius: 50px;
-            padding: 0px;
-            font-size: 18px;
-            position: fixed;
-            bottom: 35px;
-            left: 30px;
-            color: black;
-            display: none; 
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 55px;
-            height: 55px;
-        }
-        #Goftino_tamland svg {
-            width: 100%;
-            height: 100%;
-        }
-        #unread_counter {
-            background: #000000 !important;
-            border-radius: 50%;
-            padding: 3px;
-            font-size: 12px;
-            position: absolute;
-            color: white;
-            min-width: 18px;
-            height: 18px;
-            top: -5px;
-            right: -5px;
-            z-index: 5;
-            text-align: center;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        @media (min-width: 768px) and (max-width: 1200px) {
-        #goftino_w {
-            position: fixed !important;
-            bottom: 50px !important;
-            left: 0px !important;
-            z-index: 9999 !important;
-        }
-    }
-
-    @media only screen and (max-width: 768px) {
-        #Goftino_tamland {
-            position: fixed ;
-            top: 50% ;
-            left: -3px;
-            transform: translateY(-50%) ;
-            padding: 0px;
-            transition: none ;
-            border-radius: 15% ;
-            width: 2.5rem ;
-            height: 2.5rem ;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, .2), 0 1px 10px rgba(0, 0, 0, .15) ;
-            margin: 0 auto ;
-        }
-        #Goftino_tamland svg {
-                width: 80%;
-                height: 80%;
-            }
-    }
-    </style>
-    <div id="Goftino_tamland">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-            <path d="M60.19,53.75a3,3,0,1,0,3.06,3A3,3,0,0,0,60.19,53.75Zm-11.37,0a3,3,0,1,0,3.06,3A3,3,0,0,0,48.81,53.75Zm45.94,4A35,35,0,1,0,52.75,92v12.76s14.55-4.25,30.53-19.28C94.68,74.74,94.75,59.41,94.75,59.41l0,0C94.74,58.87,94.75,58.3,94.75,57.72Zm-10.14.6s0,10.64-8,18.09A57.93,57.93,0,0,1,53,89.8V80.34A24.29,24.29,0,1,1,84.61,57.16c0,.4,0,.8,0,1.19ZM70.69,53.75a3,3,0,1,0,3.06,3A3,3,0,0,0,70.69,53.75Z" transform="translate(0.25 0.25)" style="fill:#ffffff"></path>
-        </svg>
-        <span id="unread_counter">0</span>
-    </div>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            // بررسی و حذف آیکن‌های اضافی
-            const widgetButtons = document.querySelectorAll('#Goftino_tamland');
-            if (widgetButtons.length > 1) {
-                for (let i = 1; i < widgetButtons.length; i++) {
-                    widgetButtons[i].remove();
-                }
-            }
-
-            const widgetObserver = new IntersectionObserver(function (entries, observer) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        loadWidgetScript();
-                        observer.disconnect(); 
-                    }
-                });
-            });
-
-            const widgetButton = document.getElementById('Goftino_tamland');
-            widgetObserver.observe(widgetButton);
-
-            function loadWidgetScript() {
-                var d = document;
-                var g = d.createElement("script"),
-                    i = "kkkIbA", 
-                    s = "https://www.goftino.com/widget/" + i,
-                    l = localStorage.getItem("goftino_" + i);
-
-                g.type = "text/javascript";
-                g.async = true;
-                g.src = l ? s + "?o=" + l : s;
-
-                g.onload = function () {
-                    if (typeof Goftino !== "undefined") {
-                        Goftino.setWidget({
-                            hasIcon: false,
-                            counter: "#unread_counter"
-                        });
-
-                        widgetButton.style.display = "flex";
-
-                        widgetButton.addEventListener("click", function () {
-                            Goftino.toggle();
-                        });
-                    }
-                };
-                d.getElementsByTagName("head")[0].appendChild(g);
-            }
-        });
-    </script>
-    <?php
-    }
-}
-add_action('wp_footer', 'add_chat_widget');
-
-/*End Goftino*/
-
-
 /**
  * Courses Groups Items.
  */
@@ -1110,7 +969,7 @@ function teachers_course_items_func(){
                     };
                 });
             </script>
-            <div class="container multiteacher my-5">
+            <div class="container multiteacher my-5" style="display:none">
                 <li class="multiteacher-courses-items">
                     <div class="row courses-wrapper align-items-start justify-content-center">
                         <div class="row justify-content-center" id="courseRow">
@@ -1415,6 +1274,8 @@ function teachers_course_items_func(){
                     jQuery("#teacher-"+teacherSelected).click();
                     document.getElementById("teacher-"+teacherSelected).scrollIntoView();
                 }
+                
+                jQuery('.container.multiteacher').fadeIn(500);
             }
         </script>
         <?php
@@ -1668,20 +1529,7 @@ function render_updatecourse() {
     <?php
 }
 
-function sa_clarity(){
-    if (!is_page('course-checkout')) {
-    ?>
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "mehb0ip6zx");
-    </script>
-    <?php
-    }
-}
-//add_action('wp_head', 'sa_clarity', 10);
+
 
 //[ads_banner_1st  grade="130"]
 add_shortcode('ads_banner_1st','ads_banner_1st_func');
@@ -2475,7 +2323,7 @@ function post_to_third_party($entry, $form) {
     $return_path = site_url('/return-payment-gateway?entry_id=' . $entry_id);
 
     gform_update_meta($entry_id, 'payment_status', 'Processing');
-    if($amount !== '0'){
+    if($amount !== 0){
         $data = prepare_payment_data($entry_id, $amount, $return_path);
         $response = send_payment_request($data);
         if ($response && isset($response->token)) {
@@ -2490,15 +2338,80 @@ function post_to_third_party($entry, $form) {
 }
 
 function calculate_amount($entry) {
-    if($entry['6'] == '0'){ 
-        $amount_field = $entry['6'];
-        return $amount_field; // فرض کنید مقادیر همیشه عدد هستند
-    }elseif($entry['18'] == '0'){
-        $amount_field = $entry['18'];
-        return $amount_field; // فرض کنید مقادیر همیشه عدد هستند
+    if(isset($_COOKIE['discountIsSet'])){
+        error_log('Yes discountIsSet is set');
+        $discount_is_set = $_COOKIE['discountIsSet'];
+        error_log('discountIsSet is:'.$discount_is_set);
+        if($discount_is_set && !empty($entry['20'])){
+            if($entry['9'] == "دوره معمولی" || $entry['9'] == "چند استاده" || $entry['9'] == "آزمون"){
+                $course_type_lms = 1;
+            }elseif($entry['9'] == "بسته"){
+                $course_type_lms = 2;
+            }
+            error_log('Mobile is:'.$entry['2']);
+            error_log('CourseId is:'.$entry['8']);
+            error_log('Type is:'.$course_type_lms);
+            error_log('DiscountCode is:'.$entry['20']);
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => 'https://api.tamland.ir/api/payment/checkDiscount',
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'POST',
+              CURLOPT_POSTFIELDS =>'{
+                "Mobile": "'.$entry['2'].'",
+                "CourseId": '.$entry['8'].',
+                "Type": '.$course_type_lms.',
+                "DiscountCode":"'.$entry['20'].'"
+            }',
+              CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+              ),
+            ));
+            
+            $response = curl_exec($curl);
+            
+            curl_close($curl);
+            error_log('Response is:'.$response);
+            $data = json_decode($response, true);
+            error_log('Data is:'.$data);
+            $percentage = (int) $data[0]['fldPercentage'];
+            error_log('Percentage is:'.$percentage);
+            $original_price = (int) $entry['6'];       // تبدیل به عدد صحیح
+            error_log('original_price is:'.$original_price);
+            $discount_amount = ($original_price * $percentage) / 100;
+            error_log('discount_amount is:'.$discount_amount);
+            $amount_field = $original_price - $discount_amount;
+            error_log('amount_field is:'.$amount_field);
+            if($amount_field == 0){
+                return $amount_field;
+            }else{
+               return $amount_field . '0'; 
+            }
+        }else{
+            $amount_field = $entry['6'];
+            error_log('amount_field is:'.$amount_field);
+            if($amount_field == 0){
+                return $amount_field;
+            }else{
+               return $amount_field . '0'; 
+            }
+        }
+        
     }else{
-        $amount_field = $entry['18'] ?: $entry['6'];
-        return $amount_field . '0'; // فرض کنید مقادیر همیشه عدد هستند
+        error_log('Discount not set');
+        $amount_field = $entry['6'];
+        error_log('amount_field is:'.$amount_field);
+        if($amount_field == 0){
+            return $amount_field;
+        }else{
+           return $amount_field . '0'; 
+        }
     }
 }
 
@@ -2640,11 +2553,11 @@ function view_course_form_func(){
         $ref_url_payment = $_POST['input_10'];
     }
     echo '<a href="'.$ref_url_payment.'" class="view-course-form" target="_blank">مشاهده دوره</a>';
-    echo '<script>
+    /*echo '<script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelector("#tamlandLogo a").href = "'.$ref_url_payment.'";
         });
-    </script>';
+    </script>';*/
 }
 
 
@@ -3244,12 +3157,6 @@ add_action('wp_head', function() {
     <link rel="preload" href="https://mid1.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_Light.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="https://mid1.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb_Bold.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="https://mid1.tamland.ir/wp-content/uploads/2022/09/IRANSansWeb.ttf" as="font" type="font/ttf" crossorigin>
-
-
-    <!--<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">-->
     <?php
 });
 
@@ -3425,3 +3332,24 @@ function aparat_video_shortcode($atts) {
     return '';
 }
 add_shortcode('aparat_player', 'aparat_video_shortcode');
+
+
+
+function my_child_theme_gtm_head_script() {
+    ?>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5S53CVZ6');</script>
+    <?php
+}
+add_action( 'wp_head', 'my_child_theme_gtm_head_script' );
+
+function my_child_theme_gtm_body_noscript() {
+    ?>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5S53CVZ6"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <?php
+}
+add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
