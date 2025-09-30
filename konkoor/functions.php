@@ -54,11 +54,11 @@ function add_analytics_script(){
     </script>
     
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l][];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NGJ3F8GT');</script>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NGJ3F8GT');</script>
     <!-- End Google Tag Manager -->
 <?php
 }
@@ -69,7 +69,7 @@ function wpdoc_add_custom_body_open_code(){
     ?>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NGJ3F8GT"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <?php
 }
@@ -201,37 +201,54 @@ function format_time($time) {
     return $parts[0] . ':' . $parts[1];
 }
 
-
-
-/**     
- * Display the comment template with the [mrh_comments_template] 
- * shortcode on singular pages. 
-
- */
- add_shortcode( 'mrh_comments_template', function( $atts = array(), $content = '' )
- {
-    if( is_singular() && post_type_supports( get_post_type(), 'comments' ) )
-    {
-        ob_start();
-        comments_template();
-        add_filter( 'comments_open',       'mrh_comments_open'   );
-        add_filter( 'get_comments_number', 'mrh_comments_number' );
-        return ob_get_clean();
+// غیرفعال کردن کامنت برای پست تایپ خاص
+function disable_comments_for_custom_post_type( $open, $post_id ) {
+    $post = get_post( $post_id );
+    if ( $post->post_type === 'course' ) {
+        return false; // کامنت بسته شود
     }
-    return '';
-}, 10, 2 );
+    return $open;
+}
+add_filter( 'comments_open', 'disable_comments_for_custom_post_type', 10 , 2 );
+add_filter( 'pings_open', 'disable_comments_for_custom_post_type', 10 , 2 );
 
-function mrh_comments_open( $open )
-{
-    remove_filter( current_filter(), __FUNCTION__ );
-    return false;
+// حذف بخش مدیریت کامنت برای پست تایپ خاص
+function remove_comment_support_from_custom_post_type() {
+    remove_post_type_support( 'course', 'comments' );
+    remove_post_type_support( 'course', 'trackbacks' );
+}
+add_action( 'init', 'remove_comment_support_from_custom_post_type', 100 );
+
+ /**     
+  * Display the comment template with the [mrh_comments_template] 
+  * shortcode on singular pages. 
+
+  */
+add_shortcode( 'mrh_comments_template', function( $atts = array(), $content = '' )
+  {
+     if( is_singular() && post_type_supports( get_post_type(), 'comments' ) )
+     {
+         ob_start();
+         comments_template();
+         add_filter( 'comments_open',       'mrh_comments_open'   );
+         add_filter( 'get_comments_number', 'mrh_comments_number' );
+         return ob_get_clean();
+     }
+     return '';
+ }, 10, 2 );
+
+ function mrh_comments_open( $open )
+ {
+     remove_filter( current_filter(), __FUNCTION__ );
+ return false;
 }
 
-function mrh_comments_number( $open )
-{
-    remove_filter( current_filter(), __FUNCTION__ );
-    return 0;
-}
+ function mrh_comments_number( $open )
+ {
+     remove_filter( current_filter(), __FUNCTION__ );
+     return 0;
+ }
+
 
 /**
  * Add float button that users can link to other Tamland's websites.
@@ -350,62 +367,102 @@ Success!
 }
 //add_shortcode('coursesmobile', 'coursesmobile_func');
 
-/**
-    * Add Iran mobile format 
-*/
-add_filter( 'gform_phone_formats', 'ir_phone_format', 10, 2 );
 
-function ir_phone_format( $phone_formats ) {
+// ## STEP 1: DEFINE THE IRANIAN PHONE FORMAT
+
+add_filter( 'gform_phone_formats', 'ir_custom_phone_format' );
+function ir_custom_phone_format( $phone_formats ) {
     $phone_formats['ir'] = array(
         'label'       => 'شماره موبایل ایران',
-        'regex'       => '/^09(0[0-9]|1[0-9]|9[0-9]|3[0-9]|2[0-9])\d{7}$/', // Matches exactly 11 digits
-        'instruction' => 'شماره وارد شده صحیح نمی‌باشد و باید شامل 11 رقم باشد',
+        'mask'        => false, // Masking is handled by the script.
+        'regex'       => '/^09[0-9]{9}$/',
+        'instruction' => 'یک شماره موبایل ۱۱ رقمی معتبر وارد کنید.',
     );
-
     return $phone_formats;
 }
 
-// Enqueue JavaScript to add real-time input validation
-add_action( 'gform_enqueue_scripts', 'enqueue_phone_validation_script', 10, 2 );
-function enqueue_phone_validation_script( $form, $is_ajax ) {
+// ## STEP 2: ADD JAVASCRIPT FOR REAL-TIME CONVERSION AND VALIDATION
+
+add_action('wp_footer', 'gravity_forms_persian_numerals_handler');
+function gravity_forms_persian_numerals_handler() {
+    // Only run this script if Gravity Forms is active on the page.
+    if ( ! class_exists( 'GFCommon' ) ) {
+        return;
+    }
     ?>
     <script>
-    jQuery(document).ready(function ($) {
-    // Replace 'input[name="input_1"]' with the specific selector for your phone field
-    const phoneFieldSelector = 'input[type="tel"]';
-
-    $(document).on('input', phoneFieldSelector, function () {
-        const $field = $(this);
-        let value = $field.val();
-
-        // Remove non-numeric characters
-        value = value.replace(/\D/g, '');
-
-        // Limit the value to 11 characters
-        if (value.length > 11) {
-            value = value.substring(0, 11);
+    document.addEventListener('DOMContentLoaded', function () {
+        // More efficient function to convert Persian/Arabic numerals to English.
+        function toEnglishDigits(str) {
+            if (typeof str !== 'string' || !str) return '';
+            return str.replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
+                      .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632);
         }
 
-        // Update the field value
-        $field.val(value);
+        // Target all Gravity Forms number and phone fields.
+        const numberFields = document.querySelectorAll(
+            '.gform_wrapper input[type="tel"], .gform_wrapper input[type="number"], .gform_wrapper .gf_numeric input'
+        );
+
+        numberFields.forEach(function (field) {
+            // Set attributes for better mobile experience and validation.
+            field.setAttribute('type', 'text');
+            field.setAttribute('inputmode', 'numeric');
+            field.setAttribute('pattern', '[0-9]*');
+            
+            // Apply 11-digit limit specifically to your custom Iranian phone format.
+            // This checks if the field's container has the class added by Gravity Forms for your custom format.
+            if (field.closest('.gfield_phone_ir')) {
+                 field.setAttribute('maxlength', '11');
+            }
+
+            // Real-time conversion and cleaning as the user types.
+            field.addEventListener('input', function () {
+                const caretPosition = this.selectionStart;
+                const originalLength = this.value.length;
+
+                let convertedValue = toEnglishDigits(this.value);
+                convertedValue = convertedValue.replace(/[^\d]/g, ''); // Remove any non-digit characters.
+                
+                this.value = convertedValue;
+
+                // Restore cursor position for a smooth typing experience.
+                const newLength = this.value.length;
+                if (caretPosition !== null) {
+                    this.setSelectionRange(caretPosition - (originalLength - newLength), caretPosition - (originalLength - newLength));
+                }
+            });
+
+            // Prevent pasting of non-numeric characters.
+            field.addEventListener('paste', function (e) {
+                e.preventDefault();
+                const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
+                const onlyNumbers = toEnglishDigits(clipboardData).replace(/[^\d]/g, '');
+                document.execCommand('insertText', false, onlyNumbers);
+            });
+        });
     });
-
-    $(document).on('blur', phoneFieldSelector, function () {
-        const $field = $(this);
-        const value = $field.val();
-
-        // Check if the input matches the required format
-        const isValid = /^09(0[0-9]|1[0-9]|9[0-9]|3[0-9]|2[0-9])\d{7}$/.test(value);
-
-        if (!isValid) {
-            //alert('شماره موبایل باید با 09 شروع شود و شامل 11 رقم باشد.');
-            $field.focus();
-        }
-    });
-});
-
     </script>
     <?php
+}
+
+// ## STEP 3: SERVER-SIDE VALIDATION AS A FINAL SAFEGUARD
+
+add_filter( 'gform_pre_submission', 'ir_form_final_number_conversion' );
+function ir_form_final_number_conversion( $form ) {
+    foreach ( $form['fields'] as $field ) {
+        if ( in_array($field->type, ['phone', 'number']) || strpos($field->cssClass, 'gf_numeric') !== false ) {
+            $field_id = 'input_' . str_replace('.', '_', $field->id);
+            if ( isset( $_POST[ $field_id ] ) && is_string( $_POST[ $field_id ] ) ) {
+                $persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+                $arabic  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+                $english = ['0','1','2','3','4','5','6','7','8','9'];
+                $_POST[ $field_id ] = str_replace($persian, $english, $_POST[ $field_id ]);
+                $_POST[ $field_id ] = str_replace($arabic, $english, $_POST[ $field_id ]);
+            }
+        }
+    }
+    return $form;
 }
 
 
@@ -910,7 +967,7 @@ function teachers_course_items_func(){
         $page  = jet_engine()->options_pages->registered_pages['courses-options'];
         $tax = $page->get( 'tax' );
         ?>
-        <script type="text/javascript" defer>
+        <script type="text/javascript">
             jQuery(document).ready(function(){
                 jQuery.fn.shuffle = function() {
                     var allElems = this.get(),
@@ -932,7 +989,7 @@ function teachers_course_items_func(){
                 };
             });
         </script>
-            <div class="container multiteacher my-5">
+            <div class="container multiteacher my-5" style="display:none">
                 <li class="multiteacher-courses-items">
                     <div class="row courses-wrapper align-items-start justify-content-center">
                         <div class="row justify-content-center" id="courseRow">
@@ -980,7 +1037,7 @@ function teachers_course_items_func(){
                         }
                         ?>
                         </div>
-						<script type="text/javascript" defer>
+						<script type="text/javascript">
 						jQuery(document).ready(function(){
 						  jQuery("#courseRow .course-row-item").shuffle();
 						});
@@ -1260,6 +1317,9 @@ function teachers_course_items_func(){
                     jQuery("#teacher-"+teacherSelected).click();
                     document.getElementById("teacher-"+teacherSelected).scrollIntoView();
                 }
+                
+                
+                jQuery('.container.multiteacher').fadeIn(100);
             }
         </script>
         <style>
@@ -2485,7 +2545,7 @@ function get_related_ad_page_link_func() {
     return esc_url($page_link ?: '#');
 }
 add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
-
+/*
 add_filter('pre_http_request', function($pre, $args, $url) {
     error_log("🔍 Request to: " . $url);
     return false;
@@ -2538,3 +2598,26 @@ add_filter('rest_authentication_errors', function($result) {
     }
     return $result;
 });
+
+*/
+//count word of exam short description
+function count_chars_of_exam_short_desc() {
+    global $post;
+    if ( ! $post ) return 0;
+
+    $field_value = get_post_meta( $post->ID, 'exam-short-desc', true );
+    if ( ! $field_value ) return 0;
+
+    $clean_text = strip_tags( $field_value );
+    $char_count = strlen( trim( $clean_text ) );
+
+    return $char_count;
+}
+add_shortcode( 'exam_short_desc_char_count', 'count_chars_of_exam_short_desc' );
+
+
+// تعریف شورتکد
+function return_1715_shortcode() {
+    return '1715';
+}
+add_shortcode('return_1715', 'return_1715_shortcode');
