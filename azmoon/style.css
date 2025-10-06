@@ -1,0 +1,233 @@
+.my-accordion {
+            font-family: 'ایران‌سنسX', 'Arial', sans-serif;
+            direction: rtl;
+            overflow: hidden;
+            margin: 20px 0;
+            background-color: transparent;
+        }
+        .my-accordion .accordion-item {
+            background-color: transparent;
+        }
+        .my-accordion .accordion-item:last-child {
+            border-bottom: none;
+        }
+        .my-accordion .accordion-header {
+            background-color: transparent;
+            color: #c0392b;
+            font-size: 1.15rem;
+            font-weight: bold;
+            padding: 18px 25px;
+            border-right :none;
+            border-left :none;
+            border-top :none;
+            border-bottom: 1px solid #DBDFED;
+            cursor: pointer;
+            width: 100%;
+            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .my-accordion .accordion-header:hover {
+            background-color: transparent;
+        }
+        .my-accordion .accordion-header .icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: #c0392b;
+            transition: transform 0.2s ease;
+        }
+        .my-accordion .accordion-header .icon::before {
+            content: '+';
+        }
+        .my-accordion .accordion-header.active .icon::before {
+            content: '-';
+        }
+        .my-accordion .accordion-content {
+            display: none;
+            background-color: transparent !important;
+            padding: 0 20px 10px 20px;
+            background-color: #fcfcfc;
+            border-top: 1px solid #eee;
+        }
+        .lesson-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+        .lesson-item {
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            border:none;
+        }
+        .lesson-item:last-child {
+            margin-bottom: 0;
+        }
+        .lesson-item .lesson-header {
+            background-color: transparent;
+            color: #333;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: right;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .lesson-item .lesson-header:hover {
+        }
+        .lesson-item .lesson-header .icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #777;
+            line-height: 1;
+            transform: rotate(0deg);
+            transition: transform 0.2s ease;
+        }
+        .lesson-item .lesson-header .icon::before {
+            content: '▼';
+            color:black;
+        }
+        .lesson-item .lesson-header.active .icon::before {
+            content: '▲';
+            color:black;
+        }
+        .lesson-item .lesson-content {
+            display: none;
+            padding: 10px 20px;
+        }
+        .source-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .source-item {
+            margin-bottom: 10px;
+            background-color: #FCFCFC;
+            border-radius:12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 12px 12px;
+        }
+        .source-item:last-child {
+            border-bottom: none;
+        }
+        .source-item .teacher-info {
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: 500;
+            white-space: nowrap;
+            width: 20%;
+        }
+        .source-item .source-links {
+            width:80%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            flex-flow:row-reverse;
+        }
+        .source-item .source-link {
+            width:31%;
+            text-decoration: none;
+            color: #444;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            direction:ltr;
+            align-items: center;
+            gap:2px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .source-item .source-link:hover {
+            background-color: #ebebeb;
+            border-color: #ccc;
+        }
+        .source-item .source-icon {
+            font-family: 'Font Awesome 5 Free', 'Arial', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            color: #666;
+        }
+        .source-item .source-link .source-icon-img {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .my-accordion {
+                margin: 10px 0;
+                border-radius: 8px;
+            }
+            .my-accordion .accordion-header {
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
+            .lesson-item .lesson-header {
+                padding: 10px 15px;
+                font-size: 0.95rem;
+            }
+            .lesson-item .lesson-header .icon {
+                width: 14px;
+                height: 14px;
+            }
+            .source-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+            .source-item .teacher-info {
+                width: 100%;
+                text-align: right;
+                margin-bottom: 8px;
+            }
+            .source-item .source-links {
+                direction:ltr;
+                width: 100%;
+                justify-content: space-around;
+                flex-flow: row;
+                gap: 8px;
+            }
+            .source-item .source-link {
+                width: auto;
+                padding: 6px 10px;
+                justify-content: center;
+            }
+            .source-item .source-link .source-text {
+                display: none;
+            }
+        }
+  html[data-azmoon-step="1"] #step2-container,
+  html[data-azmoon-step="1"] #step3-container { display: none !important; }
+
+  html[data-azmoon-step="2"] #step1-container,
+  html[data-azmoon-step="2"] #step3-container { display: none !important; }
+
+  html[data-azmoon-step="3"] #step1-container,
+  html[data-azmoon-step="3"] #step2-container { display: none !important; }
+
+  /* دکمه‌ها */
+  html[data-azmoon-step="3"] #az-next-btn { display: none !important; }
+  html[data-azmoon-step="1"] #az-back-btn { display: none !important; }
+
+  /* انتخاب‌ها */
+  .is-selected { border-bottom:6px solid #C11817 !important; color: #fff !important; }
+  .azmoon-selectable { cursor: pointer; transition: background-color .2s, color .2s, box-shadow .2s; border-radius: 12px; }
+  .is-hidden { display: none !important; }
+
+  #azmoon-error { margin-top: 8px; font-size: 14px; color: #d33; }
