@@ -12,7 +12,11 @@
  */
 define('UPLOADS_DIR', site_url().'/wp-content/uploads');
 $secret_key = defined('TAMLAND_PURCHASE_SECTRET_KEY') ? TAMLAND_PURCHASE_SECTRET_KEY : '';
-
+$TAMLAND_PURCHASE_USR = defined('TAMLAND_PURCHASE_USR') ? TAMLAND_PURCHASE_USR : '';
+$TAMLAND_MID1_PSW = defined('TAMLAND_MID1_PSW') ? TAMLAND_MID1_PSW : '';
+$TAMLAND_MID2_PSW = defined('TAMLAND_MID2_PSW') ? TAMLAND_MID2_PSW : '';
+$TAMLAND_KONKOOR_PSW = defined('TAMLAND_KONKOOR_PSW') ? TAMLAND_KONKOOR_PSW : '';
+$TAMLAND_TIZHOOSHAN_PSW = defined('TAMLAND_TIZHOOSHAN_PSW') ? TAMLAND_TIZHOOSHAN_PSW : '';
 
 add_theme_support( 'widgets' );
 
@@ -43,7 +47,7 @@ function hello_elementor_child_enqueue_scripts() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.2.0', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '1.0.0', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.5.33', true );
+	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.5.34', true );
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_enqueue_scripts', 20 );
 
@@ -1064,6 +1068,19 @@ function teachers_course_items_func(){
                                                     </a>
                                                 </div>
                                                 <?php endif; ?>
+                                                  <?php if($teachers_courses['item-'.$j]['teacher-aparat-code-teaser'] != ""): ?>
+                                                <div class="col-6 py-1">
+                                                        <div class="col first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code-teaser']; ?>">
+                                                            <div class="elementor-widget-container">
+                                                                <a class="w-100 d-block">
+                                                                    <button class="d-block btn w-100" style="background:#B21E1ECC;color:#fff;border-radius:20px">
+                                                                    تیزر معرفی دوره استاد
+                                                                    </button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                </div>
+                                                <?php endif; ?>
                                                 <?php if($teachers_courses['item-'.$j]['teacher-aparat-code'] != ""): ?>
                                                 <div class="col-6 py-1">
                                                         <div class="col first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code']; ?>">
@@ -1416,9 +1433,9 @@ function render_updatecourse() {
                     {fldType:80,fldTypeVal:178},
                     {fldType:64,fldTypeVal:132},
                     {fldType:64,fldTypeVal:131},
-                    {fldType:60,fldTypeVal:129},
+                    {fldType:158,fldTypeVal:129},
                     {fldType:59,fldTypeVal:130},
-                    {fldType:62,fldTypeVal:114},
+                    {fldType:131,fldTypeVal:114},
                     {fldType:72,fldTypeVal:167},
                     {fldType:61,fldTypeVal:119}
                     ],
@@ -1434,8 +1451,22 @@ function render_updatecourse() {
                 if(teacherRes[0] != "" && teacherRes[0] != null && teacherRes[0] != undefined ){
                     jQuery('#teacher-archive-all ul li label:contains('+teacherRes[0]+') [name="tax_input[teacher-archive][]"]').attr('checked','checked');
                 }
-                
-                
+                let isInstallment = dataVal.fldInstallment;
+                if(isInstallment){
+                    var trueIsChecked = jQuery('#installments-true').attr('checked');
+                    if(trueIsChecked !== 'checked'){
+                        jQuery('[data-control-name=installments] .cx-switcher-wrap').click();
+                    }
+                    let installment_price = dataVal.fldPriceInstallmentOne.toString();
+                    installment_price = installment_price.substring(0,(price.length - 1));
+                    jQuery('[name="installment_pay"]').val(installment_price);
+                }else{
+                    var falseIsChecked = jQuery('#installments-false').attr('checked');
+                    if(falseIsChecked !== 'checked'){
+                        jQuery('[data-control-name=installments] .cx-switcher-wrap').click();
+                    }
+                    jQuery('[name="installment_pay"]').val("");
+                }
               }
               )
           .catch(error =>{
@@ -1474,6 +1505,18 @@ function render_updatecourse() {
                 let fldStartDateTime = dataVal.fldStartDateTime;
                 let startDate = fldStartDateTime.split("T");
                 let SDate = new Date(startDate[0]);
+                let isInstallment = dataVal.fldIsInstallment;
+                if(isInstallment){
+                    var trueIsChecked = jQuery('#installments-true').attr('checked');
+                    if(trueIsChecked !== 'checked'){
+                        jQuery('[data-control-name=installments] .cx-switcher-wrap').click();
+                    }
+                }else{
+                    var falseIsChecked = jQuery('#installments-false').attr('checked');
+                    if(falseIsChecked !== 'checked'){
+                        jQuery('[data-control-name=installments] .cx-switcher-wrap').click();
+                    }
+                }
                 jQuery('[name="start-date"]').val(new Intl.DateTimeFormat('fa-IR',{
                     timeZone: 'Asia/Tehran',
                 }).format(SDate));
@@ -1843,6 +1886,7 @@ function custom_phone_validation($result, $value, $form, $field) {
 
 add_shortcode('add_to_cart_button_course', 'add_to_cart_button_course_func');
 function add_to_cart_button_course_func($atts){
+    global $secret_key;
     $checkout_page_url = site_url().'/course-checkout';
     $post = get_post();
     $item_name = str_replace("|","-",$post->post_title);
@@ -1856,12 +1900,14 @@ function add_to_cart_button_course_func($atts){
             'is_archive' => false,
     		'teachers_course_id' => ''
     ), $atts );
+    $is_installment = get_post_meta( $post->ID, 'installments', true );
     if($course_type == 'normal-course' || $course_type == 'course-pack' || ($course_type == 'multi-teacher' && $button_atts['is_archive'] == true) || $post_type == 'exams'){
         // Get Prices
         $price = get_post_meta( $post->ID, 'price_tax', true );
         $price_sale = get_post_meta( $post->ID, 'price_sale_tax', true );
         $region_price = get_post_meta( $post->ID, 'region-price', true );
         $course_id_lms = get_post_meta( $post->ID, 'course-id-lms', true );
+        
         if($region_price !=""){
             for( $i = 0; $i < 1; $i++ ){
                 if($region_price['item-'.$i]['region-price-sale-tax'] != ""){
@@ -1902,7 +1948,7 @@ function add_to_cart_button_course_func($atts){
         }
     }
     
-    $token = hash_hmac('sha256', $course_id_lms . '|' . $items[0]["price"], $secret_key);
+    $token = hash_hmac('sha256', $course_id_lms . '|' . trim($items[0]["price"]), $secret_key);
     ?>
     <form method="post" action="<?php echo $checkout_page_url; ?>">
         <?php
@@ -1916,6 +1962,7 @@ function add_to_cart_button_course_func($atts){
             <?php
         }
         ?>
+        <input type="hidden" name="course_id" value="<?php echo $post->ID ?>">
         <input type="hidden" name="course_id_lms" value="<?php echo $course_id_lms; ?>">
         <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
         <?php
@@ -1939,6 +1986,7 @@ function add_to_cart_button_course_func($atts){
             ';
         }
         ?>
+        <input type="hidden" name="installments" value="<?php echo $is_installment; ?>">
         <input type="hidden" name="course_numbers" value="<?php echo count($items); ?>">
         <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
         <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
@@ -1953,6 +2001,7 @@ add_filter('gform_pre_render_4', 'validate_secure_token');
 
 function validate_secure_token($form) {
      if(!is_admin()){
+        global $secret_key;
         if (isset($_GET['gf_token'])) {
             $draft_token = sanitize_text_field($_GET['gf_token']);
             // دریافت مقادیر پیش‌نویس مرتبط با توکن
@@ -1963,25 +2012,25 @@ function validate_secure_token($form) {
                 $submission = json_decode($draft_values['submission'], true);
                 $input_7 = explode("|", $submission['submitted_values']['7']);
                 if(!isset($input_7[1], $submission['submitted_values']['8'], $submission['submitted_values']['26'])){
-                    die('اطلاعات ناقص است');
+                    wp_die('اطلاعات ناقص است');
                 }
                 
-                $expected_token = hash_hmac('sha256', $submission['submitted_values']['8'] . '|' . $input_7[1], $secret_key);
-
+                $expected_token = hash_hmac('sha256', $submission['submitted_values']['8'] . '|' . trim($input_7[1]), $secret_key);
+                //print_r($expected_token);
                 if ($submission['submitted_values']['26'] !== $expected_token) {
-                    die('درخواست شما نامعتبر است');
+                    wp_die('درخواست شما نامعتبر است');
                 }
             }
         }else{
             // بررسی وجود مقادیر در POST
             if (!isset($_POST['course_id_lms'], $_POST['course_price_0'], $_POST['secure_token'])) {
-                die('اطلاعات ناقص است');
+                wp_die('اطلاعات ناقص است');
             }
-        
-            $expected_token = hash_hmac('sha256', $_POST['course_id_lms'] . '|' . $_POST['course_price_0'], $secret_key);
-        
+
+            $expected_token = hash_hmac('sha256', $_POST['course_id_lms'] . '|' . trim($_POST['course_price_0']), $secret_key);
+            //print_r($_POST['course_price_0']);
             if ($_POST['secure_token'] !== $expected_token) {
-                die('درخواست شما نامعتبر است');
+                wp_die('درخواست شما نامعتبر است');
             }
         }
     
@@ -2033,6 +2082,49 @@ function add_courses_fields( $form ) {
                  }else{
                      $field->defaultValue = $submission['submitted_values'][$field->id];
                  }
+                 
+            }
+            $installment = $submission['submitted_values'][29];
+            if($installment == "true"){
+            ?>
+                <style>
+                    #switchLabel{
+                        display:block !important;
+                    }
+                    .view-course-form{
+                        top:173px !important;
+                    }
+                </style>
+            <?php
+            }elseif($installment == "false"){
+            ?>
+                <style>
+                    #switchLabel{
+                        display:none !important;
+                    }
+                    .view-course-form{
+                        top:83px !important;
+                    }
+                </style>
+            <?php
+            }
+            $isInstallment = $submission['submitted_values'][28];
+            if($isInstallment == "1"){
+            ?>
+                <script>
+                    jQuery(document).ready(function(){
+                        jQuery('.switch .slider').addClass('active');
+                    });
+                </script>
+            <?php
+            }elseif($isInstallment == "0"){
+            ?>
+                <script>
+                    jQuery(document).ready(function(){
+                        jQuery('.switch .slider').removeClass('active');
+                    });
+                </script>
+            <?php
             }
         }
     }else{
@@ -2067,6 +2159,84 @@ function add_courses_fields( $form ) {
                 }
             }
         }
+        
+        if(isset($_POST['course_id'])){
+            $course_id = $_POST['course_id'];
+            
+            foreach ( $form['fields'] as &$field ) {
+                if ( $field->id == 23 ) {
+                    $field->defaultValue = $course_id;
+                }
+            }
+        }else{
+            $course_id = $_POST['input_23'];
+            foreach ( $form['fields'] as &$field ) {
+                if ( $field->id == 23 ) {
+                    $field->defaultValue = $course_id;
+                }
+            }
+        }
+        if(isset($_POST['installments'])){
+            foreach ( $form['fields'] as &$field ) {
+                if ( $field->id == 29 ) {
+                    $field->defaultValue = $_POST['installments'];
+                }
+            }
+            if($_POST['installments'] == "true"){
+                ?>
+                <style>
+                    #switchLabel{
+                        display:block !important;
+                    }
+                    .view-course-form{
+                        top:173px !important;
+                    }
+                </style>
+                <?php
+            }elseif($_POST['installments'] == "false"){
+                ?>
+                <style>
+                    #switchLabel{
+                        display:none !important;
+                    }
+                    .view-course-form{
+                        top:83px !important;
+                    }
+                </style>
+                <?php
+            }
+        }else{
+            $installments = $_POST['input_29'];
+            foreach ( $form['fields'] as &$field ) {
+                if ( $field->id == 29 ) {
+                    $field->defaultValue = $installments;
+                }
+            }
+            if($installments == "true"){
+                ?>
+                <style>
+                    #switchLabel{
+                        display:block !important;
+                    }
+                    .view-course-form{
+                        top:173px !important;
+                    }
+                </style>
+                <?php
+            }elseif($installments == "false"){
+                ?>
+                <style>
+                    #switchLabel{
+                        display:none !important;
+                    }
+                    .view-course-form{
+                        top:83px !important;
+                    }
+                </style>
+                <?php
+            }
+        }
+        
         
         if(isset($_POST['course_type'])){
             $course_type = $_POST['course_type'];
@@ -2274,42 +2444,46 @@ function post_to_third_party($entry, $form) {
     }elseif($entry['9'] == "بسته"){
         $course_type_lms = 2;
     }
-    $lmsdata = array(
-	    "Name" => $entry['1'],
-		"Mobile" => $entry['2'],
-		"CourseId" => (int)$entry['8'],
-		"Price" => $amount,
-		"Status" => 10,
-		"TrackingCode" => "",
-		"Type" => (int)$course_type_lms,
-	    "PaymentDate" => $entry['date_created'],
-		"WPCode" => (int)$entry['id'],
-		"MaskedCardNumber" => "",
-		"UtmSource" => isset($entry[11]) ? $entry[11] : "",
-		"UtmMedium" => isset($entry[12]) ? $entry[12] : "",
-		"UtmChannel" => isset($entry[13]) ? $entry[13] : ""
-	);
-                    
-	// Encode the data as a JSON string
-	$lmsdatas = json_encode($lmsdata);
-    error_log('(After Sub) LMS Data Encoded: ' . print_r($lmsdatas, true));
     
-	$curl2 = curl_init();
-    curl_setopt_array($curl2, array(
-		CURLOPT_URL => 'https://api.tamland.ir/api/payment/savePayment',
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING => '',
-		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 0,
-	    CURLOPT_FOLLOWLOCATION => true,
-		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		CURLOPT_CUSTOMREQUEST => 'POST',
-		CURLOPT_POSTFIELDS =>$lmsdatas,
-		CURLOPT_HTTPHEADER => array(
-			'Content-Type: application/json',
-			'Cookie: cookiesession1=678B28A8A9990742D7412CE00BD0687F'
-		),
-	));
+        error_log('isinstallment is '.$entry['28']);
+        $lmsdata = array(
+    	    "Name" => $entry['1'],
+    		"Mobile" => $entry['2'],
+    		"CourseId" => (int)$entry['8'],
+    		"Installment" => (int)$entry['28'],
+    		"Price" => $amount,
+    		"Status" => 10,
+    		"TrackingCode" => "",
+    		"Type" => (int)$course_type_lms,
+    	    "PaymentDate" => $entry['date_created'],
+    		"WPCode" => (int)$entry['id'],
+    		"MaskedCardNumber" => "",
+    		"UtmSource" => isset($entry[11]) ? $entry[11] : "",
+    		"UtmMedium" => isset($entry[12]) ? $entry[12] : "",
+    		"UtmChannel" => isset($entry[13]) ? $entry[13] : ""
+    	);
+    
+    
+    // Encode the data as a JSON string
+    	$lmsdatas = json_encode($lmsdata);
+        error_log('After Sub: '.print_r($lmsdatas, true));
+        
+    	$curl2 = curl_init();
+        curl_setopt_array($curl2, array(
+    		CURLOPT_URL => 'https://api.tamland.ir/api/payment/savePayment',
+    		CURLOPT_RETURNTRANSFER => true,
+    		CURLOPT_ENCODING => '',
+    		CURLOPT_MAXREDIRS => 10,
+    		CURLOPT_TIMEOUT => 0,
+    	    CURLOPT_FOLLOWLOCATION => true,
+    		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    		CURLOPT_CUSTOMREQUEST => 'POST',
+    		CURLOPT_POSTFIELDS =>$lmsdatas,
+    		CURLOPT_HTTPHEADER => array(
+    			'Content-Type: application/json',
+    			'Cookie: cookiesession1=678B28A8A9990742D7412CE00BD0687F'
+    		),
+    	));
 
 	$lmsresponses = curl_exec($curl2);
     error_log("lmsresponses: " . $lmsresponses);               
@@ -2338,11 +2512,129 @@ function post_to_third_party($entry, $form) {
 }
 
 function calculate_amount($entry) {
-    if(isset($_COOKIE['discountIsSet'])){
-        error_log('Yes discountIsSet is set');
-        $discount_is_set = $_COOKIE['discountIsSet'];
-        error_log('discountIsSet is:'.$discount_is_set);
-        if($discount_is_set && !empty($entry['20'])){
+    global $TAMLAND_PURCHASE_USR;
+    global $TAMLAND_MID1_PSW;
+    global $TAMLAND_MID2_PSW;
+    global $TAMLAND_KONKOOR_PSW;
+    global $TAMLAND_TIZHOOSHAN_PSW;
+    
+    if(isset($_COOKIE['discountIsSet']) && $_COOKIE['discountIsSet'] == "true"){
+        $discountIsSet = true;
+    }else{
+        $discountIsSet = false; 
+    }
+    
+    if($entry['28'] == "1"){
+        $installmentsIsSet = true;
+    }else{
+        $installmentsIsSet = false; 
+    }
+    
+    if($discountIsSet == false && $installmentsIsSet == true){
+        error_log('Yes installmentsIsSet is set');
+        
+            $url = $entry['10'];
+            $parts = parse_url($url);
+            
+            $scheme = $parts['scheme'];    // https
+            $host   = $parts['host'];      // subdomain.tamland.ir
+            
+            $baseUrl = $scheme . '://' . $host;
+            
+            $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+            
+            switch ($host) {
+                case "mid1.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID1_PSW
+                    );
+                    break;
+            
+                case "mid2.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID2_PSW
+                    );
+                    break;
+                    
+                case "konkoor.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_KONKOOR_PSW
+                    );
+                    break;
+                    
+                case "tizhooshan.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_TIZHOOSHAN_PSW
+                    );
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            
+            $user_ch = curl_init();
+            
+            curl_setopt($user_ch, CURLOPT_URL, $user_url);
+            curl_setopt($user_ch, CURLOPT_POST, true);
+            curl_setopt($user_ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($user_ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json'
+            ));
+            curl_setopt($user_ch, CURLOPT_POSTFIELDS, json_encode($user_data));
+            
+            $user_response = curl_exec($user_ch);
+            
+            if (curl_errno($user_ch)) {
+                echo 'Curl error: ' . curl_error($user_ch);
+                curl_close($user_ch);
+                exit;
+            }
+            
+            curl_close($user_ch);
+            
+            $user_response_data = json_decode($user_response, true);
+            
+            // گرفتن توکن
+            $user_token = $user_response_data['token'];
+            error_log('token: '.$user_token);
+            $course_id = isset($entry['23']) ? intval($entry['23']) : 0;
+            error_log($course_id);
+            
+            $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
+        
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => $api_url,
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'GET',
+              CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer '.$user_token
+              ),
+            ));
+            
+            $response = curl_exec($curl);
+            
+            curl_close($curl);
+            
+            $data = json_decode($response, true);
+            // مقدار مورد نظر
+            $installment_pay_tax = $data['meta']['installment_pay_tax'] ?? '';
+    
+            $amount_field = $installment_pay_tax;
+            return $amount_field . '0';
+    }elseif(($discountIsSet == true && !empty($entry['20'])) && $installmentsIsSet == false){
+        
             if($entry['9'] == "دوره معمولی" || $entry['9'] == "چند استاده" || $entry['9'] == "آزمون"){
                 $course_type_lms = 1;
             }elseif($entry['9'] == "بسته"){
@@ -2393,26 +2685,121 @@ function calculate_amount($entry) {
             }else{
                return $amount_field . '0'; 
             }
-        }else{
-            $amount_field = $entry['6'];
-            error_log('amount_field is:'.$amount_field);
-            if($amount_field == 0){
-                return $amount_field;
-            }else{
-               return $amount_field . '0'; 
-            }
-        }
+        
+    }elseif($discountIsSet == true && $installmentsIsSet == true){
         
     }else{
-        error_log('Discount not set');
-        $amount_field = $entry['6'];
+        
+        error_log('Yes installmentsIsSet is set');
+        
+            $url = $entry['10'];
+            $parts = parse_url($url);
+            
+            $scheme = $parts['scheme'];    // https
+            $host   = $parts['host'];      // subdomain.tamland.ir
+            
+            $baseUrl = $scheme . '://' . $host;
+            
+            $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+            
+            switch ($host) {
+                case "mid1.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID1_PSW
+                    );
+                    break;
+            
+                case "mid2.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID2_PSW
+                    );
+                    break;
+                    
+                case "konkoor.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_KONKOOR_PSW
+                    );
+                    break;
+                    
+                case "tizhooshan.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_TIZHOOSHAN_PSW
+                    );
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            
+            $user_ch = curl_init();
+            
+            curl_setopt($user_ch, CURLOPT_URL, $user_url);
+            curl_setopt($user_ch, CURLOPT_POST, true);
+            curl_setopt($user_ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($user_ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json'
+            ));
+            curl_setopt($user_ch, CURLOPT_POSTFIELDS, json_encode($user_data));
+            
+            $user_response = curl_exec($user_ch);
+            
+            if (curl_errno($user_ch)) {
+                echo 'Curl error: ' . curl_error($user_ch);
+                curl_close($user_ch);
+                exit;
+            }
+            
+            curl_close($user_ch);
+            
+            $user_response_data = json_decode($user_response, true);
+            
+            // گرفتن توکن
+            $user_token = $user_response_data['token'];
+            error_log('token: '.$user_token);
+            $course_id = isset($entry['23']) ? intval($entry['23']) : 0;
+            error_log($course_id);
+            
+            $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
+        
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => $api_url,
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'GET',
+              CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer '.$user_token
+              ),
+            ));
+            
+            $response = curl_exec($curl);
+            
+            curl_close($curl);
+            
+            $data = json_decode($response, true);
+            // مقدار مورد نظر
+            $price_tax = $data['meta']['price_tax'] ?? '';
+
+        error_log('Both not set');
+        $amount_field = $price_tax;
         error_log('amount_field is:'.$amount_field);
         if($amount_field == 0){
             return $amount_field;
         }else{
            return $amount_field . '0'; 
-        }
+        } 
     }
+
 }
 
 function prepare_payment_data($entry_id, $amount, $return_path) {
@@ -2654,6 +3041,7 @@ function modify_incomplete_submission( $submission_json, $resume_token, $form){
     $mobile = $updated_json->submitted_values->{'2'};
     $courseId = $updated_json->submitted_values->{'8'};
     $amount = $updated_json->submitted_values->{'6'};
+    $isInstallment = $updated_json->submitted_values->{'28'};
     $type = $updated_json->submitted_values->{'9'};
     if($type == "دوره معمولی" || $type == "چند استاده" || $type == "آزمون"){
         $course_type_lms = 1;
@@ -2665,21 +3053,22 @@ function modify_incomplete_submission( $submission_json, $resume_token, $form){
     $utmChannel = $updated_json->submitted_values->{'13'};
     
     $lmsdata = array(
-	    "Name" => $name,
-		"Mobile" => $mobile,
-		"CourseId" => (int)$courseId,
-		"Price" => $amount,
-		"Status" => 11,
-		"TrackingCode" => "",
-		"Type" => (int)$course_type_lms,
-	    "PaymentDate" => "",
-		"WPCode" => (int)$entry['id'],
-		"MaskedCardNumber" => "",
-		"UtmSource" => isset($utmSource) ? $utmSource : "",
-		"UtmMedium" => isset($utmMedium) ? $utmMedium : "",
-		"UtmChannel" => isset($utmChannel) ? $utmChannel : ""
-		
-	);
+    	    "Name" => $name,
+    		"Mobile" => $mobile,
+    		"CourseId" => (int)$courseId,
+    		"Price" => $amount,
+    		"Installment" => (int)$isInstallment,
+    		"Status" => 11,
+    		"TrackingCode" => "",
+    		"Type" => (int)$course_type_lms,
+    	    "PaymentDate" => "",
+    		"WPCode" => (int)$entry['id'],
+    		"MaskedCardNumber" => "",
+    		"UtmSource" => isset($utmSource) ? $utmSource : "",
+    		"UtmMedium" => isset($utmMedium) ? $utmMedium : "",
+    		"UtmChannel" => isset($utmChannel) ? $utmChannel : ""
+    		
+    	);
                     
 	// Encode the data as a JSON string
 	$lmsdatas = json_encode($lmsdata);
@@ -3353,3 +3742,129 @@ function my_child_theme_gtm_body_noscript() {
     <?php
 }
 add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
+
+// هندل درخواست AJAX
+add_action('wp_ajax_get_course_details', 'get_course_details_callback');
+add_action('wp_ajax_nopriv_get_course_details', 'get_course_details_callback');
+
+function get_course_details_callback() {
+    global $TAMLAND_PURCHASE_USR;
+    global $TAMLAND_MID1_PSW;
+    global $TAMLAND_MID2_PSW;
+    global $TAMLAND_KONKOOR_PSW;
+    global $TAMLAND_TIZHOOSHAN_PSW;
+    
+    $url = $_POST['ref_url_payment'];
+    $parts = parse_url($url);
+    
+    $scheme = $parts['scheme'];    // https
+    $host   = $parts['host'];      // subdomain.tamland.ir
+    
+    $baseUrl = $scheme . '://' . $host;
+    
+    $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+    
+    switch ($host) {
+        case "mid1.tamland.ir":
+            $user_data = array(
+                "username" => $TAMLAND_PURCHASE_USR,
+                "password" => $TAMLAND_MID1_PSW
+            );
+            break;
+    
+        case "mid2.tamland.ir":
+            $user_data = array(
+                "username" => $TAMLAND_PURCHASE_USR,
+                "password" => $TAMLAND_MID2_PSW
+            );
+            break;
+                    
+        case "konkoor.tamland.ir":
+            $user_data = array(
+                "username" => $TAMLAND_PURCHASE_USR,
+                "password" => $TAMLAND_KONKOOR_PSW
+            );
+            break;
+            
+        case "tizhooshan.tamland.ir":
+            $user_data = array(
+                "username" => $TAMLAND_PURCHASE_USR,
+                "password" => $TAMLAND_TIZHOOSHAN_PSW
+            );
+            break;
+                    
+        default:
+            break;
+    }
+    
+    
+    $user_ch = curl_init();
+    
+    curl_setopt($user_ch, CURLOPT_URL, $user_url);
+    curl_setopt($user_ch, CURLOPT_POST, true);
+    curl_setopt($user_ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($user_ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json'
+    ));
+    curl_setopt($user_ch, CURLOPT_POSTFIELDS, json_encode($user_data));
+    
+    $user_response = curl_exec($user_ch);
+    
+    if (curl_errno($user_ch)) {
+        echo 'Curl error: ' . curl_error($user_ch);
+        curl_close($user_ch);
+        exit;
+    }
+    
+    curl_close($user_ch);
+    
+    $user_response_data = json_decode($user_response, true);
+    
+    // گرفتن توکن
+    $user_token = $user_response_data['token'];
+    error_log('token: '.$user_token);
+    $course_id = isset($_POST['course_id']) ? intval($_POST['course_id']) : 0;
+    error_log($course_id);
+    if (!$course_id) {
+        wp_send_json_error("Course ID not provided");
+    }
+    
+    $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
+
+    $curl = curl_init();
+    
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $api_url,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'GET',
+      CURLOPT_HTTPHEADER => array(
+        'Authorization: Bearer '.$user_token
+      ),
+    ));
+    
+    $response = curl_exec($curl);
+    
+    curl_close($curl);
+    //echo $response;
+
+    if (is_wp_error($response)) {
+        wp_send_json_error($response->get_error_message());
+    }
+    
+    $data = json_decode($response, true);
+    // مقدار مورد نظر
+    $installment_pay_tax = $data['meta']['installment_pay_tax'] ?? '';
+    $price_tax = $data['meta']['price_tax'] ?? '';
+    
+    wp_send_json_success([
+        'installment_pay_tax' => $installment_pay_tax,
+        'price_tax' => $price_tax
+    ]);
+
+    wp_die();
+}
