@@ -8,9 +8,21 @@ define( 'UPLOADS', '/wp-content/uploads/' );
     <title>صفحه خرید دوره | مدرسه آنلاین متوسطه اول تام لند</title>
     <script src="https://mid1.tamland.ir/wp-includes/js/jquery/jquery.min.js" id="jquery-core-js"></script>
     <script src="https://mid1.tamland.ir/wp-content/themes/hello-theme-child-master/assets/js/js.cookie.min.js"></script>
-    <link rel="stylesheet" href="https://mid1.tamland.ir/wp-content/themes/hello-theme-child-master/assets/css/course-checkout.css?ver=1.0.7" id="course-checkout-css">
+    <link rel="stylesheet" href="https://mid1.tamland.ir/wp-content/themes/hello-theme-child-master/assets/css/course-checkout.css?ver=1.1.6" id="course-checkout-css">
     <script defer>
         var gform;gform||(document.addEventListener("gform_main_scripts_loaded",function(){gform.scriptsLoaded=!0}),document.addEventListener("gform/theme/scripts_loaded",function(){gform.themeScriptsLoaded=!0}),window.addEventListener("DOMContentLoaded",function(){gform.domLoaded=!0}),gform={domLoaded:!1,scriptsLoaded:!1,themeScriptsLoaded:!1,isFormEditor:()=>"function"==typeof InitializeEditor,callIfLoaded:function(o){return!(!gform.domLoaded||!gform.scriptsLoaded||!gform.themeScriptsLoaded&&!gform.isFormEditor()||(gform.isFormEditor()&&console.warn("The use of gform.initializeOnLoaded() is deprecated in the form editor context and will be removed in Gravity Forms 3.1."),o(),0))},initializeOnLoaded:function(o){gform.callIfLoaded(o)||(document.addEventListener("gform_main_scripts_loaded",()=>{gform.scriptsLoaded=!0,gform.callIfLoaded(o)}),document.addEventListener("gform/theme/scripts_loaded",()=>{gform.themeScriptsLoaded=!0,gform.callIfLoaded(o)}),window.addEventListener("DOMContentLoaded",()=>{gform.domLoaded=!0,gform.callIfLoaded(o)}))},hooks:{action:{},filter:{}},addAction:function(o,r,e,t){gform.addHook("action",o,r,e,t)},addFilter:function(o,r,e,t){gform.addHook("filter",o,r,e,t)},doAction:function(o){gform.doHook("action",o,arguments)},applyFilters:function(o){return gform.doHook("filter",o,arguments)},removeAction:function(o,r){gform.removeHook("action",o,r)},removeFilter:function(o,r,e){gform.removeHook("filter",o,r,e)},addHook:function(o,r,e,t,n){null==gform.hooks[o][r]&&(gform.hooks[o][r]=[]);var d=gform.hooks[o][r];null==n&&(n=r+"_"+d.length),gform.hooks[o][r].push({tag:n,callable:e,priority:t=null==t?10:t})},doHook:function(r,o,e){var t;if(e=Array.prototype.slice.call(e,1),null!=gform.hooks[r][o]&&((o=gform.hooks[r][o]).sort(function(o,r){return o.priority-r.priority}),o.forEach(function(o){"function"!=typeof(t=o.callable)&&(t=window[t]),"action"==r?t.apply(null,e):e[0]=t.apply(null,e)})),"filter"==r)return e[0]},removeHook:function(o,r,t,n){var e;null!=gform.hooks[o][r]&&(e=(e=gform.hooks[o][r]).filter(function(o,r,e){return!!(null!=n&&n!=o.tag||null!=t&&t!=o.priority)}),gform.hooks[o][r]=e)}});
+    </script>
+    <script>
+        !function (t, e, n) {
+            t.yektanetAnalyticsObject = n, t[n] = t[n] || function () {
+                t[n].q.push(arguments)
+            }, t[n].q = t[n].q || [];
+            var a = new Date, r = a.getFullYear().toString() + "0" + a.getMonth() + "0" + a.getDate() + "0" + a.getHours(),
+                c = e.getElementsByTagName("script")[0], s = e.createElement("script");
+            s.id = "ua-script-DSLcJKBG"; s.dataset.analyticsobject = n;
+            s.async = 1; s.type = "text/javascript";
+            s.src = "https://cdn.yektanet.com/rg_woebegone/scripts_v3/DSLcJKBG/rg.complete.js?v=" + r, c.parentNode.insertBefore(s, c)
+        }(window, document, "yektanet");
     </script>
 </head>
 
@@ -28,6 +40,12 @@ define( 'UPLOADS', '/wp-content/uploads/' );
         </svg>
         <span>لطفاً قبل از انجام پرداخت، VPN خود را غیرفعال کنید تا در فرآیند خرید اختلال ایجاد نشود.</span></div>
         <div class="w-100 p-relative text-center">
+            <label style="display:none" id="switchLabel" for="choice_4_28_1">
+                <span class="switch">
+                    <span class="slider round"></span>
+                </span>
+                <?php esc_html_e('خرید اقساطی'); ?>
+            </label>
             <?php echo do_shortcode('[gravityform id="4" title="false" description="false" ajax="false" tabindex="1"]'); ?>
         </div>
         <div class="tamland-schools">
@@ -80,7 +98,8 @@ define( 'UPLOADS', '/wp-content/uploads/' );
     		}());
     	
     </script>
-     <script src="https://mid1.tamland.ir/wp-content/themes/hello-theme-child-master/assets/js/course-checkout.js?ver=1.0.7" id="course-checkout-js"></script>
+     <script src="https://mid1.tamland.ir/wp-content/themes/hello-theme-child-master/assets/js/course-checkout.js?ver=1.4.28" id="course-checkout-js"></script>
+      
 </body>
 
 </html>

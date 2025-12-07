@@ -34,7 +34,7 @@ function hello_elementor_child_enqueue_scripts() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.2.0', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '1.0.0', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '2.8.38', true );
+	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '2.8.41', true );
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_enqueue_scripts', 20 );
 
@@ -1248,7 +1248,7 @@ function teachers_course_items_func(){
                                             <?php endif; ?>
                                             <div class="row justify-content-center">
                                                 <?php if($teachers_courses['item-'.$j]['teacher-course-price-tax'] != ""): ?>
-                                                <div class="col-3">
+                                                <div class="col-8">
                                                     <!--<a href="<?php echo $teachers_courses['item-'.$j]['teacher-purchase-link']; ?>" class="elementor-button elementor-button-link elementor-size-sm" style="border-radius:16px;border:3px solid #C4161C">ثبت نام در این دوره</a>-->
                                                     <?php
                                                             echo do_shortcode('[add_to_cart_button_course teachers_course_id="'.$teachers_courses['item-'.$j]['teacher-course-name'].'"]'); 
@@ -1273,7 +1273,7 @@ function teachers_course_items_func(){
                     </div>
                 </li>
         </div>
-        <script>
+        <script defer>
             window.onload = function(e){
                 var elements = document.getElementsByClassName("course-teacher-item");
                 var teacherCourseInfo = document.getElementsByClassName("teacher-course-info");
@@ -1319,7 +1319,7 @@ function teachers_course_items_func(){
                 }
                 
                 
-                jQuery('.container.multiteacher').fadeIn(100);
+                jQuery('.container.multiteacher').fadeIn(5);
             }
         </script>
         <style>
@@ -2249,6 +2249,7 @@ add_action('wp_footer', 'custom_inline_script');
 // Shortcode for Add to cart Button [add_to_cart_button_course]
 add_shortcode('add_to_cart_button_course', 'add_to_cart_button_course_func');
 function add_to_cart_button_course_func($atts){
+    global $secret_key;
     $button_atts = shortcode_atts( array(
             'id' => '',
             'title' => 'ثبت نام در این دوره',
@@ -2269,7 +2270,7 @@ function add_to_cart_button_course_func($atts){
     
     //Creating item array.
     $items = array();
-    
+    $is_installment = get_post_meta( $post->ID, 'installments', true );
     if($course_type == 'normal-course' || $course_type == 'course-pack' || ($course_type == 'multi-teacher' && $button_atts['is_archive'] == true) || $post_type == 'exams'){
         // Get Prices
         $price = get_post_meta( $post->ID, 'price_tax', true );
@@ -2321,7 +2322,7 @@ function add_to_cart_button_course_func($atts){
             }
         }
     }
-    $token = hash_hmac('sha256', $course_id_lms . '|' . $items[0]["price"], $secret_key);
+    $token = hash_hmac('sha256', $course_id_lms . '|' . trim($items[0]["price"]), $secret_key);
     ?>
     <form method="post" action="<?php echo $checkout_page_url; ?>">
         <?php
@@ -2335,7 +2336,7 @@ function add_to_cart_button_course_func($atts){
             <?php
         }
         ?>
-        <input type="hidden" name="post_id" value="<?php echo $post->ID; ?>">
+        <input type="hidden" name="course_id" value="<?php echo $post->ID; ?>">
         <input type="hidden" name="teacher_course_id" value="<?php echo $teacher_course_id; ?>">
         <input type="hidden" name="course_id_lms" value="<?php echo $course_id_lms; ?>">
         <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
@@ -2365,6 +2366,7 @@ function add_to_cart_button_course_func($atts){
             ';
         }
         ?>
+        <input type="hidden" name="installments" value="<?php echo $is_installment; ?>">
         <input type="hidden" name="course_numbers" value="<?php echo count($items); ?>">
         <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
         <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
@@ -2616,8 +2618,19 @@ function count_chars_of_exam_short_desc() {
 add_shortcode( 'exam_short_desc_char_count', 'count_chars_of_exam_short_desc' );
 
 
-// تعریف شورتکد
-function return_1715_shortcode() {
-    return '1715';
+// Shortcode: [aparat_code]
+function shortcode_aparat_code() {
+    // اگر داخل حلقه نیستیم، سعی کنیم پست فعلی را بگیریم
+    $post_id = get_the_ID();
+    if (!$post_id) return '';
+
+    // گرفتن مقدار متافیلد
+    $code = get_post_meta($post_id, 'aparat-code', true);
+
+    // اگر خالی بود، خروجی نده
+    if (empty($code)) return '';
+
+    // خروجی نهایی
+    return $code;
 }
-add_shortcode('return_1715', 'return_1715_shortcode');
+add_shortcode('aparat_code', 'shortcode_aparat_code');

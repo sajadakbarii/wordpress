@@ -1,9 +1,11 @@
 jQuery(document).ready(function () {
         let discountClickCount = 0;
+        let installmentsClickCount = 0;
         let totalPrice = {
             text: "",
             number: 0,
         };
+        
         let finalPrice = {
             text: "",
             number: 0,
@@ -25,7 +27,7 @@ jQuery(document).ready(function () {
                 .html(`کد تخفیف <b>${discountCode}</b> با موفقیت اعمال شد<button type="button" class="del-discount-code"><i class="fa fa-times"></i></button>`)
                 .removeClass('not-valid d-none')
                 .addClass('valid');
-           setCookie("discountIsSet", "true", 9); // Expires in 9 minutes 
+           setCookie("discountIsSet", "true", 9, "/course-checkout"); // Expires in 9 minutes 
         };
 
         const applyDiscountFailure = (message) => {
@@ -34,7 +36,7 @@ jQuery(document).ready(function () {
                 .text(message)
                 .removeClass('valid d-none')
                 .addClass('not-valid');
-            setCookie("discountIsSet", "false", 9); // Expires in 9 minutes 
+            setCookie("discountIsSet", "false", 9, "/course-checkout"); // Expires in 9 minutes 
         };
 
         jQuery('#apply_discount').on('click', function () {
@@ -55,7 +57,7 @@ jQuery(document).ready(function () {
                 totalPrice.number = parseInt(totalPrice.text.replace(/ تومان|,/g, ''));
                 discountClickCount++;
             }
-
+            
             if (discountCode) {
                 fetch("https://api.tamland.ir/api/payment/checkDiscount", {
                     method: "POST",
@@ -78,15 +80,19 @@ jQuery(document).ready(function () {
                                 break;
                             case 1:
                                 applyDiscountFailure('زمان کد تخفیف به پایان رسیده است');
+                                jQuery('#input_4_20').val('');
                                 break;
                             case 2:
                                 applyDiscountFailure('کد تخفیف وارد شده برای این دوره مجاز نمی‌باشد');
+                                jQuery('#input_4_20').val('');
                                 break;
                             case 3:
                                 applyDiscountFailure('کد تخفیف وارد شده نامعتبر است');
+                                jQuery('#input_4_20').val('');
                                 break;
                             case 4:
                                 applyDiscountFailure('تعداد استفاده از کد تخفیف بیشتر از حد مجاز است');
+                                jQuery('#input_4_20').val('');
                                 break;
                             default:
                                 console.error('وضعیت ناشناخته دریافت شد');
@@ -99,7 +105,7 @@ jQuery(document).ready(function () {
         jQuery(document).on('click', '.del-discount-code', function () {
             resetPrice();
             jQuery('.discount-validate-message').removeClass('valid').addClass('d-none').empty();
-            setCookie("discountIsSet", "false", 9); // Expires in 5 minutes 
+            setCookie("discountIsSet", "false", 9, "/course-checkout"); // Expires in 5 minutes 
         });
         
         // Maxlength check for input field
@@ -113,6 +119,77 @@ jQuery(document).ready(function () {
             });
 
         });
+        
+        jQuery('#switchLabel').on('click', function(e){
+            e.preventDefault();
+    
+            let inactiveRadio = jQuery('#choice_4_28_0'); // غیرفعال
+            let activeRadio   = jQuery('#choice_4_28_1'); // فعال
+            let courseId = jQuery('#input_4_23').val();
+            let refer_url = jQuery('#input_4_10').val();
+            
+            // اگر الان فعال است → غیرفعال کن
+            if (activeRadio.prop('checked')) {
+                inactiveRadio.prop('checked', true).trigger('change');
+                jQuery('.switch .slider').removeClass('active');
+                jQuery('#gform_submit_button_4').val('در حال بروز رسانی مبلغ پرداخت ...');
+                jQuery("#switchLabel").css("pointer-events", "none");
+                jQuery.ajax({
+                    url: '/wp-admin/admin-ajax.php',
+                    type: 'POST',
+                    data: {
+                        action: 'get_course_details',
+                        course_id: courseId,
+                        ref_url_payment: refer_url
+                    },
+                    success: function (response) {
+                        jQuery('#gform_submit_button_4').val('پرداخت');
+                        jQuery("#switchLabel").css("pointer-events", "auto");
+                        console.log("Course data:", response.data.price_tax);
+                        finalPrice.number = response.data.price_tax;
+                        finalPrice.text = finalPrice.number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
+                        jQuery('#input_4_6').val(finalPrice.text);
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr.responseText);
+                    }
+                });
+            } 
+            // اگر الان غیرفعال است → فعال کن
+            else {
+                activeRadio.prop('checked', true).trigger('change');
+                jQuery('.switch .slider').addClass('active');
+                /*if(installmentsClickCount === 0){
+                    totalPrice.text = jQuery('#input_4_6').val();
+                    totalPrice.number = parseInt(totalPrice.text.replace(/ تومان|,/g, ''));
+                    installmentsClickCount++;
+                }*/
+                jQuery('#gform_submit_button_4').val('در حال بروز رسانی مبلغ پرداخت ...');
+                jQuery("#switchLabel").css("pointer-events", "none");
+                jQuery.ajax({
+                    url: '/wp-admin/admin-ajax.php',
+                    type: 'POST',
+                    data: {
+                        action: 'get_course_details',
+                        course_id: courseId,
+                        ref_url_payment: refer_url
+                    },
+                    success: function (response) {
+                        jQuery('#gform_submit_button_4').val('پرداخت');
+                        jQuery("#switchLabel").css("pointer-events", "auto");
+                        //console.log("Course data:", response.data.installment_pay_tax);
+                        finalPrice.number = response.data.installment_pay_tax;
+                        finalPrice.text = finalPrice.number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
+                        jQuery('#input_4_6').val(finalPrice.text);
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr.responseText);
+                    }
+                });
+            }
+    
+        });
+        
     });
             
 // Function to validate Iranian mobile number
@@ -157,12 +234,12 @@ jQuery(document).ready(function () {
       toggleButtonState();
     });
     
-function setCookie(name, value, minutes) {
+function setCookie(name, value, minutes, path) {
   let expires = "";
   if (minutes) {
     const date = new Date();
     date.setTime(date.getTime() + (minutes * 60 * 1000)); // Convert minutes to ms
     expires = "; expires=" + date.toUTCString();
   }
-  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  document.cookie = name + "=" + (value || "") + expires + "; path=" + path + "; SameSite=Lax;";
 }

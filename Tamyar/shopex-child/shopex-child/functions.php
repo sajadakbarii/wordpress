@@ -1,11 +1,16 @@
 <?php
+
+$TU = defined('TU') ? TU : '';
+$TP = defined('TP') ? TP : '';
+
 // Enqueue styles from parent and child theme
 function shopex_child_enqueue_styles() {
     wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
     wp_enqueue_style('child-style', get_stylesheet_directory_uri() . '/style.css', array('parent-style'), wp_get_theme()->get('Version'));
+    
+    wp_enqueue_script('java', get_stylesheet_directory_uri() . '/assets/js/java.js', array(), '1.0.1', true);
 }
 add_action('wp_enqueue_scripts', 'shopex_child_enqueue_styles');
-
 
 
 function tamyar_add_orders_pagination_endpoint() {
@@ -13,11 +18,12 @@ function tamyar_add_orders_pagination_endpoint() {
 }
 add_action( 'init', 'tamyar_add_orders_pagination_endpoint' );
 
+
 add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
 // remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
 // remove_action( 'woocommerce_before_cart', 'woocommerce_cart_coupon', 10 );
 // remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals_coupon_form', 10 );
-
+/*
 function add_google_analytics() {
   ?>
   <!-- Google Analytics -->
@@ -31,8 +37,43 @@ function add_google_analytics() {
   <!-- End Google Analytics -->
   <?php
 }
-add_action('wp_head', 'add_google_analytics');
+add_action('wp_head', 'add_google_analytics');*/
 
+
+
+add_action('wp_head','add_extra_script', 9999);
+function add_extra_script(){
+    ?>
+<script type="text/javascript" defer>
+  window.addEventListener("load", function() {
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);
+        t.async = true;
+        t.src = "https://www.clarity.ms/tag/" + i;
+        y=l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "ss1v26uf9k");
+    
+    // لود کردن فایل اصلی gtag.js
+    var gaScript = document.createElement("script");
+    gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-S0TXBW0FLK"; // جایگزین با GA-ID خودت
+    gaScript.async = true;
+    document.body.appendChild(gaScript);
+
+    // بعد از لود شدن اسکریپت، gtag مقداردهی شود
+    gaScript.onload = function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-S0TXBW0FLK'); // جایگزین با GA-ID خودت
+    };
+    
+    ["keydown","touchmove","touchstart","mouseover"].forEach(function(v){window.addEventListener(v,function(){if(!window.isGoftinoAdded){window.isGoftinoAdded=1;var i="qHxEq5",d=document,g=d.createElement("script"),s="https://www.goftino.com/widget/"+i,l=localStorage.getItem("goftino_"+i);g.type="text/javascript",g.async=!0,g.src=l?s+"?o="+l:s;d.getElementsByTagName("head")[0].appendChild(g);}})});
+  });
+</script>
+    <?php
+}
 function teacher_list_from_products_shortcode($atts){
     $atts = shortcode_atts([
         'count'   => 0,  
@@ -233,10 +274,18 @@ function add_custom_button_to_products_page() {
         var tamshopTeacherIds = [];
         var hasNewProduct = false;
         var addedProduct = 0;
-        
+        var tokenImg = ""; 
         const token = btoa("ck_9f4beb4f30c7ff4d7fe458035da45274cf1272bf:cs_2dabbcd8423ea8d632269cde1b2118c251b8dacc");
         // Function to get product properties
-        
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "username": "sajad", "password": "Hoe3yglky)Xt)eWnG5^Wchtm" })
+        };
+        fetch('https://tamyar.ir/wp-json/jwt-auth/v1/token', options)
+        .then(response => response.json())
+        .then(response => tokenImg = response.token)
+         .catch(err => console.error(err));
         jQuery(document).ready(function ($) {
             // Function to call any API and return a promise
             function callApi(url, method, headers, data) {
@@ -365,7 +414,7 @@ function add_custom_button_to_products_page() {
                                 });
                                 
                                 shopProductsDetails = getShopProducts_response.data.map(function(product) {
-                                    let D_regularPrice = product['fldAmountTamPriceAdmin'].toString();
+                                    let D_regularPrice = product['fldAmountTamPriceAdmin']?.toString() ?? '';
                                     let D_tamcoinPercentage = parseFloat(product['fldCoinPercentage']);
                                     let D_tamcoinToPrice = Math.floor(((D_tamcoinPercentage * D_regularPrice) / 100) / 10000) * 10000;
                                     
@@ -395,7 +444,7 @@ function add_custom_button_to_products_page() {
                                         addedProduct++;
                                         //console.log(addedProduct);
                                         let title = product['fldProductTitle'];
-                                        let regularPrice = product['fldAmountTamPriceAdmin'].toString();
+                                        let regularPrice = product['fldAmountTamPriceAdmin']?.toString() ?? '';
                                         let featureImg = product['fldProductImageUrl'];
                                         let category = product['fldFKFirstCategory']
                                                                 .split(',')
@@ -543,7 +592,39 @@ function add_custom_button_to_products_page() {
                                         }
                                         //console.log(tamshopAttr);
                                         if (!tamshopAttr.color.length && !tamshopAttr.size.length) {
+                                            
+                                                        let imageId = null;
+                                                        try {
+                                                            let fullImageUrl = "https://stream.tamland.ir/tamland/1402/shop/" + featureImg;
+                                                            let fileName = featureImg.split('/').pop();
                                                         
+                                                            const imageResponse = await fetch(fullImageUrl);
+                                                            if (!imageResponse.ok) throw new Error("خطا در دریافت تصویر از تملند");
+                                                        
+                                                            const imageBlob = await imageResponse.blob();
+                                                            const formData = new FormData();
+                                                            formData.append("file", imageBlob, fileName);
+                                                        
+                                                            const uploadResponse = await fetch("https://tamyar.ir/wp-json/wp/v2/media", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    "Content-Disposition": "attachment; filename=" + featureImg,
+                                                                    "Authorization": "Bearer " + tokenImg
+                                                                },
+                                                                body: formData
+                                                            });
+                                                        
+                                                            if (uploadResponse.ok) {
+                                                                const uploadedImage = await uploadResponse.json();
+                                                                imageId = uploadedImage.id;
+                                                                console.log("✅ تصویر با موفقیت آپلود شد:", imageId);
+                                                            } else {
+                                                                console.warn("⚠️ خطا در آپلود تصویر:", await uploadResponse.text());
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("❌ خطا در فرآیند دانلود یا آپلود تصویر:", err);
+                                                        }
+
                                                         var wc_settings = {
                                                           "url": "https://tamyar.ir/wp-json/wc/v3/products",
                                                           "method": "POST",
@@ -559,20 +640,21 @@ function add_custom_button_to_products_page() {
                                                             "description": productDescription,
                                                             "categories": wc_categories,
                                                             "teacher": wc_teachers,
+                                                            "images": [{ id: imageId }],
                                                             "attributes": attributes,
                                                             "meta_data": [
                                                               {
                                                                 "key": "tamshop-product-id",
                                                                 "value": tamshopId
                                                               },
-                                                              {
+                                                              /*{
                                                                 "key": "_harikrutfiwu_url",
                                                                 "value": {
                                                                     "img_url": "https://stream.tamland.ir/tamland/1402/shop/"+featureImg,
                                                                     "width": "",
                                                                     "height": ""
                                                                 }
-                                                              },
+                                                              },*/
                                                               {
                                                                 "key": "max_prctamcoins_required",
                                                                 "value": tamcoinToPrice
@@ -584,7 +666,37 @@ function add_custom_button_to_products_page() {
                                                         //console.log("Next API wc_response:", wc_response);
                                                     
                                                     }else{
+                                                        let imageId = null;
+                                                        try {
+                                                            let fullImageUrl = "https://stream.tamland.ir/tamland/1402/shop/" + featureImg;
+                                                            let fileName = featureImg.split('/').pop();
                                                         
+                                                            const imageResponse = await fetch(fullImageUrl);
+                                                            if (!imageResponse.ok) throw new Error("خطا در دریافت تصویر از تملند");
+                                                        
+                                                            const imageBlob = await imageResponse.blob();
+                                                            const formData = new FormData();
+                                                            formData.append("file", imageBlob, fileName);
+                                                        
+                                                            const uploadResponse = await fetch("https://tamyar.ir/wp-json/wp/v2/media", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    "Content-Disposition": "attachment; filename=" + featureImg,
+                                                                    "Authorization": "Bearer " + tokenImg
+                                                                },
+                                                                body: formData
+                                                            });
+                                                        
+                                                            if (uploadResponse.ok) {
+                                                                const uploadedImage = await uploadResponse.json();
+                                                                imageId = uploadedImage.id;
+                                                                console.log("✅ تصویر با موفقیت آپلود شد:", imageId);
+                                                            } else {
+                                                                console.warn("⚠️ خطا در آپلود تصویر:", await uploadResponse.text());
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("❌ خطا در فرآیند دانلود یا آپلود تصویر:", err);
+                                                        }
                                                         // Proceed with using tamshopAttr.color
                                                         var wc_settings = {
                                                           "url": "https://tamyar.ir/wp-json/wc/v3/products",
@@ -600,20 +712,21 @@ function add_custom_button_to_products_page() {
                                                             "description": productDescription,
                                                             "categories": wc_categories,
                                                             "teacher": wc_teachers,
+                                                            "images": [{ id: imageId }],
                                                             "attributes": attributes,
                                                             "meta_data": [
                                                               {
                                                                 "key": "tamshop-product-id",
                                                                 "value": tamshopId
                                                               },
-                                                              {
+                                                              /*{
                                                                 "key": "_harikrutfiwu_url",
                                                                 "value": {
                                                                     "img_url": "https://stream.tamland.ir/tamland/1402/shop/"+featureImg,
                                                                     "width": "",
                                                                     "height": ""
                                                                 }
-                                                              },
+                                                              },*/
                                                               {
                                                                 "key": "max_prctamcoins_required",
                                                                 "value": tamcoinToPrice
@@ -878,7 +991,7 @@ function add_custom_button_to_products_page() {
                                         value: maxCoin.toString()
                                     });
                                 }
-                                if (imageUrl !== null) {
+                                /*if (imageUrl !== null) {
                                     metaData.push({
                                         "key": "_harikrutfiwu_url",
                                         "value": {
@@ -887,7 +1000,43 @@ function add_custom_button_to_products_page() {
                                             "height": ""
                                         }
                                     });
+                                }*/
+                                
+                                if(imageUrl !== null){
+                                    let imageId = null;
+                                                        try {
+                                                            let fullImageUrl = "https://stream.tamland.ir/tamland/1402/shop/" + imageUrl;
+                                                            let fileName = imageUrl.split('/').pop();
+                                                        
+                                                            const imageResponse = await fetch(fullImageUrl);
+                                                            if (!imageResponse.ok) throw new Error("خطا در دریافت تصویر از تملند");
+                                                        
+                                                            const imageBlob = await imageResponse.blob();
+                                                            const formData = new FormData();
+                                                            formData.append("file", imageBlob, fileName);
+                                                        
+                                                            const uploadResponse = await fetch("https://tamyar.ir/wp-json/wp/v2/media", {
+                                                                method: "POST",
+                                                                headers: {
+                                                                    "Content-Disposition": "attachment; filename=" + imageUrl,
+                                                                    "Authorization": "Bearer " + tokenImg
+                                                                },
+                                                                body: formData
+                                                            });
+                                                        
+                                                            if (uploadResponse.ok) {
+                                                                const uploadedImage = await uploadResponse.json();
+                                                                imageId = uploadedImage.id;
+                                                                console.log("✅ تصویر با موفقیت آپلود شد:", imageId);
+                                                            } else {
+                                                                console.warn("⚠️ خطا در آپلود تصویر:", await uploadResponse.text());
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("❌ خطا در فرآیند دانلود یا آپلود تصویر:", err);
+                                                        }
+                                                        payload.images = [{ id: imageId }];
                                 }
+                                
                                 if (metaData.length > 0) {
                                     payload.meta_data = metaData;
                                 }
@@ -1069,7 +1218,7 @@ function add_custom_button_to_products_page() {
                             async function processAndUpdateProduct(item, parentId = null, isVariation = false) {
                                     const tamMeta = item.meta_data?.find(meta => meta.key === 'tamshop-product-id');
                                     if (!tamMeta) return;
-                                
+                                    let productId;
                                     const tamId = parseInt(tamMeta.value);
                                     let stock = null, newtitle = null, newprice = null, newimg = null, newcoin = null, newAttributes = null, variationId = null;
                                     let needsUpdate = false;
@@ -1114,14 +1263,22 @@ function add_custom_button_to_products_page() {
                                         }
                                 
                                         // بررسی تصویر
-                                        let imgMeta = item.meta_data?.find(meta => meta.key === '_harikrutfiwu_url');
-                                        let expectedImg = "https://stream.tamland.ir/tamland/1402/shop/" + matchedProduct.fldProductImageUrl;
-                                
-                                        if (!imgMeta || imgMeta.value.img_url !== expectedImg) {
+                                        
+                                        //let imgMeta = item.meta_data?.find(meta => meta.key === '_harikrutfiwu_url');
+                                        if(item.images.length == 0){
                                             newimg = matchedProduct.fldProductImageUrl;
+                                            console.log('newimg updated: '+newimg);
                                             needsUpdate = true;
+                                        }else{
+                                            let featuredImageName = item.images[0].src.split('/').pop();
+                                            if (!featuredImageName || featuredImageName !== matchedProduct.fldProductImageUrl) {
+                                                newimg = matchedProduct.fldProductImageUrl;
+                                                console.log('newimg updated: '+newimg);
+                                                needsUpdate = true;
+                                            }
                                         }
-                                
+                                        //let expectedImg = "https://stream.tamland.ir/tamland/1402/shop/" + matchedProduct.fldProductImageUrl;
+                                        
                                         // بررسی کوین
                                         let coinMeta = item.meta_data?.find(meta => meta.key === 'max_prctamcoins_required');
                                         if (!coinMeta || coinMeta.value !== matchedProduct.tamcoinToPrice) {
@@ -1158,13 +1315,19 @@ function add_custom_button_to_products_page() {
                                             }
                                         });
                                     }
-                                
+                                    
+                                    if(isVariation){
+                                        productId = variationId;
+                                    }else{
+                                        productId = item.id;
+                                    }
+                                    
                                     // اگر نیاز به آپدیت بود
                                     if (needsUpdate) {
                                         await updateProductData(
-                                            variationId,
+                                            productId,
                                             stock,
-                                            newtitle,
+                                            null, // عنوان
                                             newprice,
                                             newimg,
                                             wc_categories,
@@ -1655,6 +1818,7 @@ function after_payment_gateway($order_id) {
         // Add product details to the $products array
         $products[] = [
             'ProductId' => $tamshop_product_id,
+            'PackageId' => 0,
             'ProductCount' => $product_count,
             'ProductProperties' => $product_properties
         ];
@@ -1719,7 +1883,7 @@ function after_payment_gateway($order_id) {
         'PostalCode' => $postal_code,
         'Address' => $address,
         'Description' => $order->get_customer_note(),
-        'Products' => $products // Add the products array here
+        'Products' => $products, // Add the products array here
     ];
 
     // Example: Log the payload (for debugging)
@@ -1869,337 +2033,6 @@ function get_tamyar_product_id_from_cart_products() {
 }
 
 
-//speed code 
-
-
-add_action('send_headers', function () {
-    if (!is_user_logged_in() && !is_admin() && !defined('DOING_AJAX') && !defined('REST_REQUEST')) {
-
-        $uri = $_SERVER['REQUEST_URI'];
-
-
-        if (preg_match('#^/first-session-video/#', $uri)) {
-            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-            header("Pragma: no-cache");
-        } else {
-            header("Cache-Control: public, max-age=86400");
-        }
-    }
-}, 1); 
-
-remove_action('wp_head', 'rsd_link');
-remove_action('wp_head', 'wlwmanifest_link');
-remove_action('wp_head', 'wp_generator');
-remove_action('wp_head', 'wp_shortlink_wp_head');
-remove_action('wp_head', 'rest_output_link_wp_head');
-remove_action('wp_head', 'print_emoji_detection_script', 7);
-remove_action('admin_print_scripts', 'print_emoji_detection_script');
-remove_action('wp_print_styles', 'print_emoji_styles');
-remove_action('admin_print_styles', 'print_emoji_styles');
-add_filter('the_generator', '__return_empty_string');
-
-
-add_filter('heartbeat_send', function($response, $screen_id) {
-    if (!is_admin()) {
-        return false;
-    }
-    return $response;
-}, 10, 2);
-
-
-function disable_feed() { wp_die(__('No feed available.', 'textdomain')); }
-add_action('do_feed', 'disable_feed', 1);
-add_action('do_feed_rdf', 'disable_feed', 1);
-add_action('do_feed_rss', 'disable_feed', 1);
-add_action('do_feed_rss2', 'disable_feed', 1);
-add_action('do_feed_atom', 'disable_feed', 1);
-
-
-function remove_css_js_ver($src) {
-    if (strpos($src, '?ver=')) $src = remove_query_arg('ver', $src);
-    return $src;
-}
-add_filter('style_loader_src', 'remove_css_js_ver', 10, 2);
-add_filter('script_loader_src', 'remove_css_js_ver', 10, 2);
-
-
-add_action('wp_enqueue_scripts', function () {
-    wp_deregister_script('wp-embed');
-}, 100);
-
-
-add_filter('script_loader_tag', function($tag, $handle, $src) {
-    if (is_admin() || strpos($src, 'jquery.min.js') !== false) return $tag;
-    return str_replace(' src', ' defer src', $tag);
-}, 10, 3);
-
-
-add_action('init', function() {
-    add_filter('tiny_mce_plugins', function($plugins) {
-        return array_diff($plugins, ['wpemoji']);
-    });
-}, 9999);
-
-add_action('wp_head', function () {
-    echo '
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://tamyar.ir" crossorigin>
-    <link rel="preconnect" href="https://stream.tamland.ir" crossorigin>
-
-
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link rel="dns-prefetch" href="//tamyar.ir">
-    <link rel="dns-prefetch" href="//stream.tamland.ir">
-
-
-    <link rel="preload" href="https://tamyar.ir/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" as="script">
-    <link rel="preload" href="https://tamyar.ir/wp-content/plugins/elementor/assets/lib/swiper/swiper.min.js?ver=5.3.6" as="script">
-    
-    
-
-    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/17.png" as="image">
-    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/10.png" as="image">
-    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/49.png" as="image">
-    <link rel="preload" href="https://tamyar.ir/wp-content/uploads/2025/07/18.png" as="image">
-    <link rel="preload" href="https://stream.tamland.ir/tamland/1402/shop/Tamland_product_2025-08-01-06-05-44.jpg" as="image">
-    ';
-});
-
-
-if (!is_user_logged_in()) {
-    header("Cache-Control: public, max-age=86400");
- }
-
-function detect_low_speed_mobile() {
-    if (wp_is_mobile()) {
-        echo "
-        <script>
-        if (navigator.connection && (navigator.connection.saveData || 
-            navigator.connection.effectiveType === '2g' || 
-            navigator.connection.effectiveType === '3g')) {
-            document.documentElement.classList.add('low-speed');
-        }
-        </script>
-        ";
-    }
-}
-add_action('wp_head', 'detect_low_speed_mobile', 1);
-
-remove_action('wp_head', 'print_emoji_detection_script', 7);
-remove_action('wp_print_styles', 'print_emoji_styles');
-
-
-function remove_jquery_migrate_mobile( $scripts ) {
-    if ( wp_is_mobile() && isset( $scripts->registered['jquery'] ) ) {
-        $scripts->registered['jquery']->deps = array_diff( $scripts->registered['jquery']->deps, array('jquery-migrate') );
-    }
-}
-add_action('wp_default_scripts', 'remove_jquery_migrate_mobile');
-
-
-function add_lazy_loading_to_images($content){
-    return str_replace('<img', '<img loading="lazy"', $content);
-}
-add_filter('the_content', 'add_lazy_loading_to_images');
-
-function defer_heavy_css_mobile() {
-    if ( wp_is_mobile() ) {
-        ?>
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            if (!document.documentElement.classList.contains('low-speed')) {
-                var l = document.createElement("link");
-                l.rel = "stylesheet";
-                l.href = "<?php echo get_stylesheet_directory_uri(); ?>/css/f6d8294.css?ver=df3e2";
-                l.media = "print";
-                l.onload = function() { this.media = "all"; };
-                document.head.appendChild(l);
-            }
-        });
-        </script>
-
-        <?php
-    }
-}
-add_action('wp_footer', 'defer_heavy_css_mobile');
-
-
-function defer_google_fonts_mobile() {
-    if ( wp_is_mobile() ) {
-        ?>
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            if (!document.documentElement.classList.contains('low-speed')) {
-                var gf = document.createElement("link");
-                gf.rel = "stylesheet";
-                gf.href = "https://fonts.googleapis.com/css2?family=IRANSans&display=swap";
-                gf.media = "print";
-                gf.onload = function() { this.media = "all"; };
-                document.head.appendChild(gf);
-            }
-        });
-        </script>
-        <?php
-    }
-}
-add_action('wp_footer', 'defer_google_fonts_mobile');
-
-
-function defer_iframes_mobile($content) {
-    if (wp_is_mobile() && !is_admin()) {
-        $content = preg_replace_callback('/<iframe([^>]*)><\/iframe>/i', function ($matches) {
-            $attrs = $matches[1];
-            return '<iframe loading="lazy"' . $attrs . '></iframe>';
-        }, $content);
-    }
-    return $content;
-}
-add_filter('the_content', 'defer_iframes_mobile', 99);
-
-/*
-add_action('wp_head', function () {
-    if (wp_is_mobile()) {
-        echo '<link rel="preload" as="image" href="https://tizhooshan.tamland.ir/wp-content/uploads/2025/05/%D9%87%D9%85%D8%A7%DB%8C%D8%B4-%D8%AC%D9%85%D8%B9-%D8%A8%D9%86%D8%AF%DB%8C-%D8%AA%DB%8C%D8%B2%D9%87%D9%88%D8%B4%D8%A7%D9%86.webp" fetchpriority="high">';
-    }
-}, 1);
-*/
-
-function remove_unused_css_inline() {
-    if (wp_is_mobile()) {
-        echo '<style>body *:not(:first-child){display:none!important;}</style>';
-    }
-}
-
-
-//loading
-
-function is_known_bot() {
-    if (!isset($_SERVER['HTTP_USER_AGENT'])) return false;
-    $bots = [
-        'Googlebot', 'Bingbot', 'Slurp', 'DuckDuckBot', 'YandexBot',
-        'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'WhatsApp', 'TelegramBot'
-    ];
-    foreach ($bots as $bot) {
-        if (stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) return true;
-    }
-    return false;
-}
-
-
-function enqueue_universal_lazyload_script() {
-    if (is_admin() || is_known_bot()) return;
-    ?>
-    <style>
-        .lazy-section-placeholder {
-            background: #f0f0f0;
-            margin: 1rem 0;
-            display: block;
-        }
-    </style>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
-
-        lazyElements.forEach(el => {
-
-            const style = window.getComputedStyle(el);
-
-            const placeholder = document.createElement('div');
-            placeholder.className = 'lazy-section-placeholder';
-            placeholder.style.height = el.offsetHeight + 'px';
-            placeholder.style.width = el.offsetWidth + 'px';
-            placeholder.style.marginTop = style.marginTop;
-            placeholder.style.marginBottom = style.marginBottom;
-            placeholder.style.marginLeft = style.marginLeft;
-            placeholder.style.marginRight = style.marginRight;
-            placeholder.style.paddingTop = style.paddingTop;
-            placeholder.style.paddingBottom = style.paddingBottom;
-            placeholder.style.paddingLeft = style.paddingLeft;
-            placeholder.style.paddingRight = style.paddingRight;
-            placeholder.style.boxSizing = style.boxSizing;
-
-            el.style.display = 'none';
-            el.parentNode.insertBefore(placeholder, el);
-
-            const observer = new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        el.style.display = '';
-                        placeholder.remove();
-                        obs.unobserve(el);
-                    }
-                });
-            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
-
-            observer.observe(placeholder);
-        });
-    });
-    </script>
-    <?php
-}
-add_action('wp_footer', 'enqueue_universal_lazyload_script', 100);
-
-function enqueue_mobile_only_lazyload_script() {
-    if (is_admin() || is_known_bot()) return;
-    ?>
-    <style>
-        .lazy-section-placeholder {
-            background: #f0f0f0;
-            margin: 1rem 0;
-            display: block;
-        }
-    </style>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // فقط موبایل
-        if (!/Mobi|Android/i.test(navigator.userAgent)) return;
-
-        const lazyElements = document.querySelectorAll('[class*="lazy-"], .hero-section');
-
-        lazyElements.forEach(el => {
-            const style = window.getComputedStyle(el);
-
-            const placeholder = document.createElement('div');
-            placeholder.className = 'lazy-section-placeholder';
-            placeholder.style.height = el.offsetHeight + 'px';
-            placeholder.style.width = el.offsetWidth + 'px';
-            placeholder.style.marginTop = style.marginTop;
-            placeholder.style.marginBottom = style.marginBottom;
-            placeholder.style.marginLeft = style.marginLeft;
-            placeholder.style.marginRight = style.marginRight;
-            placeholder.style.paddingTop = style.paddingTop;
-            placeholder.style.paddingBottom = style.paddingBottom;
-            placeholder.style.paddingLeft = style.paddingLeft;
-            placeholder.style.paddingRight = style.paddingRight;
-            placeholder.style.boxSizing = style.boxSizing;
-
-            el.style.display = 'none';
-            el.parentNode.insertBefore(placeholder, el);
-
-            const observer = new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        el.style.display = '';
-                        placeholder.remove();
-                        obs.unobserve(el);
-                    }
-                });
-            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.1 });
-
-            observer.observe(placeholder);
-        });
-    });
-    </script>
-    <?php
-}
-add_action('wp_footer', 'enqueue_mobile_only_lazyload_script', 100);
-
-
-//loading end
-//end speed code
 
 
 /**
@@ -2396,3 +2229,378 @@ function randomize_teacher_cards_js() {
     }
 }
 add_action('wp_head', 'randomize_teacher_cards_js');
+
+add_action( 'pws_save_order_post_barcode', 'tamyar_pws_save_order_post_barcode', 200, 2 );
+
+function tamyar_pws_save_order_post_barcode(WC_Order $order, $barcode){
+    $order_id = $order->get_id();
+    
+    $curl = curl_init();
+    
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => 'https://api.tamland.ir/api/user/Login',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'POST',
+      CURLOPT_POSTFIELDS =>'{
+        "Username":"'.$TU.'",
+        "Password":"'.$TP.'",
+        "SchoolId":-1,
+        "Os":"", 
+        "Browser":"",
+        "Device":"",
+        "otpCall":"0"
+    }
+        ',
+      CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json'
+      ),
+    ));
+                
+    $response_login = curl_exec($curl);
+    curl_close($curl);
+    
+    $response_login_json = json_decode($response_login, true);
+    
+    // بررسی مقدار status
+    if (isset($response_login_json['status']) && $response_login_json['status'] == 0) {
+        $token = $response_login_json['token']; // گرفتن توکن
+        // ذخیره توکن مثلاً در سشن
+        
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => 'https://api.tamland.ir/api/shop/savePostTrackingCode',
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'POST',
+          CURLOPT_POSTFIELDS =>'{
+            "OrderId": '.$order_id.',
+            "TrackingId":"'.$barcode.'"
+        }',
+          CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$token
+          ),
+        ));
+        
+        $response_savePostTrackingCode = curl_exec($curl);
+        curl_close($curl);
+        
+        $response_savePostTrackingCode_json = json_decode($response_savePostTrackingCode, true);
+        $order->add_order_note( $response_savePostTrackingCode_json[0]['status'] );
+        if (isset($response_savePostTrackingCode_json[0]['status']) && $response_savePostTrackingCode_json[0]['status'] == 0) {
+            $order->add_order_note( "کد مرسوله $barcode برای سفارش $order_id در پنل LMS تاملند ثبت شد." );
+        }   
+        
+    }
+}
+
+add_shortcode('slider', 'slider_func');
+function slider_func(){
+    if ( wp_is_mobile()) :
+	    echo do_shortcode('[elementor-template id="56910"]');
+    else :
+	    echo do_shortcode('[elementor-template id="56906"]');
+     endif;
+}
+
+add_shortcode('tamyar_grades_menu', 'tamyar_grades_menu_shortcode');
+function tamyar_grades_menu_shortcode() {
+
+    $terms = get_terms(array(
+        'taxonomy'   => 'grade',
+        'hide_empty' => true, 
+        'parent'     => 0
+    ));
+    
+    if (empty($terms) || is_wp_error($terms)) {
+        return ''; 
+    }
+    
+
+    $desired_order = array(1752, 1751, 1750, 1753, 1745, 1755, 1749, 1744, 1754, 1746, 1743, 1748);
+    
+
+    usort($terms, function($a, $b) use ($desired_order) {
+        $a_pos = array_search($a->term_id, $desired_order);
+        $b_pos = array_search($b->term_id, $desired_order);
+        
+
+        if ($a_pos === false) $a_pos = 999;
+        if ($b_pos === false) $b_pos = 999;
+        
+        return $a_pos - $b_pos;
+    });
+    
+
+    $output = '<ul class="tamyar-grades-menu">';
+    
+    foreach ($terms as $term) {
+        $term_link = get_term_link($term);
+        
+        if (is_wp_error($term_link)) {
+            continue; 
+        }
+        
+        $output .= sprintf(
+            '<li class="grade-item"><a href="%s">%s</a></li>',
+            esc_url($term_link),
+            esc_html($term->name)
+        );
+    }
+    
+    $output .= '</ul>';
+    
+    return $output;
+}
+
+
+add_filter('style_loader_tag', 'add_font_display_swap_to_fonts', 10, 2);
+function add_font_display_swap_to_fonts($html, $handle) {
+
+    $font_keywords = array('fonts.googleapis.com', 'font-awesome', 'fa-solid', 'fa-regular', 'fa-brands', 'elementor-icons');
+    
+
+    foreach ($font_keywords as $keyword) {
+        if (strpos($html, $keyword) !== false) {
+            $html = preg_replace("/rel='stylesheet'/", "rel='preload' as='style' onload=\"this.onload=null;this.rel='stylesheet'\"", $html);
+            $html .= "<noscript><link rel='stylesheet' href='" . esc_url(str_replace(array(" rel='preload' as='style' onload=\"this.onload=null;this.rel='stylesheet'\""), '', $html)) . "'></noscript>";
+            break; 
+        }
+    }
+    return $html;
+}
+
+
+
+function optimize_jquery_with_rocket() {
+
+    if (!function_exists('get_rocket_option')) {
+        return;
+    }
+    
+
+    if (!is_admin() && !is_single() && !is_page()) {
+        wp_deregister_script('jquery');
+        wp_deregister_script('jquery-migrate');
+    }
+}
+add_action('wp_enqueue_scripts', 'optimize_jquery_with_rocket');
+
+function rocket_exclusions() {
+
+    $excluded_files = array(
+        'jquery.min.js',
+        'jquery-migrate.min.js',
+        'bootstrap.min.js',
+        'custom-scripts.js'
+    );
+    
+    foreach ($excluded_files as $file) {
+        if (!defined('WP_ROCKET_EXCLUDED_JS')) {
+            define('WP_ROCKET_EXCLUDED_JS', serialize(array($file)));
+        }
+    }
+}
+add_action('wp', 'rocket_exclusions');
+
+add_action('plugins_loaded', function() {
+    if (is_plugin_active('autoptimize/autoptimize.php')) {
+        deactivate_plugins('autoptimize/autoptimize.php');
+    }
+    if (is_plugin_active('wp-super-cache/wp-cache.php')) {
+        deactivate_plugins('wp-super-cache/wp-cache.php');
+    }
+});
+
+add_action('woocommerce_checkout_update_order_meta', function($order_id) {
+    if (!empty($_POST['billing_phone'])) {
+        update_post_meta($order_id, '_billing_phone', sanitize_text_field($_POST['billing_phone']));
+    }
+});
+
+add_action('woocommerce_checkout_update_order_meta', function($order_id, $posted_data = null) {
+    $log_file = WP_CONTENT_DIR . '/wc-phone-debug-log.txt';
+    $timestamp = date('Y-m-d H:i:s');
+    $user_id = get_current_user_id();
+
+
+    $post_raw = print_r($_POST, true);
+    $phone_post = isset($_POST['billing_phone']) ? sanitize_text_field($_POST['billing_phone']) : '(not found in $_POST)';
+
+
+    $log = [];
+    $log[] = "==============================================";
+    $log[] = "🕓 [$timestamp]";
+    $log[] = "Order ID: $order_id | User ID: $user_id";
+    $log[] = "----------------------------------------------";
+    $log[] = "🔹 Step 1 – Raw POST billing_phone: " . $phone_post;
+
+
+    if ($user_id) {
+        $user_phone = get_user_meta($user_id, 'billing_phone', true);
+        $log[] = "🔹 Step 2 – User Meta billing_phone: " . ($user_phone ?: '(empty)');
+    } else {
+        $log[] = "🔹 Step 2 – User Meta: Skipped (guest checkout)";
+    }
+
+
+    $existing_order_phone = get_post_meta($order_id, '_billing_phone', true);
+    $log[] = "🔹 Step 3 – Existing Order Meta _billing_phone before save: " . ($existing_order_phone ?: '(empty)');
+
+
+    if (!empty($phone_post)) {
+        update_post_meta($order_id, '_billing_phone', $phone_post);
+    }
+
+
+    $saved_phone = get_post_meta($order_id, '_billing_phone', true);
+    $log[] = "🔹 Step 4 – Saved Order Meta _billing_phone after save: " . ($saved_phone ?: '(empty)');
+
+
+    global $wpdb;
+    $meta_exists = $wpdb->get_var($wpdb->prepare(
+        "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_billing_phone' LIMIT 1",
+        $order_id
+    ));
+    $log[] = "🔹 Step 5 – DB Query direct read: " . ($meta_exists ?: '(not found)');
+
+
+    if (empty($phone_post)) {
+        $log[] = "⚠️ ALERT: billing_phone missing in POST (frontend issue)";
+    } elseif (empty($saved_phone)) {
+        $log[] = "⚠️ ALERT: billing_phone not saved properly (backend issue)";
+    } elseif ($saved_phone !== $phone_post) {
+        $log[] = "⚠️ ALERT: mismatch between POST and saved phone!";
+    } else {
+        $log[] = "✅ billing_phone successfully captured and saved.";
+    }
+
+    $log[] = "==============================================\n";
+
+
+    file_put_contents($log_file, implode("\n", $log), FILE_APPEND);
+}, 10, 2);
+
+function tamyar_noindex_product_categories_pages() {
+
+    $current_url = home_url(add_query_arg(NULL, NULL));
+
+
+    if (strpos($current_url, 'shop/?product-categories=') !== false) {
+        echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+    }
+}
+add_action('wp_head', 'tamyar_noindex_product_categories_pages');
+
+
+add_action('woocommerce_checkout_create_order', function($order) {
+    $fields = WC()->session->get('partial_checkout_data');
+
+    if ($fields && is_array($fields)) {
+        foreach ($fields as $key => $value) {
+
+            if (strpos($key, 'billing_') === 0 || strpos($key, 'shipping_') === 0) {
+                $order->update_meta_data($key, sanitize_text_field($value));
+            }
+        }
+
+
+        if (!empty($fields['billing_email'])) {
+            $order->set_billing_email(sanitize_email($fields['billing_email']));
+        }
+        if (!empty($fields['billing_first_name'])) {
+            $order->set_billing_first_name(sanitize_text_field($fields['billing_first_name']));
+        }
+        if (!empty($fields['billing_last_name'])) {
+            $order->set_billing_last_name(sanitize_text_field($fields['billing_last_name']));
+        }
+        if (!empty($fields['billing_phone'])) {
+            $order->set_billing_phone(sanitize_text_field($fields['billing_phone']));
+        }
+
+
+        WC()->session->__unset('partial_checkout_data');
+    }
+});
+
+
+add_action('wp_footer', 'smart_hide_quantity_buttons');
+function smart_hide_quantity_buttons() {
+    if (!is_product()) return;
+
+    global $product;
+    if (!$product) return;
+
+    $hide_buttons = false;
+
+
+    if ($product->is_type('simple')) {
+        if ($product->get_manage_stock()) {
+
+            if ($product->get_stock_quantity() <= 1 || !$product->is_in_stock()) {
+                $hide_buttons = true;
+            }
+        }
+
+    }
+
+
+    elseif ($product->is_type('variable')) {
+        $has_any_variation_with_stock_gt_1 = false;
+        $all_out_of_stock = true;
+
+        foreach ($product->get_available_variations() as $variation_data) {
+            $variation = wc_get_product($variation_data['variation_id']);
+            if ($variation) {
+                if ($variation->get_manage_stock()) {
+                    if ($variation->get_stock_quantity() > 1) {
+                        $has_any_variation_with_stock_gt_1 = true;
+                    }
+                    if ($variation->is_in_stock()) {
+                        $all_out_of_stock = false;
+                    }
+                } else {
+
+                    $has_any_variation_with_stock_gt_1 = true;
+                }
+            }
+        }
+
+        if (!$has_any_variation_with_stock_gt_1 || $all_out_of_stock) {
+            $hide_buttons = true;
+        }
+    }
+
+
+    if ($hide_buttons) {
+        ?>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.quantity .plus, .quantity .minus').forEach(btn => {
+                btn.style.display = 'none';
+            });
+
+
+            const qtyInput = document.querySelector('.quantity .qty, .quantity input.input-text');
+            if (qtyInput) {
+                qtyInput.style.width = '50px';
+                qtyInput.style.textAlign = 'center';
+                qtyInput.value = '1';
+                qtyInput.readOnly = true;
+            }
+        });
+        </script>
+        <?php
+    }
+}

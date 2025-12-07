@@ -1,0 +1,325 @@
+@font-face {
+      font-family: IRANSansWeb;
+      src: url(/wp-content/uploads/2022/09/IRANSansWebFaNum.woff);
+    }
+
+    *{
+        box-sizing:border-box;
+    }
+    body{
+        background-color:#F8F8F8;
+        direction:rtl;
+        font-family:"IRANSansWeb";
+        font-size:1rem;
+    }
+    a{text-decoration:none;}
+    input, button, textarea{
+        font-family:"IRANSansWeb";
+        width:100%;
+    }
+    fieldset{
+        border:none;
+        padding:0;
+        margin-bottom:30px;
+    }
+    button, input[type=submit]{
+        cursor:pointer;
+        color:#fff;
+    }
+    .header{
+        width:100%;
+        height:115px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    .main-body{
+        width:100%;
+        height:auto;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    .main-container{
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        max-width:1330px;
+        margin-left: auto;
+        margin-right: auto;
+        background:#fff;
+        box-shadow: -4px 0px 4px 0px rgba(153, 153, 153, 0.25);
+        transition: background 0.3s, border 0.3s, border-radius 0.3s, box-shadow 0.3s;
+        padding: 30px 15px 30px 15px;
+        border-radius: 25px 25px 25px 25px;
+        position: relative;
+        height:auto;
+    }
+    .gform_wrapper{
+        max-width:480px;
+        width:100%;
+        text-align:center;
+    }
+    .gfield_label {display:none;}
+    .gfield {margin-bottom:15px;}
+    .gfield input{
+        border-style: solid;
+        border-width: 1px 1px 1px 1px;
+        border-color: #CCCCCC;
+        padding: 10px 15px 10px 15px;
+        border-radius: 12px 12px 12px 12px;
+        font-size:1rem;
+    }
+    .gform_required_legend{display:none;}
+    .gfield--type-product input{display:none;}
+    .gfield--type-product label{
+        background: rgba(238, 238, 238, 0.2);
+        color: rgb(34, 34, 34);
+        border: 1px solid rgba(204, 204, 204, 0.4);
+        position: relative;
+        display: block;
+        padding: 12px 52px 12px 15px;
+        width:481px;
+        max-width: 100%;
+        height: 70px;
+        line-height:46px;
+        cursor: pointer;
+        margin: 10px 0;
+        border-radius: 12px;
+        text-overflow: ellipsis;
+      overflow: hidden; 
+      white-space: nowrap;
+    }
+    
+    .gfield--type-product label::before{
+        width: 30px;
+        height: 30px;
+        content: "";
+        position: absolute;
+        right: 15px;
+        top:19px;
+        background-size: 100% 100%;
+        background-image: url(https://mid1.tamland.ir/wp-content/uploads/2025/07/icons8-check-48.webp);
+    }
+    .view-course-form{
+        position: absolute;
+        left: 15px;
+        /*top: 173px;*/
+        top:85px;
+        font-size: 13px;
+        color: #888 !important;
+    }
+    .p-relative{
+        position:relative;
+    }
+    
+    #gform_submit_button_4{
+        border-style: solid;
+        border-width: 2px 2px 2px 2px;
+        border-radius: 50px 50px 50px 50px;
+        -webkit-appearance: button;
+        border: 1px solid #c36;
+        display: inline-block;
+        font-size: 1rem;
+        font-weight: 400;
+        padding: .5rem 1rem;
+        text-align: center;
+        transition: all .3s;
+        white-space: nowrap;
+        background-color: #E52041;
+    }
+    #gform_submit_button_4:disabled {
+        background-color: #eee;
+        border-color: #eee;
+        color: #222;
+    }
+    
+	.discount-validate-message{
+		position:relative;
+		width:100%;
+		border-radius:12px;
+		padding:7px 15px;
+		border:1px solid transparent;
+		text-align:center;
+	}
+	.discount-validate-message.valid{
+		background-color:#d9fdef;
+		border-color:#9cf9d5;
+		color:#007d4c
+	}
+	
+	.discount-validate-message.not-valid{
+		background-color:#fdd9d9;
+		border-color:#f99c9c;
+		color:#7d0000
+	}
+	button.del-discount-code{
+		font-size: 20px;
+		font-weight: 200;
+		padding: 15px;
+		width: 20px;
+		height: 20px;
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		line-height: 25px;
+		background-color: transparent;
+		color: #e52041;
+		position: absolute;
+		right: 4px;
+		top: 5px;
+		border: 0;
+	}
+	#gform_save_4_footer_link{
+	    -webkit-appearance: button;
+	    display: block;
+        width: 100%;
+        margin: 7px 0 0 !important;
+        border-color: #eee;
+        color: #222;
+        background: #eee;
+        border-style: solid;
+        border-width: 2px 2px 2px 2px;
+        border-radius: 50px 50px 50px 50px;
+        padding: .5rem 1rem;
+        text-align: center;
+        transition: all .3s;
+        font-size: 1rem;
+	}
+	.alert{
+	    color:#E52041;
+	    display:flex;
+	    align-items:center;
+	    justify-content:center;
+	}
+	.alert span{
+	    font-size: 13px;
+        font-weight: bold;
+        line-height: 1.8em;
+	}
+	.alert svg{
+	    width:24px;
+	    height:24px;
+	    margin-left:7px;
+	}
+	.gfield_description{
+	    text-align: right;
+        font-size: 11px;
+        color: #888;
+	}
+	#field_4_21{
+	    float: left;
+        margin: 0 4px;
+        margin-top: -65px;
+        z-index: 99999;
+        position: relative;
+	}
+	#field_4_7{
+	    margin-bottom:30px;
+	}
+	#apply_discount {
+        border-radius: 12px;
+        font-size: 13px;
+        height: 40px;
+        margin: 5px 0 0 5px;
+        background:#E52041;
+        color:#fff;
+        border:1px solid #E52041;
+    }
+	#apply_discount:disabled {
+        background: transparent;
+        border-color: #ddd;
+        color: #ccc;
+    }
+    #input_4_6 {
+        text-align: left;
+        height: 70px;
+        font-weight: 600;
+        position: relative;
+    }
+    .ginput_total {
+        background: #F1FEEE;
+        border-color: #E4FFDE !important;
+        text-align: center;
+        color: #000;
+        width: 100%;
+    }
+    .w-100{
+        width:100%;
+    }
+    .text-center{
+        text-align:center;
+    }
+    .tamland-schools{
+        display:flex;
+        flex-direction:row;
+        flex-wrap:wrap;
+    }
+    .tamland-schools figure{
+        width:23%;
+        margin: 10px 1%;
+    }
+    .tamland-schools figure img{
+        width:100%;
+        height:auto;
+    }
+    
+    /* Toggle installment */
+    #switchLabel{
+        cursor:pointer;
+    }
+    .switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+.switch{
+    margin:30px 0;
+}
+.switch .slider.active {
+  background-color: #FF4748;
+}
+.switch .slider.active:before {
+  transform: translateX(24px);
+}
+.d-none{display:none;}
+
+@media (max-width: 480px) {
+    .gfield--type-product label{
+        width:310px;
+    }
+}

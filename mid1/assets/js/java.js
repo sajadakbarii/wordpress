@@ -100,7 +100,12 @@ jQuery(document).ready(function(){
             });
 
         });
-
+    
+      const enamadTimeout = setTimeout(function(){
+          jQuery('.enamad .elementor-widget-container').html('<div style="display:flex;justify-content:center">'+
+        '<a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=241690&amp;Code=K6zUoiXUdEFK4grdjSFd"><img referrerpolicy="origin" src="https://Trustseal.eNamad.ir/logo.aspx?id=241690&amp;Code=K6zUoiXUdEFK4grdjSFd" alt="" style="cursor: pointer;padding:5px;border-radius:8px;width:80px;height:auto" id="K6zUoiXUdEFK4grdjSFd"></a>'+
+        '</div>');
+      }, 3000);
 });
 
 function isMobile() {

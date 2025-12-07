@@ -36,7 +36,7 @@ function hello_elementor_child_enqueue_scripts() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.2.0', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '1.0.0', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.6.1', true );
+	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.6.2', true );
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_enqueue_scripts', 20 );
 
@@ -1344,6 +1344,19 @@ function teachers_course_items_func(){
                                                     </a>
                                                 </div>
                                                 <?php endif; ?>
+                                                 <?php if($teachers_courses['item-'.$j]['teacher-aparat-code-teaser'] != ""): ?>
+                                                <div class="col-6 py-1">
+                                                        <div class="col first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code-teaser']; ?>">
+                                                            <div class="elementor-widget-container">
+                                                                <a class="w-100 d-block">
+                                                                    <button class="d-block btn w-100" style="background:#B21E1ECC;color:#fff;border-radius:20px">
+                                                                    تیزر معرفی دوره استاد
+                                                                    </button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                </div>
+                                                <?php endif; ?>
                                                 <?php if($teachers_courses['item-'.$j]['teacher-aparat-code'] != ""): ?>
                                                 <div class="col-6 py-1">
                                                         <div class="col first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code']; ?>">
@@ -2104,6 +2117,7 @@ add_action('wp_footer','update_view_more_button_url');
 
 add_shortcode('add_to_cart_button_course', 'add_to_cart_button_course_func');
 function add_to_cart_button_course_func($atts){
+    global $secret_key;
     $checkout_page_url = 'https://mid1.tamland.ir/course-checkout';
     $post = get_post();
     $item_name = str_replace("|","-",$post->post_title);
@@ -2122,6 +2136,7 @@ function add_to_cart_button_course_func($atts){
         //$price_sale = get_post_meta( $post->ID, 'price_sale_tax', true );
         $region_price = get_post_meta( $post->ID, 'region-price', true );
         $course_id_lms = get_post_meta( $post->ID, 'course-id-lms', true );
+        $is_installment = get_post_meta( $post->ID, 'installments', true );
         if($region_price !=""){
             for( $i = 0; $i < 1; $i++ ){
                 $items[] = array( 'price' => $region_price['item-'.$i]['region-price-tax'], 'text' => $item_name);
@@ -2154,7 +2169,7 @@ function add_to_cart_button_course_func($atts){
             }
         }
     }
-    $token = hash_hmac('sha256', $course_id_lms . '|' . $items[0]["price"], $secret_key);
+    $token = hash_hmac('sha256', $course_id_lms . '|' . trim($items[0]["price"]), $secret_key);
     ?>
     <form method="post" action="<?php echo $checkout_page_url; ?>">
         <?php
@@ -2168,7 +2183,7 @@ function add_to_cart_button_course_func($atts){
             <?php
         }
         ?>
-        <input type="hidden" name="post_id" value="<?php echo $post->ID; ?>">
+        <input type="hidden" name="course_id" value="<?php echo $post->ID; ?>">
         <input type="hidden" name="teacher_course_id" value="<?php echo $teacher_course_id; ?>">
         <input type="hidden" name="course_id_lms" value="<?php echo $course_id_lms; ?>">
         <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
@@ -2193,6 +2208,7 @@ function add_to_cart_button_course_func($atts){
             ';
         }
         ?>
+        <input type="hidden" name="installments" value="<?php echo $is_installment; ?>">
         <input type="hidden" name="course_numbers" value="<?php echo count($items); ?>">
         <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
         <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
