@@ -2629,9 +2629,9 @@ function calculate_amount($entry) {
             
             $data = json_decode($response, true);
             // مقدار مورد نظر
-            $installment_pay_tax = $data['meta']['installment_pay_tax'] ?? '';
+            $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
     
-            $amount_field = $installment_pay_tax;
+            $amount_field = trim($installment_pay_tax);
             return $amount_field . '0';
     }elseif(($discountIsSet == true && !empty($entry['20'])) && $installmentsIsSet == false){
         
@@ -2686,11 +2686,156 @@ function calculate_amount($entry) {
                return $amount_field . '0'; 
             }
         
-    }elseif($discountIsSet == true && $installmentsIsSet == true){
+    }elseif(($discountIsSet == true && !empty($entry['20'])) && $installmentsIsSet == true){
+        $url = $entry['10'];
+            $parts = parse_url($url);
+            
+            $scheme = $parts['scheme'];    // https
+            $host   = $parts['host'];      // subdomain.tamland.ir
+            
+            $baseUrl = $scheme . '://' . $host;
+            
+            $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+            
+            switch ($host) {
+                case "mid1.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID1_PSW
+                    );
+                    break;
+            
+                case "mid2.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID2_PSW
+                    );
+                    break;
+                    
+                case "konkoor.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_KONKOOR_PSW
+                    );
+                    break;
+                    
+                case "tizhooshan.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_TIZHOOSHAN_PSW
+                    );
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            
+            $user_ch = curl_init();
+            
+            curl_setopt($user_ch, CURLOPT_URL, $user_url);
+            curl_setopt($user_ch, CURLOPT_POST, true);
+            curl_setopt($user_ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($user_ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json'
+            ));
+            curl_setopt($user_ch, CURLOPT_POSTFIELDS, json_encode($user_data));
+            
+            $user_response = curl_exec($user_ch);
+            
+            if (curl_errno($user_ch)) {
+                echo 'Curl error: ' . curl_error($user_ch);
+                curl_close($user_ch);
+                exit;
+            }
+            
+            curl_close($user_ch);
+            
+            $user_response_data = json_decode($user_response, true);
+            
+            // گرفتن توکن
+            $user_token = $user_response_data['token'];
+            error_log('token: '.$user_token);
+            $course_id = isset($entry['23']) ? intval($entry['23']) : 0;
+            error_log($course_id);
+            
+            $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
         
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => $api_url,
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'GET',
+              CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer '.$user_token
+              ),
+            ));
+            
+            $response = curl_exec($curl);
+            
+            curl_close($curl);
+            
+            $data = json_decode($response, true);
+            // مقدار مورد نظر
+            $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
+            
+            if($entry['9'] == "دوره معمولی" || $entry['9'] == "چند استاده" || $entry['9'] == "آزمون"){
+                $course_type_lms = 1;
+            }elseif($entry['9'] == "بسته"){
+                $course_type_lms = 2;
+            }
+            error_log('Mobile is:'.$entry['2']);
+            error_log('CourseId is:'.$entry['8']);
+            error_log('Type is:'.$course_type_lms);
+            error_log('DiscountCode is:'.$entry['20']);
+            $discount_curl = curl_init();
+            
+            curl_setopt_array($discount_curl, array(
+              CURLOPT_URL => 'https://api.tamland.ir/api/payment/checkDiscount',
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'POST',
+              CURLOPT_POSTFIELDS =>'{
+                "Mobile": "'.$entry['2'].'",
+                "CourseId": '.$entry['8'].',
+                "Type": '.$course_type_lms.',
+                "DiscountCode":"'.$entry['20'].'"
+            }',
+              CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+              ),
+            ));
+            
+            $discount_response = curl_exec($discount_curl);
+            
+            curl_close($discount_curl);
+            error_log('Response is:'.$discount_response);
+            $discount_data = json_decode($discount_response, true);
+            error_log('Data is:'.$discount_data);
+            $percentage = (int) $discount_data[0]['fldPercentage'];
+            error_log('Percentage is:'.$percentage);
+            $original_price = $installment_pay_tax;       // تبدیل به عدد صحیح
+            error_log('original_price is:'.$original_price);
+            $discount_amount = ($original_price * $percentage) / 100;
+            error_log('discount_amount is:'.$discount_amount);
+            $amount_field = $original_price - $discount_amount;
+            error_log('amount_field is:'.$amount_field);
+            if($amount_field == 0){
+                return $amount_field;
+            }else{
+               return $amount_field . '0'; 
+            }
     }else{
-        
-        error_log('Yes installmentsIsSet is set');
         
             $url = $entry['10'];
             $parts = parse_url($url);
@@ -2788,7 +2933,7 @@ function calculate_amount($entry) {
             
             $data = json_decode($response, true);
             // مقدار مورد نظر
-            $price_tax = $data['meta']['price_tax'] ?? '';
+            $price_tax = trim($data['meta']['price_tax']) ?? '';
 
         error_log('Both not set');
         $amount_field = $price_tax;
@@ -3743,6 +3888,28 @@ function my_child_theme_gtm_body_noscript() {
 }
 add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
 
+// ثبت REST API برای گرفتن نوع پست بر اساس ID
+add_action('rest_api_init', function () {
+    register_rest_route('custom/v1', '/post-type/(?P<id>\d+)', array(
+        'methods'  => 'GET',
+        'callback' => 'get_post_type_by_id',
+    ));
+});
+
+function get_post_type_by_id($data) {
+    $post_id = intval($data['id']); // مطمئن میشیم که عدد هست
+    $post_type = get_post_type($post_id);
+
+    if (!$post_type) {
+        return new WP_Error('not_found', 'پستی با این ID یافت نشد.', array('status' => 404));
+    }
+
+    return array(
+        'id'        => $post_id,
+        'post_type' => $post_type
+    );
+}
+
 // هندل درخواست AJAX
 add_action('wp_ajax_get_course_details', 'get_course_details_callback');
 add_action('wp_ajax_nopriv_get_course_details', 'get_course_details_callback');
@@ -3828,8 +3995,38 @@ function get_course_details_callback() {
     if (!$course_id) {
         wp_send_json_error("Course ID not provided");
     }
+    $post_type_url = $baseUrl . "/wp-json/custom/v1/post-type/" . $course_id;
+    $type_ch = curl_init();
+    curl_setopt_array($type_ch, array(
+        CURLOPT_URL => $post_type_url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => array(
+            'Authorization: Bearer '.$user_token // اگر نیاز به JWT دارید
+        ),
+    ));
     
-    $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
+    $type_response = curl_exec($type_ch);
+    curl_close($type_ch);
+    
+    $type_data = json_decode($type_response, true);
+    $post_type = $type_data['post_type'] ?? '';
+    
+    if (!$post_type) {
+        wp_send_json_error("Post type not found");
+        wp_die();
+    }
+    
+    // حالا $post_type مشخصه و میتونید بر اساسش API مورد نظر رو کال کنید
+    if ($post_type === 'course') {
+        $api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
+    } elseif ($post_type === 'exams') {
+        $api_url = $baseUrl."/wp-json/wp/v2/exams/" . $course_id;
+    } else {
+        wp_send_json_error("Unsupported post type: " . $post_type);
+        wp_die();
+    }
+
+    //$api_url = $baseUrl."/wp-json/wp/v2/course/" . $course_id;
 
     $curl = curl_init();
     
@@ -3858,8 +4055,8 @@ function get_course_details_callback() {
     
     $data = json_decode($response, true);
     // مقدار مورد نظر
-    $installment_pay_tax = $data['meta']['installment_pay_tax'] ?? '';
-    $price_tax = $data['meta']['price_tax'] ?? '';
+    $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
+    $price_tax = trim($data['meta']['price_tax']) ?? '';
     
     wp_send_json_success([
         'installment_pay_tax' => $installment_pay_tax,
