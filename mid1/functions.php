@@ -1947,8 +1947,8 @@ function add_to_cart_button_course_func($atts){
             }
         }
     }
-    
-    $token = hash_hmac('sha256', $course_id_lms . '|' . trim($items[0]["price"]), $secret_key);
+    $price_token = (int) preg_replace('/[^\d]/', '', $items[0]["price"]);
+    $token = hash_hmac('sha256', $course_id_lms . '|' . $price_token, $secret_key);
     ?>
     <form method="post" action="<?php echo $checkout_page_url; ?>">
         <?php
@@ -2014,8 +2014,8 @@ function validate_secure_token($form) {
                 if(!isset($input_7[1], $submission['submitted_values']['8'], $submission['submitted_values']['26'])){
                     wp_die('اطلاعات ناقص است');
                 }
-                
-                $expected_token = hash_hmac('sha256', $submission['submitted_values']['8'] . '|' . trim($input_7[1]), $secret_key);
+                $price_token = (int) preg_replace('/[^\d]/', '', $input_7[1]);
+                $expected_token = hash_hmac('sha256', $submission['submitted_values']['8'] . '|' . $price_token, $secret_key);
                 //print_r($expected_token);
                 if ($submission['submitted_values']['26'] !== $expected_token) {
                     wp_die('درخواست شما نامعتبر است');
@@ -2026,8 +2026,8 @@ function validate_secure_token($form) {
             if (!isset($_POST['course_id_lms'], $_POST['course_price_0'], $_POST['secure_token'])) {
                 wp_die('اطلاعات ناقص است');
             }
-
-            $expected_token = hash_hmac('sha256', $_POST['course_id_lms'] . '|' . trim($_POST['course_price_0']), $secret_key);
+            $price_token = (int) preg_replace('/[^\d]/', '', $_POST['course_price_0']);
+            $expected_token = hash_hmac('sha256', $_POST['course_id_lms'] . '|' . $price_token, $secret_key);
             //print_r($_POST['course_price_0']);
             if ($_POST['secure_token'] !== $expected_token) {
                 wp_die('درخواست شما نامعتبر است');
@@ -2038,6 +2038,14 @@ function validate_secure_token($form) {
     return $form;
     
 }
+
+// شروع session در functions.php
+function start_session() {
+    if(!session_id()) {
+        session_start();
+    }
+}
+add_action('init', 'start_session');
 
 add_filter( 'gform_pre_render_4', 'add_courses_fields' );
  
@@ -2053,6 +2061,14 @@ function add_courses_fields( $form ) {
  if(!is_admin()){
     if ( $form["id"] != 4 ) {
         return $form;
+    }
+    
+    if(isset($_POST['source_link'])) {
+        $source_link = sanitize_text_field($_POST['source_link']);
+        
+        // ذخیره به مدت 7 روز
+        setcookie('source_link', $source_link, time() + (7 * 24 * 60 * 60), '/');
+        $_COOKIE['source_link'] = $source_link; // برای دسترسی فوری
     }
     
     if (isset($_GET['gf_token'])) {
@@ -2518,6 +2534,10 @@ function calculate_amount($entry) {
     global $TAMLAND_KONKOOR_PSW;
     global $TAMLAND_TIZHOOSHAN_PSW;
     
+    if(isset($_COOKIE['source_link'])) {
+        error_log('sourcelink is: '.sanitize_text_field($_COOKIE['source_link']));
+    }
+    
     if(isset($_COOKIE['discountIsSet']) && $_COOKIE['discountIsSet'] == "true"){
         $discountIsSet = true;
     }else{
@@ -2629,10 +2649,10 @@ function calculate_amount($entry) {
             
             $data = json_decode($response, true);
             // مقدار مورد نظر
-            $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
+            $installment_pay_tax = (int) preg_replace('/[^\d]/', '', $data['meta']['installment_pay_tax']) ?? '';
     
-            $amount_field = trim($installment_pay_tax);
-            return $amount_field . '0';
+            $amount_field = $installment_pay_tax;
+            return $amount_field . 0;
     }elseif(($discountIsSet == true && !empty($entry['20'])) && $installmentsIsSet == false){
         
             if($entry['9'] == "دوره معمولی" || $entry['9'] == "چند استاده" || $entry['9'] == "آزمون"){
@@ -2683,7 +2703,7 @@ function calculate_amount($entry) {
             if($amount_field == 0){
                 return $amount_field;
             }else{
-               return $amount_field . '0'; 
+               return $amount_field . 0; 
             }
         
     }elseif(($discountIsSet == true && !empty($entry['20'])) && $installmentsIsSet == true){
@@ -2783,7 +2803,7 @@ function calculate_amount($entry) {
             
             $data = json_decode($response, true);
             // مقدار مورد نظر
-            $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
+            $installment_pay_tax = (int) preg_replace('/[^\d]/', '', $data['meta']['installment_pay_tax']);
             
             if($entry['9'] == "دوره معمولی" || $entry['9'] == "چند استاده" || $entry['9'] == "آزمون"){
                 $course_type_lms = 1;
@@ -2833,7 +2853,7 @@ function calculate_amount($entry) {
             if($amount_field == 0){
                 return $amount_field;
             }else{
-               return $amount_field . '0'; 
+               return $amount_field . 0; 
             }
     }else{
         
@@ -2933,15 +2953,25 @@ function calculate_amount($entry) {
             
             $data = json_decode($response, true);
             // مقدار مورد نظر
-            $price_tax = trim($data['meta']['price_tax']) ?? '';
 
+            $price_tax = (int) preg_replace('/[^\d]/', '', $data['meta']['price_tax']) ?? '';
+            
         error_log('Both not set');
-        $amount_field = $price_tax;
+        $path = isset($_COOKIE['source_link']) ? sanitize_text_field($_COOKIE['source_link']) : '';
+
+            // بررسی وجود /teacher-land/ در URL
+            if (!empty($path) && strpos($path, 'teacher-landing') !== false) {
+                $amount_field = (int) $entry['6'];
+            } else {
+               $amount_field = $price_tax;
+            }
+
+        
         error_log('amount_field is:'.$amount_field);
         if($amount_field == 0){
             return $amount_field;
         }else{
-           return $amount_field . '0'; 
+           return $amount_field . 0; 
         } 
     }
 
@@ -3888,13 +3918,23 @@ function my_child_theme_gtm_body_noscript() {
 }
 add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
 
-// ثبت REST API برای گرفتن نوع پست بر اساس ID
 add_action('rest_api_init', function () {
-    register_rest_route('custom/v1', '/post-type/(?P<id>\d+)', array(
+
+    register_rest_route('lms/v1', '/get-post-by-course-id', [
+        'methods'  => 'GET',
+        'callback' => 'get_post_by_course_id_lms',
+        'permission_callback' => '__return_true',
+    ]);
+
+    // ثبت REST API برای گرفتن نوع پست بر اساس ID
+    register_rest_route('custom/v1', '/post-type/(?P<id>\d+)', [
         'methods'  => 'GET',
         'callback' => 'get_post_type_by_id',
-    ));
+        'permission_callback' => '__return_true',
+    ]);
+
 });
+
 
 function get_post_type_by_id($data) {
     $post_id = intval($data['id']); // مطمئن میشیم که عدد هست
@@ -3909,6 +3949,76 @@ function get_post_type_by_id($data) {
         'post_type' => $post_type
     );
 }
+
+function get_post_by_course_id_lms(WP_REST_Request $request)
+{
+    $course_id_lms = sanitize_text_field($request->get_param('course_id_lms'));
+
+    if (empty($course_id_lms)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'course-id-lms is required'
+        ], 400);
+    }
+
+    $post_id = null;
+    $meta_key_used = null;
+
+    // بررسی پست‌های course
+    $course_posts = get_posts([
+        'post_type'      => 'course',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+    ]);
+
+    foreach ($course_posts as $post) {
+        // 1️⃣ بررسی repeater teachers-course
+        $teachers_repeater = get_post_meta($post->ID, 'teachers-course', true);
+        $teachers_repeater = maybe_unserialize($teachers_repeater);
+        if (!empty($teachers_repeater) && is_array($teachers_repeater)) {
+            foreach ($teachers_repeater as $row) {
+                if (isset($row['teacher-course-id-lms']) && $row['teacher-course-id-lms'] == $course_id_lms) {
+                    $post_id = $post->ID;
+                    $meta_key_used = 'teachers-course->teacher-course-id-lms';
+                    break 2;
+                }
+            }
+        }
+
+        // 2️⃣ بررسی course-id-lms ساده
+        $course_meta = get_post_meta($post->ID, 'course-id-lms', true);
+        if ($course_meta == $course_id_lms) {
+            $post_id = $post->ID;
+            $meta_key_used = 'course-id-lms';
+            break;
+        }
+    }
+
+    // 3️⃣ بررسی پست‌های exams
+    if (!$post_id) {
+        $exam_posts = get_posts([
+            'post_type'      => 'exams',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+        ]);
+
+        foreach ($exam_posts as $post) {
+            $exam_meta = get_post_meta($post->ID, 'exam-id-lms', true);
+            if ($exam_meta == $course_id_lms) {
+                $post_id = $post->ID;
+                $meta_key_used = 'exam-id-lms';
+                break;
+            }
+        }
+    }
+
+    return new WP_REST_Response([
+        'success'       => true,
+        'post_id'       => $post_id,
+        'meta_key_used' => $meta_key_used,
+    ], 200);
+}
+
 
 // هندل درخواست AJAX
 add_action('wp_ajax_get_course_details', 'get_course_details_callback');
@@ -4055,8 +4165,9 @@ function get_course_details_callback() {
     
     $data = json_decode($response, true);
     // مقدار مورد نظر
-    $installment_pay_tax = trim($data['meta']['installment_pay_tax']) ?? '';
-    $price_tax = trim($data['meta']['price_tax']) ?? '';
+    $installment_pay_tax = (int) preg_replace('/[^\d]/', '', $data['meta']['installment_pay_tax']) ?? '';
+    
+    $price_tax = (int) preg_replace('/[^\d]/', '', $data['meta']['price_tax']) ?? '';
     
     wp_send_json_success([
         'installment_pay_tax' => $installment_pay_tax,

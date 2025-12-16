@@ -2115,34 +2115,56 @@ function update_view_more_button_url(){
 }
 add_action('wp_footer','update_view_more_button_url');
 
+// Shortcode for Add to cart Button [add_to_cart_button_course]
 add_shortcode('add_to_cart_button_course', 'add_to_cart_button_course_func');
 function add_to_cart_button_course_func($atts){
     global $secret_key;
+    $button_atts = shortcode_atts( array(
+            'id' => '',
+            'title' => 'ثبت نام در این دوره',
+            'is_archive' => false,
+    		'teachers_course_id' => ''
+    ), $atts );
+    
     $checkout_page_url = 'https://mid1.tamland.ir/course-checkout';
-    $post = get_post();
+    if($button_atts['id'] == ''){
+        $post = get_post();
+    }else{
+        $post = get_post($button_atts['id']);
+    }
     $item_name = str_replace("|","-",$post->post_title);
     $secound_title = str_replace("|","-", get_post_meta($post->ID, 'secound-title', true));
+    $post_type = get_post_type($post->ID);
     $course_type = get_post_meta( $post->ID, 'course-type', true );
     
     //Creating item array.
     $items = array();
-    $button_atts = shortcode_atts( array(
-            'is_archive' => false,
-    		'teachers_course_id' => ''
-    ), $atts );
-    if($course_type == 'normal-course' || $course_type == 'course-pack' || ($course_type == 'multi-teacher' && $button_atts['is_archive'] == true)){
+    $is_installment = get_post_meta( $post->ID, 'installments', true );
+    if($course_type == 'normal-course' || $course_type == 'course-pack' || ($course_type == 'multi-teacher' && $button_atts['is_archive'] == true) || $post_type == 'exams'){
         // Get Prices
         $price = get_post_meta( $post->ID, 'price_tax', true );
-        //$price_sale = get_post_meta( $post->ID, 'price_sale_tax', true );
+        $price_sale = get_post_meta( $post->ID, 'price_sale_tax', true );
         $region_price = get_post_meta( $post->ID, 'region-price', true );
-        $course_id_lms = get_post_meta( $post->ID, 'course-id-lms', true );
-        $is_installment = get_post_meta( $post->ID, 'installments', true );
+        if($post_type == 'exams'){
+            $course_id_lms = get_post_meta( $post->ID, 'exam-id-lms', true );
+        }else{
+            $course_id_lms = get_post_meta( $post->ID, 'course-id-lms', true );
+        }
+        
         if($region_price !=""){
             for( $i = 0; $i < 1; $i++ ){
-                $items[] = array( 'price' => $region_price['item-'.$i]['region-price-tax'], 'text' => $item_name);
+                if($region_price['item-'.$i]['region-price-sale-tax'] != ""){
+                    $items[] = array( 'price' => $region_price['item-'.$i]['region-price-sale-tax'], 'text' => $item_name.' (با تخفیف)');
+                }else{
+                    $items[] = array( 'price' => $region_price['item-'.$i]['region-price-tax'], 'text' => $item_name);
+                }
             }
         }else{
-            $items[] = array( 'price' => $price, 'text' => $item_name.' '.$secound_title);
+            if($price_sale == ""){
+                $items[] = array( 'price' => $price, 'text' => $item_name.' '.$secound_title);
+            }else{
+                $items[] = array( 'price' => $price_sale, 'text' => $item_name.' (با تخفیف)');
+            }
         }
         
     }elseif($course_type == 'multi-teacher'){
@@ -2179,7 +2201,7 @@ function add_to_cart_button_course_func($atts){
             <?php
         }else{
             ?>
-            <button type="submit" class="add-to-cart-button w-100">ثبت نام در این دوره</button>
+            <button type="submit" class="add-to-cart-button w-100"><?php  echo $button_atts['title']; ?></button>
             <?php
         }
         ?>
@@ -2201,6 +2223,11 @@ function add_to_cart_button_course_func($atts){
                 <input type="hidden" name="course_type" value="بسته">
             <?php
         }
+        if($post_type == 'exams'){
+            ?>
+                <input type="hidden" name="course_type" value="آزمون">
+            <?php
+        }
         for($i = 0; $i < count($items); $i++){
             echo '
             <input type="hidden" name="course_name_'.$i.'" value="'.$items[$i]["text"].'">
@@ -2219,7 +2246,6 @@ function add_to_cart_button_course_func($atts){
     </form>
     <?php
 }
-
 add_filter( 'gform_pre_render_5', 'add_courses_fields' );
  
 //Note: when changing choice values, we also need to use the gform_pre_validation so that the new values are available when validating the field.
@@ -2526,3 +2552,100 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <?php
 }
 add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
+
+// ثبت REST API برای گرفتن نوع پست بر اساس ID
+add_action('rest_api_init', function () {
+    register_rest_route('lms/v1', '/get-post-by-course-id', [
+        'methods'  => 'GET',
+        'callback' => 'get_post_by_course_id_lms',
+        'permission_callback' => '__return_true',
+    ]);
+    
+    register_rest_route('custom/v1', '/post-type/(?P<id>\d+)', array(
+        'methods'  => 'GET',
+        'callback' => 'get_post_type_by_id',
+    ));
+});
+
+function get_post_type_by_id($data) {
+    $post_id = intval($data['id']); // مطمئن میشیم که عدد هست
+    $post_type = get_post_type($post_id);
+
+    if (!$post_type) {
+        return new WP_Error('not_found', 'پستی با این ID یافت نشد.', array('status' => 404));
+    }
+
+    return array(
+        'id'        => $post_id,
+        'post_type' => $post_type
+    );
+}
+
+function get_post_by_course_id_lms(WP_REST_Request $request)
+{
+    $course_id_lms = sanitize_text_field($request->get_param('course_id_lms'));
+
+    if (empty($course_id_lms)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'course-id-lms is required'
+        ], 400);
+    }
+
+    $post_id = null;
+    $meta_key_used = null;
+
+    // بررسی پست‌های course
+    $course_posts = get_posts([
+        'post_type'      => 'course',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+    ]);
+
+    foreach ($course_posts as $post) {
+        // 1️⃣ بررسی repeater teachers-course
+        $teachers_repeater = get_post_meta($post->ID, 'teachers-course', true);
+        $teachers_repeater = maybe_unserialize($teachers_repeater);
+        if (!empty($teachers_repeater) && is_array($teachers_repeater)) {
+            foreach ($teachers_repeater as $row) {
+                if (isset($row['teacher-course-id-lms']) && $row['teacher-course-id-lms'] == $course_id_lms) {
+                    $post_id = $post->ID;
+                    $meta_key_used = 'teachers-course->teacher-course-id-lms';
+                    break 2;
+                }
+            }
+        }
+
+        // 2️⃣ بررسی course-id-lms ساده
+        $course_meta = get_post_meta($post->ID, 'course-id-lms', true);
+        if ($course_meta == $course_id_lms) {
+            $post_id = $post->ID;
+            $meta_key_used = 'course-id-lms';
+            break;
+        }
+    }
+
+    // 3️⃣ بررسی پست‌های exams
+    if (!$post_id) {
+        $exam_posts = get_posts([
+            'post_type'      => 'exams',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+        ]);
+
+        foreach ($exam_posts as $post) {
+            $exam_meta = get_post_meta($post->ID, 'exam-id-lms', true);
+            if ($exam_meta == $course_id_lms) {
+                $post_id = $post->ID;
+                $meta_key_used = 'exam-id-lms';
+                break;
+            }
+        }
+    }
+
+    return new WP_REST_Response([
+        'success'       => true,
+        'post_id'       => $post_id,
+        'meta_key_used' => $meta_key_used,
+    ], 200);
+}

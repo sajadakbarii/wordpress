@@ -2634,3 +2634,108 @@ function shortcode_aparat_code() {
     return $code;
 }
 add_shortcode('aparat_code', 'shortcode_aparat_code');
+
+// ثبت REST API برای گرفتن نوع پست بر اساس ID
+add_action('rest_api_init', function () {
+    register_rest_route('lms/v1', '/get-post-by-course-id', [
+        'methods'  => 'GET',
+        'callback' => 'get_post_by_course_id_lms',
+        'permission_callback' => '__return_true',
+    ]);
+    
+    register_rest_route('custom/v1', '/post-type/(?P<id>\d+)', array(
+        'methods'  => 'GET',
+        'callback' => 'get_post_type_by_id',
+    ));
+});
+
+function get_post_type_by_id($data) {
+    $post_id = intval($data['id']); // مطمئن میشیم که عدد هست
+    $post_type = get_post_type($post_id);
+
+    if (!$post_type) {
+        return new WP_Error('not_found', 'پستی با این ID یافت نشد.', array('status' => 404));
+    }
+
+    return array(
+        'id'        => $post_id,
+        'post_type' => $post_type
+    );
+}
+
+add_action('rest_api_init', function () {
+    register_rest_route('lms/v1', '/get-post-by-course-id', [
+        'methods' => 'GET',
+        'callback' => 'get_post_by_course_id_lms',
+        'permission_callback' => '__return_true', // JWT افزونه خودش چک می‌کند
+    ]);
+});
+
+function get_post_by_course_id_lms(WP_REST_Request $request)
+{
+    $course_id_lms = sanitize_text_field($request->get_param('course_id_lms'));
+
+    if (empty($course_id_lms)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'course-id-lms is required'
+        ], 400);
+    }
+
+    $post_id = null;
+    $meta_key_used = null;
+
+    // بررسی پست‌های course
+    $course_posts = get_posts([
+        'post_type'      => 'course',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+    ]);
+
+    foreach ($course_posts as $post) {
+        // 1️⃣ بررسی repeater teachers-course
+        $teachers_repeater = get_post_meta($post->ID, 'teachers-course', true);
+        $teachers_repeater = maybe_unserialize($teachers_repeater);
+        if (!empty($teachers_repeater) && is_array($teachers_repeater)) {
+            foreach ($teachers_repeater as $row) {
+                if (isset($row['teacher-course-id-lms']) && $row['teacher-course-id-lms'] == $course_id_lms) {
+                    $post_id = $post->ID;
+                    $meta_key_used = 'teachers-course->teacher-course-id-lms';
+                    break 2;
+                }
+            }
+        }
+
+        // 2️⃣ بررسی course-id-lms ساده
+        $course_meta = get_post_meta($post->ID, 'course-id-lms', true);
+        if ($course_meta == $course_id_lms) {
+            $post_id = $post->ID;
+            $meta_key_used = 'course-id-lms';
+            break;
+        }
+    }
+
+    // 3️⃣ بررسی پست‌های exams
+    if (!$post_id) {
+        $exam_posts = get_posts([
+            'post_type'      => 'exams',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+        ]);
+
+        foreach ($exam_posts as $post) {
+            $exam_meta = get_post_meta($post->ID, 'exam-id-lms', true);
+            if ($exam_meta == $course_id_lms) {
+                $post_id = $post->ID;
+                $meta_key_used = 'exam-id-lms';
+                break;
+            }
+        }
+    }
+
+    return new WP_REST_Response([
+        'success'       => true,
+        'post_id'       => $post_id,
+        'meta_key_used' => $meta_key_used,
+    ], 200);
+}

@@ -14,10 +14,12 @@
 define( 'CHILD_THEME_ASTRA_CHILD_VERSION', '1.0.2' );
 
 $secret_key = defined('TAMLAND_PURCHASE_SECTRET_KEY') ? TAMLAND_PURCHASE_SECTRET_KEY : '';
+$TAMLAND_PURCHASE_USR = defined('TAMLAND_PURCHASE_USR') ? TAMLAND_PURCHASE_USR : '';
+$TAMLAND_MID1_PSW = defined('TAMLAND_MID1_PSW') ? TAMLAND_MID1_PSW : '';
+$TAMLAND_MID2_PSW = defined('TAMLAND_MID2_PSW') ? TAMLAND_MID2_PSW : '';
+$TAMLAND_KONKOOR_PSW = defined('TAMLAND_KONKOOR_PSW') ? TAMLAND_KONKOOR_PSW : '';
+$TAMLAND_TIZHOOSHAN_PSW = defined('TAMLAND_TIZHOOSHAN_PSW') ? TAMLAND_TIZHOOSHAN_PSW : '';
 
-/**
- * Enqueue styles
- */
 function child_enqueue_styles() {
     wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri(). '/assets/css/bootstrap.min.css' );
     wp_enqueue_style( 'bootstrap-rtl', get_stylesheet_directory_uri(). '/assets/css/bootstrap.rtl.min.css' );
@@ -30,7 +32,7 @@ function child_enqueue_styles() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.3.2', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '2.3.4', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script('java', get_stylesheet_directory_uri() . '/assets/js/java.js', array(), '1.6.28', true);
+	wp_enqueue_script('java', get_stylesheet_directory_uri() . '/assets/js/java.js', array(), '1.6.29', true);
 }
 
 add_action( 'wp_enqueue_scripts', 'child_enqueue_styles', 15 );
@@ -254,6 +256,8 @@ function teacher_courses_video_sample_func(){
  */
 add_shortcode('teacher_landing_current_courses','teacher_landing_current_courses_func');
 function teacher_landing_current_courses_func(){
+    /*
+    global $secret_key;
    $teacher_current_courses = get_post_meta(get_the_ID(), 'teacher-current-courses', true); 
    if (!$teacher_current_courses) return;  // اطمینان از وجود داده‌ها
    ?>
@@ -267,8 +271,8 @@ function teacher_landing_current_courses_func(){
                 }elseif($course['course-type'] == 'course-pack'){
                     $course_type = 'بسته';
                 }
-                
-                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $course['price_tax'], $secret_key);
+                $price_token = (int) preg_replace('/[^\d]/', '', $course['price_tax']);
+                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $price_token, $secret_key);
             ?>
                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                     <div class="teacher-landing-current-courses-card">
@@ -278,12 +282,14 @@ function teacher_landing_current_courses_func(){
                                     <button type="submit" style="background:transparent;padding:0;width:100%" id="teacher-landing-current-courses-img">
                                         <img src="<?php echo esc_url($course['teacher-current-courses-image']); ?>" alt="Course Image">
                                     </button>
+                                    <input type="hidden" name="course_id" value="<?php echo esc_attr($course['course_id']); ?>">
                                     <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
-                                    <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
+                                    <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
                                     <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
                                     <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             </div>
@@ -295,12 +301,14 @@ function teacher_landing_current_courses_func(){
                                     <button type="submit" style="background:transparent;padding:0" id="teacher-landing-current-courses-title">
                                         <h2><?php echo esc_html($course['teacher-current-courses-title']); ?></h2>
                                     </button>
+                                    <input type="hidden" name="course_id" value="<?php echo esc_attr($course['course_id']); ?>">
                                     <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
-                                    <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
+                                    <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
                                     <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
                                     <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             <?php endif; ?>
@@ -318,8 +326,9 @@ function teacher_landing_current_courses_func(){
                                             <button type="submit" class="add-to-cart-button-landing cart-icon"  id="teacher-landing-current-courses-buy-button">
                                                 <img src="https://tamland.ir/wp-content/uploads/2025/03/Shopping-cart.svg">
                                             </button>
+                                            <input type="hidden" name="course_id" value="<?php echo esc_attr($course['course_id']); ?>">
                                             <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
-                                            <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
+                                            <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
                                             <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
                                             <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                             <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
@@ -329,6 +338,7 @@ function teacher_landing_current_courses_func(){
                                             <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
                                             <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
                                             <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                            <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
                                             <input type="hidden" name="secure_token" value="<?= $token ?>">
                                         </form>
                                     </div>
@@ -362,14 +372,60 @@ function teacher_landing_current_courses_func(){
             <?php endforeach; ?>
         </div>
     </div>
+    
    <?php
+   */
+   
+    ob_start();
+    ?>
+    <div class="teacher-current-courses-place container-fluid">
+        <div class="row" id="teacher-current-courses">
+            <div class="col-12 text-center">
+                <span>در حال بارگذاری دوره‌ها...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    jQuery(function($){
+        $.post(
+            "<?php echo esc_url(admin_url('admin-ajax.php')); ?>",
+            {
+                action: "load_teacher_courses",
+                post_id: <?php echo (int) get_the_ID(); ?>
+            },
+            function(res){
+                if(res.success){
+                    $('#teacher-current-courses').html(res.data.html);
+                    //console.log(typeof res.data);
+                    //console.log(res.data);
+                } else {
+                    $('#teacher-current-courses').html(
+                        '<div class="col-12 text-center">دوره‌ای یافت نشد.</div>'
+                    );
+                }
+            },
+            'json'
+        );
+    });
+    </script>
+    <?php
+    return ob_get_clean();
+
 }
- 
+
 /**
  * Shortcode:  teacher_current_courses
-*/
+
 add_shortcode('teacher_current_courses','teacher_current_courses_func');
 function teacher_current_courses_func() {
+    global $secret_key;
+    global $TAMLAND_PURCHASE_USR;
+    global $TAMLAND_MID1_PSW;
+    global $TAMLAND_MID2_PSW;
+    global $TAMLAND_KONKOOR_PSW;
+    global $TAMLAND_TIZHOOSHAN_PSW;
+
     $teacher_current_courses = get_post_meta(get_the_ID(), 'teacher-current-courses', true);
     if (!$teacher_current_courses) return;  // اطمینان از وجود داده‌ها
     
@@ -386,24 +442,102 @@ function teacher_current_courses_func() {
                 }elseif($course['course-type'] == 'azmoon'){
                     $course_type = 'آزمون';
                 }
-                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $course['price_tax'], $secret_key);
+                $url = $course['teacher-current-courses-link'];
+            $parts = parse_url($url);
+            
+            $scheme = $parts['scheme'];    // https
+            $host   = $parts['host'];      // subdomain.tamland.ir
+            
+            $baseUrl = $scheme . '://' . $host;
+            
+            $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+            
+            switch ($host) {
+                case "mid1.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID1_PSW
+                    );
+                    break;
+            
+                case "mid2.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_MID2_PSW
+                    );
+                    break;
+                    
+                case "konkoor.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_KONKOOR_PSW
+                    );
+                    break;
+                    
+                case "tizhooshan.tamland.ir":
+                    $user_data = array(
+                        "username" => $TAMLAND_PURCHASE_USR,
+                        "password" => $TAMLAND_TIZHOOSHAN_PSW
+                    );
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            
+            $user_ch = curl_init();
+            
+            curl_setopt($user_ch, CURLOPT_URL, $user_url);
+            curl_setopt($user_ch, CURLOPT_POST, true);
+            curl_setopt($user_ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($user_ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json'
+            ));
+            curl_setopt($user_ch, CURLOPT_POSTFIELDS, json_encode($user_data));
+            
+            $user_response = curl_exec($user_ch);
+            
+            if (curl_errno($user_ch)) {
+                echo 'Curl error: ' . curl_error($user_ch);
+                curl_close($user_ch);
+                exit;
+            }
+            
+            curl_close($user_ch);
+            
+            $user_response_data = json_decode($user_response, true);
+            
+            // گرفتن توکن
+            $user_token = $user_response_data['token'];
+            error_log('token: '.$user_token);
+            //$course_id = isset($entry['23']) ? intval($entry['23']) : 0;
+            $endpoint = $baseUrl . "/wp-json/lms/v1/get-post-by-course-id?course_id_lms=" . $course['course_id_lms'];
+            $get_courseid_ch = curl_init();
+            curl_setopt_array($get_courseid_ch, array(
+                CURLOPT_URL => $endpoint,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => array(
+                    'Authorization: Bearer '.$user_token // اگر نیاز به JWT دارید
+                ),
+            ));
+            
+            $get_courseid_response = curl_exec($get_courseid_ch);
+            curl_close($get_courseid_ch);
+            
+            $get_courseid_data = json_decode($get_courseid_response, true);
+            error_log('Site:' . $baseUrl);
+            error_log(print_r($get_courseid_data, true));
+            $course_id = $get_courseid_data['post_id'] ?? null;
+
+                $price_token = (int) preg_replace('/[^\d]/', '', $course['price_tax']);
+                $token = hash_hmac('sha256', $course['course_id_lms'] . '|' . $price_token, $secret_key);
             ?>
                 <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <div class="teacher-current-courses-card">
                         <?php if (!empty($course['teacher-current-courses-image'])) : ?>
                             <div class="teacher-current-courses-image sa-view-more">
                                 <img src="<?php echo esc_url($course['teacher-current-courses-image']); ?>" alt="Course Image">
-                                <!--<form method="post" action="https://mid1.tamland.ir/course-checkout">
-                                    <button type="submit" style="background:transparent;padding:0;width:100%" id="teacher-current-courses-img">
-                                        <img src="<?php //echo esc_url($course['teacher-current-courses-image']); ?>" alt="Course Image">
-                                    </button>
-                                    <input type="hidden" name="course_id_lms" value="<?php //echo esc_attr($course['course_id_lms']); ?>">
-                                    <input type="hidden" name="ref_url_payment" value="<?php //the_permalink(); ?>">
-                                    <input type="hidden" name="course_type" value="<?php //echo esc_attr($course_type); ?>">
-                                    <input type="hidden" name="course_name_0" value="<?php //echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
-                                    <input type="hidden" name="course_price_0" value="<?php //echo esc_attr($course['price_tax']); ?>">
-                                    <input type="hidden" name="course_numbers" value="1">
-                                </form>-->
                                 <div class="view-more">
                                     <a href="<?php echo esc_url($course['teacher-current-courses-link']); ?>">مشاهده جزئیات دوره</a>
                                 </div>
@@ -416,12 +550,14 @@ function teacher_current_courses_func() {
                                     <button type="submit" style="background:transparent;padding:0" id="teacher-current-courses-title">
                                         <h2><?php echo esc_html($course['teacher-current-courses-title']); ?></h2>
                                     </button>
+                                    <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
                                     <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
-                                    <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
+                                    <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
                                     <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
                                     <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                     <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
                                     <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
                                     <input type="hidden" name="secure_token" value="<?= $token ?>">
                                 </form>
                             <?php endif; ?>
@@ -439,8 +575,9 @@ function teacher_current_courses_func() {
                                             <button type="submit" class="add-to-cart-button-landing cart-icon"  id="teacher-landing-current-courses-buy-button">
                                                 <img src="https://tamland.ir/wp-content/uploads/2025/03/Shopping-cart.svg">
                                             </button>
+                                            <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
                                             <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
-                                            <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
+                                            <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
                                             <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
                                             <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
                                             <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
@@ -450,6 +587,7 @@ function teacher_current_courses_func() {
                                             <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
                                             <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
                                             <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                            <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
                                             <input type="hidden" name="secure_token" value="<?= $token ?>">
                                         </form>
                                     </div>
@@ -485,7 +623,275 @@ function teacher_current_courses_func() {
     </div>
     <?php
 }
+*/
 
+add_shortcode('teacher_current_courses','teacher_current_courses_func');
+function teacher_current_courses_func() {
+    ob_start();
+    ?>
+    <div class="teacher-current-courses-place container-fluid">
+        <div class="row" id="teacher-current-courses">
+            <div class="col-12 text-center">
+                <span>در حال بارگذاری دوره‌ها...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    jQuery(function($){
+        $.post(
+            "<?php echo esc_url(admin_url('admin-ajax.php')); ?>",
+            {
+                action: "load_teacher_courses",
+                post_id: <?php echo (int) get_the_ID(); ?>
+            },
+            function(res){
+                if(res.success){
+                    $('#teacher-current-courses').html(res.data.html);
+                    //console.log(typeof res.data);
+                    //console.log(res.data);
+                } else {
+                    $('#teacher-current-courses').html(
+                        '<div class="col-12 text-center">دوره‌ای یافت نشد.</div>'
+                    );
+                }
+            },
+            'json'
+        );
+    });
+    </script>
+    <?php
+    return ob_get_clean();
+}
+
+add_action('wp_ajax_load_teacher_courses', 'load_teacher_courses_func');
+add_action('wp_ajax_nopriv_load_teacher_courses', 'load_teacher_courses_func');
+
+function load_teacher_courses_func() {
+    global $secret_key;
+    global $TAMLAND_PURCHASE_USR;
+    global $TAMLAND_MID1_PSW;
+    global $TAMLAND_MID2_PSW;
+    global $TAMLAND_KONKOOR_PSW;
+    global $TAMLAND_TIZHOOSHAN_PSW;
+    
+    $post_id = intval($_POST['post_id'] ?? 0);
+    if(!$post_id){
+        wp_send_json_error(['message' => 'Post ID is required']);
+    }
+
+    $teacher_current_courses = get_post_meta($post_id, 'teacher-current-courses', true);
+    if (!$teacher_current_courses) {
+        wp_send_json_error(['message' => 'No courses found']);
+    }
+
+    $multi_handle = curl_multi_init();
+    $curl_handles = [];
+    $results = [];
+    //$jwt_tokens = [];
+    // ایجاد همه cURL handle ها
+    foreach ($teacher_current_courses as $course) {
+
+        $parts = parse_url($course['teacher-current-courses-link']);
+        $scheme = $parts['scheme'];
+        $host = $parts['host'];
+        $baseUrl = $scheme . '://' . $host;
+
+        // user data
+        switch ($host) {
+            case "mid1.tamland.ir": $user_data = ["username"=>$TAMLAND_PURCHASE_USR,"password"=>$TAMLAND_MID1_PSW]; break;
+            case "mid2.tamland.ir": $user_data = ["username"=>$TAMLAND_PURCHASE_USR,"password"=>$TAMLAND_MID2_PSW]; break;
+            case "konkoor.tamland.ir": $user_data = ["username"=>$TAMLAND_PURCHASE_USR,"password"=>$TAMLAND_KONKOOR_PSW]; break;
+            case "tizhooshan.tamland.ir": $user_data = ["username"=>$TAMLAND_PURCHASE_USR,"password"=>$TAMLAND_TIZHOOSHAN_PSW]; break;
+            default: $user_data = []; break;
+        }
+
+        // گرفتن JWT token
+        $user_url = $baseUrl."/wp-json/jwt-auth/v1/token";
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $user_url,
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($user_data),
+            CURLOPT_TIMEOUT => 10,          // حداکثر 10 ثانیه برای کل request
+            CURLOPT_CONNECTTIMEOUT => 5,    // حداکثر 5 ثانیه برای اتصال
+        ]);
+        $curl_handles[$course['course_id_lms']]['token'] = $ch;
+        $curl_handles[$course['course_id_lms']]['baseUrl'] = $baseUrl;
+        $curl_handles[$course['course_id_lms']]['course'] = $course;
+
+        curl_multi_add_handle($multi_handle, $ch);
+    }
+
+    // اجرا کردن multi-cURL
+    $running = null;
+    do {
+        curl_multi_exec($multi_handle, $running);
+        curl_multi_select($multi_handle, 1);
+    } while ($running > 0 && $status == CURLM_OK);
+
+    // پردازش پاسخ‌ها
+    foreach ($curl_handles as $course_lms => $data) {
+        $response = curl_multi_getcontent($data['token']);
+        if(curl_errno($data['token'])){
+            $results[$course_lms] = ['error' => curl_error($data['token'])];
+            continue; // اگر خطا بود ادامه بده و بلوک نشو
+        }
+        $resp_data = json_decode($response, true);
+        /*
+        if (!isset($jwt_tokens[$host])) {
+            // فقط یک بار JWT بگیر
+            $jwt_tokens[$host] = $user_token;
+        }
+        
+        $user_token = $jwt_tokens[$host];*/
+        $user_token = $resp_data['token'] ?? '';
+
+        // get course_id via REST API
+        $endpoint = $data['baseUrl']."/wp-json/lms/v1/get-post-by-course-id?course_id_lms=".$course_lms;
+        $ch2 = curl_init();
+        curl_setopt_array($ch2, [
+            CURLOPT_URL => $endpoint,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$user_token],
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $resp2 = curl_exec($ch2);
+        curl_close($ch2);
+        $course_id = json_decode($resp2,true)['post_id'] ?? null;
+
+        // ذخیره در cache
+        set_transient('teacher_course_'.$course_lms, ['post_id'=>$course_id,'user_token'=>$user_token], HOUR_IN_SECONDS);
+
+        $results[$course_lms] = ['post_id'=>$course_id,'user_token'=>$user_token];
+        
+        curl_multi_remove_handle($multi_handle, $data['token']);
+    }
+    
+    curl_multi_close($multi_handle);
+    
+    // ساخت HTML مشابه قبل
+    $html = '';
+    foreach ($teacher_current_courses as $course) {
+    ob_start();
+        $course_lms = $course['course_id_lms'];
+        $course_id = $results[$course_lms]['post_id'] ?? null;
+        $price_token = (int) preg_replace('/[^\d]/','',$course['price_tax'] ?? 0);
+        $token = hash_hmac('sha256', $course_lms.'|'.$price_token, $secret_key);
+
+        // course type
+        $type = $course['course-type'] ?? 'normal-course';
+        switch ($type) {
+            case 'normal-course': $course_type='دوره معمولی'; break;
+            case 'multi-teacher': $course_type='چند استاده'; break;
+            case 'course-pack': $course_type='بسته'; break;
+            case 'azmoon': $course_type='آزمون'; break;
+            default: $course_type='دوره'; break;
+        }
+
+        
+        ?>
+        <div class="col-6 col-md-4 col-lg-3 mb-3">
+                    <div class="teacher-current-courses-card">
+                        <?php if (!empty($course['teacher-current-courses-image'])) : ?>
+                            <div class="teacher-current-courses-image sa-view-more">
+                                <img src="<?php echo esc_url($course['teacher-current-courses-image']); ?>" alt="Course Image">
+                                <div class="view-more">
+                                    <a href="<?php echo esc_url($course['teacher-current-courses-link']); ?>">مشاهده جزئیات دوره</a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="px-2 mb-3">
+                            <?php if (!empty($course['teacher-current-courses-title'])) : ?>
+                                <form method="post" action="https://mid1.tamland.ir/course-checkout">
+                                    <button type="submit" style="background:transparent;padding:0" id="teacher-current-courses-title">
+                                        <h2><?php echo esc_html($course['teacher-current-courses-title']); ?></h2>
+                                    </button>
+                                    <input type="hidden" name="course_id" value="<?php echo esc_attr($course_id); ?>">
+                                    <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
+                                    <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
+                                    <input type="hidden" name="source_link" value="<?php the_permalink($post_id); ?>">
+                                    <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
+                                    <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
+                                    <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
+                                    <input type="hidden" name="course_numbers" value="1">
+                                    <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
+                                    <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
+                                    <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
+                                    <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
+                                    <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                    <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
+                                    <input type="hidden" name="secure_token" value="<?= $token ?>">
+                                </form>
+                            <?php endif; ?>
+
+                            <?php if (!empty($course['secound-title'])) : ?>
+                                <span class="secound-title"><?php echo esc_html($course['secound-title']); ?></span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="px-2">
+                                <div class="row w-100 mx-0 align-items-center pt-2" style="border-top:1px solid rgba(206, 190, 190, 1)">
+                                    <?php if (!empty($course['price_tax'])) : ?>
+                                    <div class="col-3 px-1">
+                                        <form method="post" action="https://mid1.tamland.ir/course-checkout">
+                                            <button type="submit" class="add-to-cart-button-landing cart-icon"  id="teacher-landing-current-courses-buy-button">
+                                                <img src="https://tamland.ir/wp-content/uploads/2025/03/Shopping-cart.svg">
+                                            </button>
+                                            <input type="hidden" name="course_id" value="<?php echo esc_attr($course_id); ?>">
+                                            <input type="hidden" name="course_id_lms" value="<?php echo esc_attr($course['course_id_lms']); ?>">
+                                            <input type="hidden" name="ref_url_payment" value="<?php echo esc_attr($course['teacher-current-courses-link']); ?>">
+                                            <input type="hidden" name="source_link" value="<?php the_permalink($post_id); ?>">
+                                            <input type="hidden" name="course_type" value="<?php echo esc_attr($course_type); ?>">
+                                            <input type="hidden" name="course_name_0" value="<?php echo esc_attr(str_replace("|", "-", $course['teacher-current-courses-title'] . ' ' . $course['secound-title'] . ' ' . get_the_title())); ?>">
+                                            <input type="hidden" name="course_price_0" value="<?php echo esc_attr($course['price_tax']); ?>">
+                                            <input type="hidden" name="course_numbers" value="1">
+                                            <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_campaign" value="<?php echo htmlspecialchars($_GET['utm_campaign'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_term" value="<?php echo htmlspecialchars($_GET['utm_term'] ?? ''); ?>">
+                                            <input type="hidden" name="utm_content" value="<?php echo htmlspecialchars($_GET['utm_content'] ?? ''); ?>">
+                                            <input type="hidden" name="installments" value="<?php echo esc_attr($course['installments']); ?>">
+                                            <input type="hidden" name="secure_token" value="<?= $token ?>">
+                                        </form>
+                                    </div>
+                                    <?php endif; ?>
+                                    <div class="col-9 px-1 text-end">
+                                        <div>
+                                        <?php if (!empty($course['price_sale'])) : ?>
+                                            <span class="old_price"><?php echo esc_html($course['price']); ?> تومان</span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($course['price_sale_percentage'])) : ?>
+                                            <span class="price_sale_percentage_landing"><?php echo esc_html($course['price_sale_percentage']); ?> %</span>
+                                        <?php endif; ?>
+                                        </div>
+                                        <div>
+                                        <?php if ($course['price'] == "0") : ?>
+                                            <span class="free">رایگان</span>
+                                        <?php elseif ($course['price'] > 0) : ?>
+                                            <?php if (!empty($course['price_sale'])) : ?>
+                                                <span class="price_sale"><?php echo esc_html($course['price_sale']); ?></span>
+                                            <?php else: ?>
+                                                <span class="price"><?php echo esc_html($course['price']); ?></span>
+                                            <?php endif; ?>
+                                            <span class="currency">تومان</span>
+                                        <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+        <?php
+        $html .= ob_get_clean();
+    }
+
+    wp_send_json_success(['html'=>$html]);
+}
 
 /**
  * Shortcode: teacher_future_courses
@@ -1020,7 +1426,7 @@ function lcpscript(){
     <script>
         new PerformanceObserver((entryList) => {
   for (const entry of entryList.getEntries()) {
-    console.log('LCP candidate:', entry.startTime, entry);
+    //console.log('LCP candidate:', entry.startTime, entry);
   }
 }).observe({type: 'largest-contentful-paint', buffered: true});
     </script>
@@ -2690,36 +3096,105 @@ function add_najva_push_notification_script() {
 
 add_shortcode( 'lwt_time_gate_v2', 'lwt_final_time_gate_shortcode' );
 function lwt_final_time_gate_shortcode( $atts, $content = null ) {
-
+if(!is_admin()){
     if ( ! is_singular() ) return '';
 
     $is_time_to_show = false;
     $post_id = get_the_ID();
+    
     $post_type_slug = 'lw';
 
     if (get_post_type($post_id) != $post_type_slug) {
         return do_shortcode($content);
     }
     
-    $schedule_items = get_post_meta( $post_id, 'weekly_schedule', true );
+    $teacher_id = get_post_meta( $post_id, 'luckywheel_teacher_id', true );
+    
+        // check the value
+        if ( ! empty( $teacher_id ) ) {
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => 'https://api.tamland.ir/api/course/getDailyClass/'.$teacher_id,
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => '',
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 0,
+              CURLOPT_FOLLOWLOCATION => true,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+            
+            $response = curl_exec($curl);
+            
+            curl_close($curl);
+            //echo $response;
+            
+            $data = json_decode($response, true);
+            $utc = new DateTimeZone('UTC');
+            $timezone = new DateTimeZone('+03:30');
+            
+            // روز فعلی بر اساس DateTime
+            $current_day_num = (new DateTime('now', $timezone))->format('w'); 
+            
+            // نگاشت از خروجی PHP → به شماره‌گذاری شما
+            $map = [
+                6 => 7, // شنبه
+                0 => 1, // یکشنبه
+                1 => 2, // دوشنبه
+                2 => 3, // سه‌شنبه
+                3 => 4, // چهارشنبه
+                4 => 5, // پنج‌شنبه
+                5 => 6  // جمعه
+            ];
+            
+            // حالا روز جاری در سیستم شما:
+            $current_day_num_mapped = $map[$current_day_num];
+            
+            $current_time_str = (new DateTime('now', $timezone))->format('H:i');
+            
+            $is_time_to_show = false;
+            
+            foreach ($data as $item) {
+                $days = explode(',', $item['fldWeekDayCo']);
+                //var_dump($item['fldStartDateTime']);
+                $start_time = (new DateTime($item['fldStartDateTime'], $utc));
+                $start_time->setTimezone($timezone);
+                $start_time_format = $start_time->format('H:i');
 
-    if ( ! empty( $schedule_items ) && is_array( $schedule_items ) ) {
-        $current_day_num = current_time('w');
-        $current_time_str = current_time('H:i');
+                $end_time   = (new DateTime($item['fldEndDateTime'], $utc));
+                $end_time->setTimezone($timezone);
+                $end_time_format = $end_time->format('H:i');
 
-        foreach ( $schedule_items as $item ) {
-            if ( isset($item['day_of_week'], $item['start_time'], $item['end_time']) ) {
-                $day = $item['day_of_week'];
-                $start_time = $item['start_time'];
-                $end_time = $item['end_time'];
-
-                if ( $current_day_num == $day && $current_time_str >= $start_time && $current_time_str <= $end_time ) {
+                if (in_array($current_day_num_mapped, $days) && $current_time_str >= $start_time_format && $current_time_str <= $end_time_format) {
                     $is_time_to_show = true;
                     break;
                 }
             }
+
+        } else {
+            $schedule_items = get_post_meta( $post_id, 'weekly_schedule', true );
+
+            if ( ! empty( $schedule_items ) && is_array( $schedule_items ) ) {
+                $current_day_num = current_time('w');
+                $current_time_str = current_time('H:i');
+        
+                foreach ( $schedule_items as $item ) {
+                    if ( isset($item['day_of_week'], $item['start_time'], $item['end_time']) ) {
+                        $day = $item['day_of_week'];
+                        $start_time = $item['start_time'];
+                        $end_time = $item['end_time'];
+        
+                        if ( $current_day_num == $day && $current_time_str >= $start_time && $current_time_str <= $end_time ) {
+                            $is_time_to_show = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
-    }
+        
+    
 
     if ( $is_time_to_show ) {
         return do_shortcode( $content );
@@ -2792,6 +3267,7 @@ function lwt_final_time_gate_shortcode( $atts, $content = null ) {
         return $output_css . $output_html;
     }
 }
+}
 
 
 //tamyar
@@ -2806,13 +3282,13 @@ function get_teacher_products_data() {
         }
 
         $consumer_key = 'ck_1a35a7af1912254ffe912e701e3f390164e78523'; 
-        $secret_key = 'cs_dd4ebe8904d400e16484fcb848021ab6a9717a39'; 
+        $woo_secret_key = 'cs_dd4ebe8904d400e16484fcb848021ab6a9717a39'; 
 
         $api_url = 'https://tamyar.ir/wp-json/wc/v3/products?teacher=' . urlencode( $teacher_slug ) . '&per_page=10';
 
         $response = wp_remote_get( $api_url, array(
             'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode( $consumer_key . ':' . $secret_key )
+                'Authorization' => 'Basic ' . base64_encode( $consumer_key . ':' . $woo_secret_key )
             )
         ));
 
@@ -2920,3 +3396,175 @@ function display_teacher_product_image( $atts ) {
     return $output;
 }
 add_shortcode( 'teacher_product_image', 'display_teacher_product_image' );
+
+
+
+// add_filter( 'gform_get_form_filter', 'lwt_add_inline_js_to_form_safe', 10, 2 );
+// function lwt_add_inline_js_to_form_safe( $form_string, $form ) {
+
+//     $target_form_id = 25; 
+//     $phone_field_id = 3; 
+
+
+//     if ( $form['id'] != $target_form_id ) {
+//         return $form_string;
+//     }
+
+//     $script = "
+//     <script type='text/javascript'>
+//         jQuery(document).ready(function($){
+//             // پیدا کردن فیلد ورودی
+//             var phoneInput = $('#input_{$target_form_id}_{$phone_field_id}');
+
+//             // اطمینان از وجود فیلد قبل از اجرای کد
+//             if (phoneInput.length) {
+//                 // محدودیت طول به ۱۱ کاراکتر
+//                 phoneInput.attr('maxlength', 11);
+
+//                 // محدود کردن ورودی فقط به اعداد انگلیسی (0-9)
+//                 phoneInput.on('input', function() {
+//                     this.value = this.value.replace(/[^0-9]/g, '');
+//                 });
+//             }
+//         });
+//     </script>
+//     ";
+//     return $form_string . $script;
+// }
+
+
+add_action( 'gform_after_submission', 'send_lucky_wheel_sms_manually', 50, 2 );
+
+function send_lucky_wheel_sms_manually( $entry, $form ) {
+
+    // ----------- تنظیمات شما -----------
+    // شناسه فرم شما از لاگ 25 بود
+    $target_form_id = 25; 
+
+    // کلید API کاوه نگار
+    $api_key = '6A67394D58385358526B4A2F3672373758307661362B622B5649506831745550'; // <--- کلید API خود را اینجا وارد کنید
+
+    // نام قالب پیامک
+    $template_name = 'success-sms-luckywheel';
+
+    // شناسه فیلد تلفن (از لاگ شما 3 بود)
+    $phone_field_id = '3'; 
+
+    // شناسه فیلد جایزه (از تصویر شما 5 بود)
+    $prize_field_id = '5'; // <--- مطمئن شوید شناسه فیلد جایزه همین است
+    // ---------------------------------
+
+    // اگر فرم مورد نظر ما نیست، اجرا نکن
+    if ( $form['id'] != $target_form_id ) {
+        return;
+    }
+    error_log('✅ [SMS] مرحله ۱: تابع برای فرم درست اجرا شد. شناسه فرم: ' . $form['id']);
+
+    // تلفن را از ورودی اولیه می‌خوانیم
+    $phone = rgar( $entry, $phone_field_id );
+
+    // --- راه‌حل کلیدی: ورودی را دوباره از دیتابیس می‌خوانیم ---
+    // چون افزونه شما جایزه را "بعد از" ارسال در دیتابیس ذخیره می‌کند
+    // این تابع مطمئن می‌شود که ما آخرین اطلاعات ثبت شده را داریم
+    if ( class_exists('GFAPI') ) {
+        $fresh_entry = GFAPI::get_entry( $entry['id'] );
+        $prize = rgar( $fresh_entry, $prize_field_id );
+    } else {
+        error_log('❌ [SMS] خطا: GFAPI فعال نیست.');
+        return;
+    }
+    // ----------------------------------------------------
+
+    error_log('اطلاعات [SMS] مرحله ۲: شماره تلفن استخراج شده: [' . $phone . ']');
+    error_log('اطلاعات [SMS] مرحله ۲: جایزه استخراج شده (از دیتابیس): [' . $prize . ']');
+
+    // اگر تلفن یا جایزه خالی بود، یا اگر جایزه "پوچ" بود، پیامک ارسال نکن
+    if ( empty( $phone ) || empty( $prize ) || $prize == 'پوچ' ) {
+        $error_reason = empty($phone) ? 'تلفن خالی' : (empty($prize) ? 'جایزه خالی' : 'جایزه پوچ');
+        error_log('❌ [SMS] ارسال متوقف شد. دلیل: ' . $error_reason);
+        return;
+    }
+
+    // ساخت URL درخواست
+    $url = 'https://api.kavenegar.com/v1/' . $api_key . '/verify/lookup.json';
+    
+    $request_url = add_query_arg( [
+        'receptor' => $phone,
+        'token'    => $phone,  // توکن اول: تلفن (می‌توانید تغییر دهید)
+        'token2'   => $prize,  // توکن دوم: جایزه
+        'template' => $template_name,
+    ], $url );
+    
+    error_log('اطلاعات [SMS] مرحله ۳: URL نهایی درخواست: ' . $request_url);
+
+    // ارسال درخواست به کاوه نگار
+    $response = wp_remote_get( $request_url );
+    
+    // ثبت پاسخ کاوه نگار در لاگ
+    if ( is_wp_error( $response ) ) {
+        error_log('❌ [SMS] خطای وردپرس در ارسال: ' . $response->get_error_message());
+    } else {
+        $body = wp_remote_retrieve_body( $response );
+        error_log('✅ [SMS] پاسخ سرور کاوه نگار: ' . $body);
+    }
+}
+
+
+// شورتکد ویدیو بدون مدال
+function fsv_player_func($atts) {
+    global $post;
+
+    $aparat_code = get_post_meta($post->ID, 'fsv-aparat-code', true);
+    $video_name  = get_post_meta($post->ID, 'fsv-video-name', true);
+    $video_id    = get_post_meta($post->ID, 'fsv-video-id', true);
+
+    // آی‌دی منحصربه‌فرد برای هر پلیر
+    $unique_id = 'player_' . uniqid();
+
+    ob_start();
+
+    if (!empty($aparat_code)) {
+        // ویدیو آپارات
+        ?>
+        <div class="video-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+            <iframe src="https://www.aparat.com/video/video/embed/videohash/<?php echo esc_attr($aparat_code); ?>/vt/frame"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <?php
+    } elseif (!empty($video_name) && !empty($video_id)) {
+        // ویدیو از stream.tamland.ir
+        $token = get_static_token($video_name, $video_id);
+
+        if (empty($token) || strpos($token, 'error') !== false) {
+            echo '<p style="color:#fff; text-align:center;">خطا در دریافت ویدیو</p>';
+        } else {
+            ?>
+            <div id="<?php echo esc_attr($unique_id); ?>" class="stream-player" style="width:100%;max-width:800px;margin:auto;"></div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    if (typeof OvenPlayer === "undefined") {
+                        console.error("OvenPlayer not loaded. Make sure it's enqueued.");
+                        return;
+                    }
+
+                    OvenPlayer.create("<?php echo esc_js($unique_id); ?>", {
+                        sources: [
+                            { label: "1080p", type: "hls", file: "https://stream.tamland.ir/done/<?php echo $video_name; ?>/1080_<?php echo $video_name; ?>_1.m3u8?auth=<?php echo $token; ?>" },
+                            { label: "720p", type: "hls", file: "https://stream.tamland.ir/done/<?php echo $video_name; ?>/720_<?php echo $video_name; ?>_1.m3u8?auth=<?php echo $token; ?>" },
+                            { label: "480p", type: "hls", file: "https://stream.tamland.ir/done/<?php echo $video_name; ?>/480_<?php echo $video_name; ?>_1.m3u8?auth=<?php echo $token; ?>" },
+                            { label: "360p", type: "hls", file: "https://stream.tamland.ir/done/<?php echo $video_name; ?>/360_<?php echo $video_name; ?>_1.m3u8?auth=<?php echo $token; ?>" }
+                        ],
+                        autoStart: false,
+                        mute: false
+                    });
+                });
+            </script>
+            <?php
+        }
+    } else {
+        echo '<p style="text-align:center;">ویدیو موجود نیست</p>';
+    }
+
+    return ob_get_clean();
+}
+add_shortcode('fsv_player', 'fsv_player_func');
